@@ -34,7 +34,7 @@
         .buy-btn:hover:not(:disabled) { background: #3333dd; }
         .buy-btn:disabled { background: #666; cursor: not-allowed; }
         
-        #combatUI { position: absolute; top: 80px; left: 0; right: 0; display: none; width: 100%; background: #1a1f3a; padding: 15px; border-bottom: 2px solid #00ff88; flex-shrink: 0; z-index: 50; }
+        #combatUI { position: fixed; top: 0; left: 0; right: 0; display: none; width: 100%; background: #1a1f3a; padding: 15px; border-bottom: 2px solid #00ff88; flex-shrink: 0; z-index: 50; }
         #combatUI.show { display: flex; justify-content: space-around; align-items: center; gap: 15px; height: 100px; }
         
         #gameCanvas { display: none; width: 100%; height: calc(100vh - 180px); background: linear-gradient(135deg, #1a1f3a 0%, #2a2f4a 100%); cursor: crosshair; }
@@ -232,6 +232,13 @@
                 else if (a.size === 'medium') ctx.fillStyle = '#ffaa00';
                 else ctx.fillStyle = '#ff4444';
                 ctx.fillRect(-a.w/2, -a.h/2, a.w, a.h); ctx.restore();
+                // Health bar above alien
+                const barW = a.w; const barH = 5;
+                const bx = a.x - barW/2; const by = a.y - a.h/2 - 10;
+                ctx.fillStyle = '#333'; ctx.fillRect(bx, by, barW, barH);
+                const pct = a.hp / a.maxHp;
+                ctx.fillStyle = pct > 0.5 ? '#00ff88' : pct > 0.25 ? '#ffaa00' : '#ff4444';
+                ctx.fillRect(bx, by, barW * pct, barH);
             }
             ctx.fillStyle = '#4444ff'; ctx.fillRect(combat.player.x - 15, combat.player.y - 15, 30, 30);
             ctx.fillStyle = '#ffff00'; for (let b of combat.bullets) ctx.fillRect(b.x - 2, b.y - 2, 4, 4);
