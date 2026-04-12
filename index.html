@@ -218,10 +218,10 @@
                         a.shoot = a.size === 'small' ? 30 : a.size === 'medium' ? 50 : 70;
                     }
                 } else {
-                    a.shoot = 0; // Reset timer when far away
+                    a.shoot = 999; // Don't attack when far away
                 }
             }
-            // NO MORE BULLETS - aliens attack in melee only when close
+            combat.bullets = []; // Clear all bullets - melee only!
             if (combat.player.shield < 100) combat.player.shield = Math.min(100, combat.player.shield + 0.5);
             if (combat.aliens.length === 0 && !combat.complete) endMission(true);
         }
@@ -243,11 +243,11 @@
                 ctx.fillRect(bx, by, barW * pct, barH);
             }
             ctx.fillStyle = '#4444ff'; ctx.fillRect(combat.player.x - 15, combat.player.y - 15, 30, 30);
-            // Draw melee attack indicators when aliens are close
+            // Draw melee attack range when aliens are close
             for (let a of combat.aliens) {
                 const dx = combat.player.x - a.x, dy = combat.player.y - a.y, d = Math.sqrt(dx*dx + dy*dy);
                 if (d < 80) {
-                    ctx.strokeStyle = '#ff3333';
+                    ctx.strokeStyle = 'rgba(255, 50, 50, 0.5)';
                     ctx.lineWidth = 2;
                     ctx.beginPath();
                     ctx.arc(a.x, a.y, 80, 0, Math.PI * 2);
