@@ -275,7 +275,10 @@
                     a.y += (dy / d) * a.spd;
                     a.angle = Math.atan2(dy, dx);
                 }
-                a.y = Math.min(a.y, canvas.height - 120);
+                // Keep aliens well above the UI bar
+                if (a.y > canvas.height - 150) {
+                    a.y = canvas.height - 150;
+                }
                 a.shoot--;
                 if (a.shoot <= 0) {
                     combat.bullets.push({
