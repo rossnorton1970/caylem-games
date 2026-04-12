@@ -188,10 +188,11 @@
             if (s === 'small') { w = 15; h = 15; hp = 20; dmg = 5; spd = 2; }
             else if (s === 'medium') { w = 25; h = 25; hp = 40; dmg = 10; spd = 1.5; }
             else { w = 40; h = 40; hp = 80; dmg = 20; spd = 1; }
-            combat.aliens.push({ x: Math.random() * (gw - w), y: Math.random() * (gh * 0.65), w, h, hp, maxHp: hp, dmg, spd, size: s, angle: 0, lastAttack: 0 });
+            combat.aliens.push({ x: Math.random() * (gw - w), y: Math.random() * (gh * 0.65), w, h, hp, maxHp: hp, dmg, spd, size: s, angle: 0, attackCooldown: 0 });
         }
 
-        function gameLoop() { update(); draw(); if (combat.running && !combat.complete) requestAnimationFrame(gameLoop); }
+        let frameCount = 0;
+        function gameLoop() { frameCount++; update(); draw(); if (combat.running && !combat.complete) requestAnimationFrame(gameLoop); }
 
         function update() {
             combat.time--;
@@ -204,19 +205,17 @@
                 if (a.y > gh * 0.65) a.y = gh * 0.65;
                 
                 // MELEE DAMAGE: Only when close
-                if (d < 80) {
-                    const now = Date.now();
-                    const attackSpeed = a.size === 'small' ? 200 : a.size === 'medium' ? 400 : 600;
-                    if (now - a.lastAttack > attackSpeed) {
-                        if (combat.player.shield > 0) combat.player.shield = Math.max(0, combat.player.shield - a.dmg);
-                        else combat.player.health = Math.max(0, combat.player.health - a.dmg);
-                        if (combat.player.health <= 0) endMission(false);
-                        a.lastAttack = now;
-                    }
+                a.attackCooldown--;
+                if (d < 80 && a.attackCooldown <= 0) {
+                    if (combat.player.shield > 0) combat.player.shield = Math.max(0, combat.player.shield - a.dmg);
+                    else combat.player.health = Math.max(0, combat.player.health - a.dmg);
+                    if (combat.player.health <= 0) endMission(false);
+                    // Attack speed: small=fast(10 frames), medium=medium(20 frames), big=slow(30 frames)
+                    a.attackCooldown = a.size === 'small' ? 10 : a.size === 'medium' ? 20 : 30;
                 }
             }
             
-            if (combat.player.shield < 100) combat.player.shield = Math.min(100, combat.player.shield + 0.5);
+            if (combat.player.shield < 100) combat.player.shield = Math.min(100, combat.player.shield + 1);
             if (combat.aliens.length === 0 && !combat.complete) endMission(true);
         }
 
