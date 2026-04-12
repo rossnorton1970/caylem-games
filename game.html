@@ -158,7 +158,7 @@
 
         function load() {
             const s = localStorage.getItem('gameData');
-            if (s) Object.assign(game, JSON.parse(s));
+            if (s) { try { Object.assign(game, JSON.parse(s)); } catch(e) { console.warn('Save data corrupted, resetting:', e); localStorage.removeItem('gameData'); } }
             updateUI();
         }
 
