@@ -34,7 +34,7 @@
         .buy-btn:hover:not(:disabled) { background: #3333dd; }
         .buy-btn:disabled { background: #666; cursor: not-allowed; }
         
-        #combatUI { display: none; width: 100%; background: #1a1f3a; padding: 15px; border-bottom: 2px solid #00ff88; flex-shrink: 0; }
+        #combatUI { position: absolute; top: 80px; left: 0; right: 0; display: none; width: 100%; background: #1a1f3a; padding: 15px; border-bottom: 2px solid #00ff88; flex-shrink: 0; z-index: 50; }
         #combatUI.show { display: flex; justify-content: space-around; align-items: center; gap: 15px; height: 100px; }
         
         #gameCanvas { display: none; width: 100%; height: calc(100vh - 180px); background: linear-gradient(135deg, #1a1f3a 0%, #2a2f4a 100%); cursor: crosshair; }
