@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planet Hunters</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        body { font-family: Arial, sans-serif; background: #0a0e27; color: #e0e0e0; }
+        #header { background: #1a1f3a; padding: 20px; border-bottom: 2px solid #00ff88; display: flex; justify-content: space-between; }
+        .stat { margin: 0 20px; }
+        .stat-label { font-size: 12px; color: #888; }
+        .stat-value { font-size: 28px; color: #00ff88; font-weight: bold; }
+        #mainScreen { padding: 40px; background: #0a0e27; height: calc(100vh - 80px); overflow-y: auto; }
+        .section-title { font-size: 24px; color: #00ff88; margin: 30px 0 20px 0; border-bottom: 1px solid #00ff88; padding-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: #1a1f3a; border: 2px solid #444; padding: 20px; border-radius: 5px; cursor: pointer; }
+        .card:hover { border-color: #00ff88; background: #2a2f4a; }
+        .card.cleared { opacity: 0.5; }
+        .card-title { font-weight: bold; margin-bottom: 10px; font-size: 16px; }
+        .card-text { font-size: 12px; color: #aaa; margin: 5px 0; }
+        .difficulty { margin: 10px 0; font-weight: bold; }
+        .difficulty.easy { color: #00ff88; }
+        .difficulty.medium { color: #ffaa00; }
+        .difficulty.hard { color: #ff4444; }
+        button { width: 100%; padding: 10px; margin-top: 10px; border: none; border-radius: 3px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .mission-btn { background: #00ff88; color: #0a0e27; }
+        .mission-btn:hover:not(:disabled) { background: #00dd77; }
+        .mission-btn:disabled { background: #666; cursor: not-allowed; }
+        .buy-btn { background: #4444ff; color: white; }
+        .buy-btn:hover:not(:disabled) { background: #3333dd; }
+        .buy-btn:disabled { background: #666; cursor: not-allowed; }
+        #combatUI { position: fixed; top: 0; left: 0; right: 0; display: none; width: 100%; background: #1a1f3a; padding: 15px; border-bottom: 2px solid #00ff88; z-index: 50; }
+        #combatUI.show { display: flex; justify-content: space-around; align-items: center; gap: 15px; height: 100px; }
+        #gameCanvas { display: none; width: 100%; height: calc(100vh - 180px); background: linear-gradient(135deg, #1a1f3a 0%, #2a2f4a 100%); cursor: crosshair; }
+        #gameCanvas.show { display: block; }
+        .bar-container { width: 150px; }
+        .bar-label { font-size: 11px; color: #888; }
+        .bar { width: 100%; height: 18px; background: #333; border: 1px solid #666; margin-top: 4px; position: relative; }
+        .bar-fill { height: 100%; position: absolute; top: 0; left: 0; transition: width 0.2s; }
+        .shield-fill { background: #4444ff; }
+        .health-fill { background: #ff4444; }
+        .timer { font-size: 24px; color: #ffaa00; font-weight: bold; min-width: 80px; text-align: center; }
+        .timer.warning { color: #ff4444; animation: pulse 0.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .tools { display: flex; gap: 8px; }
+        .tool-btn { background: #ff6600; color: white; padding: 8px; font-size: 11px; flex: 1; }
+        .tool-btn:hover:not(:disabled) { background: #ff5500; }
+        .tool-btn:disabled { background: #666; cursor: not-allowed; }
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; }
+        #modal.show { display: flex; }
+        .modalBox { background: rgba(10, 14, 39, 0.98); padding: 40px; border: 2px solid #00ff88; text-align: center; border-radius: 10px; min-width: 350px; }
+        .modalBox.fail { border-color: #ff4444; }
+        .modalTitle { font-size: 32px; margin-bottom: 20px; color: #00ff88; }
+        .modalBox.fail .modalTitle { color: #ff4444; }
+        .modalReward { font-size: 18px; color: #ffaa00; margin: 20px 0; }
+        .returnBtn { background: #00ff88; color: #0a0e27; margin-top: 20px; padding: 12px; width: 100%; font-size: 16px; }
+        .returnBtn:hover { background: #00dd77; }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <div class="stat"><div class="stat-label">CREDITS</div><div class="stat-value" id="credits">500</div></div>
+        <div class="stat"><div class="stat-label">WEAPON</div><div class="stat-value" id="weapon">Basic Laser</div></div>
+        <div class="stat"><div class="stat-label">MISSIONS</div><div class="stat-value" id="missions">0</div></div>
+    </div>
+
+    <div id="mainScreen">
+        <div class="section-title">🚀 AVAILABLE MISSIONS</div>
+        <div class="grid" id="planets"></div>
+        <div class="section-title">⚔️ WEAPON SHOP</div>
+        <div class="grid" id="shop"></div>
+    </div>
+
+    <div id="combatUI">
+        <div class="bar-container">
+            <div class="bar-label">SHIELD</div>
+            <div class="bar"><div class="bar-fill shield-fill" id="shield" style="width: 100%"></div></div>
+        </div>
+        <div class="bar-container">
+            <div class="bar-label">HEALTH</div>
+            <div class="bar"><div class="bar-fill health-fill" id="health" style="width: 100%"></div></div>
+        </div>
+        <div style="text-align: center; flex: 1;">
+            <div style="font-size: 16px; color: #ffaa00;">ALIENS: <span id="alienCount">0</span></div>
+        </div>
+        <div class="timer" id="timer">25:00</div>
+        <div class="tools">
+            <button class="tool-btn" id="orbBtn" onclick="useTool('orbital')">ORB<br><span id="orbCount">0</span></button>
+            <button class="tool-btn" id="bombBtn" onclick="useTool('bomb')">BOMB<br><span id="bombCount">0</span></button>
+            <button class="tool-btn" id="laserBtn" onclick="useTool('laser')">LASER<br><span id="laserCount">0</span></button>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="modal">
+        <div class="modalBox" id="modalBox">
+            <div class="modalTitle" id="modalTitle">Mission Complete</div>
+            <div class="modalReward" id="modalReward"></div>
+            <button class="returnBtn" onclick="returnToShop()">Return to Mothership</button>
+        </div>
+    </div>
+
+    <script>
+        const game = {
+            credits: 500, weapon: 'basic', missions: 0, cleared: [],
+            inventory: { orbital: 5, bomb: 5, laser: 5 },
+            weapons: {
+                basic: { name: 'Basic Laser', damage: 10, price: 0 },
+                plasma: { name: 'Plasma Rifle', damage: 20, price: 150 },
+                pulse: { name: 'Pulse Cannon', damage: 35, price: 350 },
+                nova: { name: 'Nova Blaster', damage: 50, price: 700 }
+            },
+            planets: [
+                { id: 1, name: 'Kepler-452b', desc: 'Desert world', diff: 'easy', aliens: 5, reward: 100 },
+                { id: 2, name: 'Proxima-3', desc: 'Ice planet', diff: 'medium', aliens: 8, reward: 200 },
+                { id: 3, name: 'TRAPPIST-1e', desc: 'Volcanic hellscape', diff: 'hard', aliens: 12, reward: 400 },
+                { id: 4, name: 'Gliese-667', desc: 'Toxic atmosphere', diff: 'medium', aliens: 10, reward: 250 },
+                { id: 5, name: 'Wolf-1061c', desc: 'Dense jungle', diff: 'hard', aliens: 15, reward: 500 }
+            ]
+        };
+
+        const combat = {
+            planet: null, time: 1500, running: false,
+            player: { x: 400, y: 300, shield: 100, health: 100, damage: 10 },
+            aliens: [], complete: false
+        };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let gw = 0, gh = 0;
+
+        function load() { const s = localStorage.getItem('gameData'); if (s) Object.assign(game, JSON.parse(s)); updateUI(); }
+        function save() { localStorage.setItem('gameData', JSON.stringify({ credits: game.credits, weapon: game.weapon, missions: game.missions, cleared: game.cleared, inventory: game.inventory })); }
+
+        function updateUI() {
+            document.getElementById('credits').textContent = game.credits;
+            document.getElementById('weapon').textContent = game.weapons[game.weapon].name;
+            document.getElementById('missions').textContent = game.missions;
+            renderPlanets(); renderShop();
+        }
+
+        function renderPlanets() {
+            const div = document.getElementById('planets');
+            div.innerHTML = '';
+            game.planets.forEach(p => {
+                const cleared = game.cleared.includes(p.id);
+                div.innerHTML += `<div class="card ${cleared ? 'cleared' : ''}"><div class="card-title">🪐 ${p.name}</div><div class="card-text">${p.desc}</div><div class="difficulty ${p.diff}">${p.diff.toUpperCase()}</div><div class="card-text">${p.aliens} aliens | ${p.reward} credits</div><button class="mission-btn" ${cleared ? 'disabled' : ''} onclick="startMission(${p.id})">${cleared ? 'CLEARED' : 'START'}</button></div>`;
+            });
+        }
+
+        function renderShop() {
+            const div = document.getElementById('shop');
+            div.innerHTML = '';
+            for (const [k, w] of Object.entries(game.weapons)) {
+                const owned = game.weapon === k;
+                const afford = game.credits >= w.price;
+                div.innerHTML += `<div class="card"><div class="card-title">⚔️ ${w.name}</div><div class="card-text">${w.price === 0 ? 'STARTER' : w.price + ' CREDITS'}</div><button class="buy-btn" ${owned || !afford ? 'disabled' : ''} onclick="buyWeapon('${k}')">${owned ? 'EQUIPPED' : afford ? 'BUY' : 'CANT AFFORD'}</button></div>`;
+            }
+        }
+
+        function buyWeapon(k) {
+            const w = game.weapons[k];
+            if (game.credits >= w.price) { game.credits -= w.price; game.weapon = k; combat.player.damage = w.damage; save(); updateUI(); }
+        }
+
+        function startMission(id) {
+            const p = game.planets.find(x => x.id === id);
+            if (!p) return;
+            combat.planet = p; combat.time = 1500; combat.complete = false; combat.running = true;
+            combat.player.shield = 100; combat.player.health = 100; combat.player.damage = game.weapons[game.weapon].damage;
+            combat.aliens = [];
+            document.getElementById('mainScreen').style.display = 'none';
+            document.getElementById('combatUI').classList.add('show');
+            document.getElementById('gameCanvas').classList.add('show');
+            gw = canvas.clientWidth; gh = canvas.clientHeight;
+            canvas.width = gw; canvas.height = gh;
+            for (let i = 0; i < p.aliens; i++) spawnAlien();
+            gameLoop();
+        }
+
+        function spawnAlien() {
+            const sizes = ['small', 'medium', 'large'];
+            const s = sizes[Math.floor(Math.random() * 3)];
+            let w, h, hp, dmg, spd;
+            if (s === 'small') { w = 15; h = 15; hp = 20; dmg = 5; spd = 2; }
+            else if (s === 'medium') { w = 25; h = 25; hp = 40; dmg = 10; spd = 1.5; }
+            else { w = 40; h = 40; hp = 80; dmg = 20; spd = 1; }
+            combat.aliens.push({ x: Math.random() * (gw - w), y: Math.random() * (gh * 0.65), w, h, hp, maxHp: hp, dmg, spd, size: s, angle: 0, lastAttack: 0 });
+        }
+
+        function gameLoop() { update(); draw(); if (combat.running && !combat.complete) requestAnimationFrame(gameLoop); }
+
+        function update() {
+            combat.time--;
+            if (combat.time <= 0) endMission(false);
+            combat.aliens = combat.aliens.filter(a => a.hp > 0);
+            
+            for (let a of combat.aliens) {
+                const dx = combat.player.x - a.x, dy = combat.player.y - a.y, d = Math.sqrt(dx*dx + dy*dy);
+                if (d > 0) { a.x += (dx / d) * a.spd; a.y += (dy / d) * a.spd; a.angle = Math.atan2(dy, dx); }
+                if (a.y > gh * 0.65) a.y = gh * 0.65;
+                
+                // MELEE DAMAGE: Only when close
+                if (d < 80) {
+                    const now = Date.now();
+                    const attackSpeed = a.size === 'small' ? 200 : a.size === 'medium' ? 400 : 600;
+                    if (now - a.lastAttack > attackSpeed) {
+                        if (combat.player.shield > 0) combat.player.shield = Math.max(0, combat.player.shield - a.dmg);
+                        else combat.player.health = Math.max(0, combat.player.health - a.dmg);
+                        if (combat.player.health <= 0) endMission(false);
+                        a.lastAttack = now;
+                    }
+                }
+            }
+            
+            if (combat.player.shield < 100) combat.player.shield = Math.min(100, combat.player.shield + 0.5);
+            if (combat.aliens.length === 0 && !combat.complete) endMission(true);
+        }
+
+        function draw() {
+            ctx.fillStyle = '#0a0e27'; ctx.fillRect(0, 0, gw, gh);
+            
+            for (let a of combat.aliens) {
+                ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.angle);
+                if (a.size === 'small') ctx.fillStyle = '#00ff88';
+                else if (a.size === 'medium') ctx.fillStyle = '#ffaa00';
+                else ctx.fillStyle = '#ff4444';
+                ctx.fillRect(-a.w/2, -a.h/2, a.w, a.h); ctx.restore();
+            }
+            
+            ctx.fillStyle = '#4444ff'; ctx.fillRect(combat.player.x - 15, combat.player.y - 15, 30, 30);
+            
+            // Draw attack range circles
+            for (let a of combat.aliens) {
+                const dx = combat.player.x - a.x, dy = combat.player.y - a.y, d = Math.sqrt(dx*dx + dy*dy);
+                if (d < 80) {
+                    ctx.strokeStyle = 'rgba(255, 50, 50, 0.5)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(a.x, a.y, 80, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+            
+            document.getElementById('shield').style.width = combat.player.shield + '%';
+            document.getElementById('health').style.width = combat.player.health + '%';
+            document.getElementById('alienCount').textContent = combat.aliens.length;
+            const m = Math.floor(combat.time / 60), s = combat.time % 60, t = document.getElementById('timer');
+            t.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+            if (combat.time < 300) t.classList.add('warning');
+            document.getElementById('orbCount').textContent = game.inventory.orbital;
+            document.getElementById('bombCount').textContent = game.inventory.bomb;
+            document.getElementById('laserCount').textContent = game.inventory.laser;
+            document.getElementById('orbBtn').disabled = game.inventory.orbital === 0;
+            document.getElementById('bombBtn').disabled = game.inventory.bomb === 0;
+            document.getElementById('laserBtn').disabled = game.inventory.laser === 0;
+        }
+
+        canvas.addEventListener('click', (e) => {
+            const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+            for (let a of combat.aliens) {
+                const dx = x - a.x, dy = y - a.y, d = Math.sqrt(dx*dx + dy*dy);
+                if (d < 50) { a.hp -= combat.player.damage; break; }
+            }
+        });
+
+        function useTool(t) {
+            if (game.inventory[t] <= 0) return;
+            game.inventory[t]--;
+            let dmg = t === 'orbital' ? 50 : t === 'bomb' ? 40 : 30;
+            const ex = Math.random() * (gw - 100) + 50, ey = Math.random() * (gh * 0.65 - 100) + 50;
+            for (let a of combat.aliens) {
+                const d = Math.sqrt((a.x - ex)**2 + (a.y - ey)**2);
+                if (d < 100) a.hp -= dmg;
+            }
+        }
+
+        function endMission(success) {
+            combat.complete = true; combat.running = false;
+            const box = document.getElementById('modalBox'), title = document.getElementById('modalTitle'), reward = document.getElementById('modalReward');
+            if (success) {
+                box.classList.remove('fail'); title.textContent = 'MISSION COMPLETE!';
+                const r = combat.planet.reward;
+                game.credits += r; game.missions++; game.cleared.push(combat.planet.id);
+                reward.textContent = '+' + r + ' CREDITS';
+            } else {
+                box.classList.add('fail'); title.textContent = 'MISSION FAILED'; reward.textContent = '';
+            }
+            save(); document.getElementById('modal').classList.add('show');
+        }
+
+        function returnToShop() {
+            document.getElementById('modal').classList.remove('show');
+            document.getElementById('combatUI').classList.remove('show');
+            document.getElementById('gameCanvas').classList.remove('show');
+            document.getElementById('mainScreen').style.display = 'block';
+            updateUI();
+        }
+
+        load();
+    </script>
+</body>
+</html>
