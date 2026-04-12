@@ -314,7 +314,7 @@
 
         function load() {
             const s = localStorage.getItem('game');
-            if (s) Object.assign(game, JSON.parse(s));
+            if (s) { try { Object.assign(game, JSON.parse(s)); } catch(e) { console.warn('Save corrupted, resetting:', e); localStorage.removeItem('game'); } }
             updateUI();
         }
 

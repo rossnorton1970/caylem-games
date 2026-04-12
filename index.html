@@ -537,12 +537,14 @@
         function loadGameState() {
             const saved = localStorage.getItem('planetHuntersState');
             if (saved) {
-                const loaded = JSON.parse(saved);
-                gameState.credits = loaded.credits;
-                gameState.currentWeapon = loaded.currentWeapon;
-                gameState.missionsCompleted = loaded.missionsCompleted;
-                gameState.clearedPlanets = loaded.clearedPlanets;
-                gameState.inventory = loaded.inventory;
+                try {
+                    const loaded = JSON.parse(saved);
+                    gameState.credits = loaded.credits;
+                    gameState.currentWeapon = loaded.currentWeapon;
+                    gameState.missionsCompleted = loaded.missionsCompleted;
+                    gameState.clearedPlanets = loaded.clearedPlanets;
+                    gameState.inventory = loaded.inventory;
+                } catch(e) { console.warn('Save corrupted, resetting:', e); localStorage.removeItem('planetHuntersState'); }
             }
             updateUI();
         }
