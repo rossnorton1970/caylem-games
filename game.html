@@ -38,7 +38,7 @@
         #combatWrapper.active { display: flex; }
         #gameCanvas { width: 100%; flex: 1; background: linear-gradient(135deg, #1a1f3a 0%, #2a2f4a 100%); cursor: crosshair; display: block; }
         
-        #combatUI { position: fixed; bottom: 0; left: 0; right: 0; background: #1a1f3a; padding: 15px; border-top: 2px solid #00ff88; display: flex; justify-content: space-around; align-items: center; gap: 15px; height: 120px; width: 100%; z-index: 11; }
+        #combatUI { background: #1a1f3a; padding: 15px; border-top: 2px solid #00ff88; display: flex; justify-content: space-around; align-items: center; gap: 15px; height: 120px; }
         .bar-container { width: 180px; }
         .bar-label { font-size: 11px; color: #888; }
         .bar { width: 100%; height: 18px; background: #333; border: 1px solid #666; margin-top: 4px; position: relative; }
@@ -88,8 +88,8 @@
     </div>
 
     <div id="combatWrapper">
-        <canvas id="gameCanvas"></canvas>
-        <div id="combatUI">
+        <canvas id="gameCanvas" style="margin-bottom: 130px;"></canvas>
+        <div id="combatUI" style="position: fixed; bottom: 0; left: 0; width: 100%; z-index: 999;">
             <div class="bar-container">
                 <div class="bar-label">SHIELD</div>
                 <div class="bar"><div class="bar-fill shield-fill" id="shield" style="width: 100%"></div></div>
