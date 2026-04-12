@@ -243,7 +243,7 @@
             document.getElementById('combatUI').style.display = 'flex';
 
             gameWidth = window.innerWidth;
-            gameHeight = window.innerHeight - 120;
+            gameHeight = window.innerHeight - 150; // LEAVE 150px for bar at bottom
             canvas.width = gameWidth;
             canvas.height = gameHeight;
 
@@ -259,9 +259,11 @@
             else if (s === 'medium') { w = 25; h = 25; hp = 40; dmg = 10; spd = 1.5; }
             else { w = 40; h = 40; hp = 80; dmg = 20; spd = 1; }
 
+            // Spawn ONLY in top 65% of canvas
+            const maxSpawnY = gameHeight * 0.65;
             const a = {
                 x: Math.random() * (gameWidth - w),
-                y: Math.random() * (gameHeight * 0.7),
+                y: Math.random() * maxSpawnY,
                 w, h, hp, maxHp: hp, dmg, spd, size: s, angle: 0, shoot: Math.random() * 60 + 30
             };
             combat.aliens.push(a);
@@ -288,8 +290,8 @@
                     a.angle = Math.atan2(dy, dx);
                 }
 
-                // HARD BOUNDARY - aliens cannot go past 75% of canvas height
-                const maxY = gameHeight * 0.75;
+                // HARD BOUNDARY - aliens CANNOT go into bottom 35% of screen (reserved for bar)
+                const maxY = gameHeight * 0.65;
                 if (a.y > maxY) a.y = maxY;
                 if (a.x < 0) a.x = 0;
                 if (a.x > gameWidth) a.x = gameWidth;
