@@ -235,7 +235,7 @@
             document.getElementById('mainScreen').style.display = 'none';
             document.getElementById('combatScreen').classList.add('active');
             canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight - 150;
+            canvas.height = window.innerHeight - 130;
             gameLoop();
         }
 
@@ -248,7 +248,7 @@
             else { w = 40; h = 40; hp = 80; dmg = 20; spd = 1; }
             const a = {
                 x: Math.random() * (canvas.width - w),
-                y: Math.random() * (canvas.height - 150),
+                y: Math.random() * (canvas.height - 100),
                 w, h, hp, maxHp: hp, dmg, spd, size: s, angle: 0, shoot: Math.random() * 60 + 30
             };
             combat.aliens.push(a);
