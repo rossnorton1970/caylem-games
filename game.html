@@ -88,8 +88,10 @@
     </div>
 
     <div id="combatWrapper">
-        <canvas id="gameCanvas" style="margin-bottom: 130px;"></canvas>
-        <div id="combatUI" style="position: fixed; bottom: 0; left: 0; width: 100%; z-index: 999;">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+    
+    <div id="combatUI" style="position: fixed; bottom: 0; left: 0; width: 100%; z-index: 999; display: none;">
             <div class="bar-container">
                 <div class="bar-label">SHIELD</div>
                 <div class="bar"><div class="bar-fill shield-fill" id="shield" style="width: 100%"></div></div>
@@ -238,9 +240,10 @@
 
             document.getElementById('mainScreen').style.display = 'none';
             document.getElementById('combatWrapper').classList.add('active');
+            document.getElementById('combatUI').style.display = 'flex';
 
             gameWidth = window.innerWidth;
-            gameHeight = window.innerHeight - 150;
+            gameHeight = window.innerHeight - 120;
             canvas.width = gameWidth;
             canvas.height = gameHeight;
 
@@ -418,6 +421,7 @@
         function backToMothership() {
             document.getElementById('resultModal').classList.remove('show');
             document.getElementById('combatWrapper').classList.remove('active');
+            document.getElementById('combatUI').style.display = 'none';
             document.getElementById('mainScreen').style.display = 'block';
             updateUI();
         }
