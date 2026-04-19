@@ -66,7 +66,13 @@
         <div class="stat"><div class="stat-label">MISSIONS</div><div class="stat-value" id="missions">0</div></div>
     </div>
 
-    <div id="mainScreen">
+    <div id="mainMenu" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);">
+        <h1 style="font-size: 64px; color: #00ff88; margin-bottom: 20px; text-shadow: 0 0 20px #00ff88;">⭐ PLANET HUNTERS ⭐</h1>
+        <p style="font-size: 20px; color: #ffaa00; margin-bottom: 40px;">Explore. Fight. Survive.</p>
+        <button onclick="startGame()" style="background: #00ff88; color: #0a0e27; padding: 20px 60px; font-size: 24px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer;" onmouseover="this.style.background='#00dd77'" onmouseout="this.style.background='#00ff88'">START GAME</button>
+    </div>
+
+    <div id="mainScreen" style="display: none;">
         <div class="section-title">🚀 AVAILABLE MISSIONS</div>
         <div class="grid" id="planets"></div>
         <div class="section-title">⚔️ WEAPON SHOP</div>
@@ -131,6 +137,11 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         let gw = 0, gh = 0;
+
+        function startGame() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('mainScreen').style.display = 'block';
+        }
 
         function load() { const s = localStorage.getItem('gameData'); if (s) Object.assign(game, JSON.parse(s)); updateUI(); }
         function save() { localStorage.setItem('gameData', JSON.stringify({ credits: game.credits, weapon: game.weapon, missions: game.missions, cleared: game.cleared, inventory: game.inventory })); }
@@ -228,6 +239,18 @@
                 else if (a.size === 'medium') ctx.fillStyle = '#ffaa00';
                 else ctx.fillStyle = '#ff4444';
                 ctx.fillRect(-a.w/2, -a.h/2, a.w, a.h); ctx.restore();
+                
+                // Draw health bar above alien
+                const healthPercent = (a.hp / a.maxHp) * 100;
+                const barWidth = a.w + 10;
+                const barHeight = 6;
+                ctx.fillStyle = '#333';
+                ctx.fillRect(a.x - barWidth/2, a.y - a.h/2 - 15, barWidth, barHeight);
+                ctx.fillStyle = healthPercent > 50 ? '#00ff88' : healthPercent > 25 ? '#ffaa00' : '#ff4444';
+                ctx.fillRect(a.x - barWidth/2, a.y - a.h/2 - 15, (barWidth * healthPercent) / 100, barHeight);
+                ctx.strokeStyle = '#666';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(a.x - barWidth/2, a.y - a.h/2 - 15, barWidth, barHeight);
             }
             
             ctx.fillStyle = '#4444ff'; ctx.fillRect(combat.player.x - 15, combat.player.y - 15, 30, 30);
@@ -297,6 +320,11 @@
             document.getElementById('gameCanvas').classList.remove('show');
             document.getElementById('mainScreen').style.display = 'block';
             updateUI();
+        }
+        
+        function showMainMenu() {
+            document.getElementById('mainScreen').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'flex';
         }
 
         load();
