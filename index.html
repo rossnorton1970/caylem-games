@@ -8,57 +8,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; overflow: hidden; }
         body { font-family: Arial, sans-serif; background: #0a0e27; color: #e0e0e0; }
-        #header { background: #1a1f3a; padding: 20px; border-bottom: 2px solid #00ff88; display: flex; justify-content: space-between; }
-        .stat { margin: 0 20px; }
-        .stat-label { font-size: 12px; color: #888; }
-        .stat-value { font-size: 28px; color: #00ff88; font-weight: bold; }
-        #mainScreen { padding: 40px; background: #0a0e27; height: calc(100vh - 80px); overflow-y: auto; }
-        .section-title { font-size: 24px; color: #00ff88; margin: 30px 0 20px 0; border-bottom: 1px solid #00ff88; padding-bottom: 10px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .card { background: #1a1f3a; border: 2px solid #444; padding: 20px; border-radius: 5px; cursor: pointer; }
-        .card:hover { border-color: #00ff88; background: #2a2f4a; }
-        .card.cleared { opacity: 0.5; }
-        .card-title { font-weight: bold; margin-bottom: 10px; font-size: 16px; }
-        .card-text { font-size: 12px; color: #aaa; margin: 5px 0; }
-        .difficulty { margin: 10px 0; font-weight: bold; }
-        .difficulty.easy { color: #00ff88; }
-        .difficulty.medium { color: #ffaa00; }
-        .difficulty.hard { color: #ff4444; }
-        button { width: 100%; padding: 10px; margin-top: 10px; border: none; border-radius: 3px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
-        .mission-btn { background: #00ff88; color: #0a0e27; }
-        .mission-btn:hover:not(:disabled) { background: #00dd77; }
-        .mission-btn:disabled { background: #666; cursor: not-allowed; }
-        .buy-btn { background: #4444ff; color: white; }
-        .buy-btn:hover:not(:disabled) { background: #3333dd; }
-        .buy-btn:disabled { background: #666; cursor: not-allowed; }
-        #combatUI { position: fixed; top: 0; left: 0; right: 0; display: none; width: 100%; background: #1a1f3a; padding: 15px; border-bottom: 2px solid #00ff88; z-index: 50; }
-        #combatUI.show { display: flex; justify-content: space-around; align-items: center; gap: 15px; height: 100px; }
-        #gameCanvas { display: none; width: 100%; height: calc(100vh - 180px); background: linear-gradient(135deg, #1a1f3a 0%, #2a2f4a 100%); cursor: crosshair; }
-        #gameCanvas.show { display: block; }
-        .bar-container { width: 150px; }
-        .bar-label { font-size: 11px; color: #888; }
-        .bar { width: 100%; height: 18px; background: #333; border: 1px solid #666; margin-top: 4px; position: relative; }
-        .bar-fill { height: 100%; position: absolute; top: 0; left: 0; transition: width 0.2s; }
-        .shield-fill { background: #4444ff; }
-        .health-fill { background: #ff4444; }
-        .timer { font-size: 24px; color: #ffaa00; font-weight: bold; min-width: 80px; text-align: center; }
-        .timer.warning { color: #ff4444; animation: pulse 0.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        .tools { display: flex; gap: 8px; }
-        .tool-btn { background: #ff6600; color: white; padding: 8px; font-size: 11px; flex: 1; }
-        .tool-btn:hover:not(:disabled) { background: #ff5500; }
-        .tool-btn:disabled { background: #666; cursor: not-allowed; }
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; }
-        #modal.show { display: flex; }
-        .modalBox { background: rgba(10, 14, 39, 0.98); padding: 40px; border: 2px solid #00ff88; text-align: center; border-radius: 10px; min-width: 350px; }
-        .modalBox.fail { border-color: #ff4444; }
-        .modalTitle { font-size: 32px; margin-bottom: 20px; color: #00ff88; }
-        .modalBox.fail .modalTitle { color: #ff4444; }
-        .modalReward { font-size: 18px; color: #ffaa00; margin: 20px 0; }
-        .returnBtn { background: #00ff88; color: #0a0e27; margin-top: 20px; padding: 12px; width: 100%; font-size: 16px; }
-        .returnBtn:hover { background: #00dd77; }
         
-        /* Main Menu */
         #mainMenu { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); }
         .menu-title { font-size: 64px; color: #00ff88; margin-bottom: 20px; text-shadow: 0 0 20px #00ff88; }
         .menu-subtitle { font-size: 20px; color: #ffaa00; margin-bottom: 40px; }
@@ -70,7 +20,14 @@
         .menu-btn.settings { background: #ffaa00; color: #0a0e27; }
         .menu-btn.settings:hover { background: #ff9900; }
         
-        /* Party Modal */
+        #shipCanvas { display: none; width: 100%; height: 100%; background: #0a0e27; cursor: move; }
+        
+        #header { background: #1a1f3a; padding: 15px 30px; border-bottom: 2px solid #00ff88; display: none; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .header-stat { margin: 0 20px; }
+        .stat-label { font-size: 12px; color: #888; }
+        .stat-value { font-size: 24px; color: #00ff88; font-weight: bold; }
+        
         #partyModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 101; align-items: center; justify-content: center; }
         #partyModal.show { display: flex; }
         .partyBox { background: rgba(10, 14, 39, 0.98); padding: 40px; border: 2px solid #00ff88; border-radius: 10px; min-width: 500px; max-height: 80vh; overflow-y: auto; }
@@ -82,100 +39,36 @@
         .party-form.show { display: block; }
         .party-form input, .party-form select { width: 100%; padding: 10px; margin: 10px 0; background: #1a1f3a; border: 1px solid #444; color: #e0e0e0; }
         .party-form input::placeholder { color: #666; }
-        .party-form button { width: 100%; padding: 12px; background: #00ff88; color: #0a0e27; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; }
+        .party-form button { width: 100%; padding: 12px; background: #00ff88; color: #0a0e27; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; border-radius: 5px; }
         .party-form button:hover { background: #00dd77; }
         .party-list { margin-top: 20px; }
         .party-item { background: #1a1f3a; padding: 15px; margin: 10px 0; border: 1px solid #444; border-radius: 5px; }
         .party-item-name { color: #00ff88; font-weight: bold; margin-bottom: 5px; }
         .party-item-info { font-size: 12px; color: #aaa; margin: 5px 0; }
-        .party-item-btn { background: #4444ff; color: white; padding: 8px; width: 100%; margin-top: 10px; border: none; cursor: pointer; }
+        .party-item-btn { background: #4444ff; color: white; padding: 8px; width: 100%; margin-top: 10px; border: none; cursor: pointer; border-radius: 3px; }
         .party-item-btn:hover { background: #3333dd; }
         .close-modal { position: absolute; top: 20px; right: 20px; background: #ff4444; color: white; border: none; width: 40px; height: 40px; font-size: 24px; cursor: pointer; border-radius: 5px; }
-        
-        /* Party Lobby */
-        #partyLobby { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); z-index: 102; flex-direction: column; padding: 20px; overflow-y: auto; }
-        #partyLobby.show { display: flex; }
-        .lobby-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ff88; padding-bottom: 20px; margin-bottom: 20px; }
-        .lobby-title { font-size: 28px; color: #00ff88; }
-        .lobby-code { font-size: 14px; color: #ffaa00; background: #1a1f3a; padding: 10px 15px; border-radius: 5px; }
-        .players-section { flex: 1; }
-        .players-section h3 { color: #00ff88; margin-bottom: 15px; }
-        .player-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        .player-card { background: #1a1f3a; border: 2px solid #444; padding: 15px; border-radius: 5px; text-align: center; }
-        .player-card.leader { border-color: #ffaa00; background: rgba(255, 170, 0, 0.1); }
-        .player-name { color: #00ff88; font-weight: bold; margin-bottom: 5px; }
-        .player-status { font-size: 12px; color: #aaa; }
-        .player-ready { color: #00ff88; font-weight: bold; }
-        .chat-section { background: #1a1f3a; border: 1px solid #444; border-radius: 5px; padding: 15px; margin-bottom: 20px; height: 150px; overflow-y: auto; }
-        .chat-message { margin: 8px 0; padding: 8px; background: #0a0e27; border-radius: 3px; font-size: 12px; }
-        .chat-message strong { color: #00ff88; }
-        .chat-input-area { display: flex; gap: 10px; margin-bottom: 20px; }
-        .chat-input-area input { flex: 1; padding: 10px; background: #1a1f3a; border: 1px solid #444; color: #e0e0e0; border-radius: 5px; }
-        .chat-input-area button { flex: 0 0 60px; background: #00ff88; color: #0a0e27; font-weight: bold; border: none; cursor: pointer; border-radius: 5px; }
-        .chat-input-area button:hover { background: #00dd77; }
-        .lobby-buttons { display: flex; gap: 10px; }
-        .lobby-buttons button { flex: 1; padding: 15px; font-size: 16px; font-weight: bold; border: none; cursor: pointer; border-radius: 5px; }
-        .ready-btn { background: #4444ff; color: white; }
-        .ready-btn:hover { background: #3333dd; }
-        .ready-btn.ready { background: #00ff88; color: #0a0e27; }
-        .ready-btn.ready:hover { background: #00dd77; }
-        .leave-btn { background: #ff4444; color: white; }
-        .leave-btn:hover { background: #dd3333; }
     </style>
 </head>
 <body>
-    <div id="header" style="display: none;">
-        <div class="stat"><div class="stat-label">CREDITS</div><div class="stat-value" id="credits">500</div></div>
-        <div class="stat"><div class="stat-label">WEAPON</div><div class="stat-value" id="weapon">Basic Laser</div></div>
-        <div class="stat"><div class="stat-label">MISSIONS</div><div class="stat-value" id="missions">0</div></div>
-    </div>
-
     <div id="mainMenu">
         <h1 class="menu-title">⭐ PLANET HUNTERS ⭐</h1>
         <p class="menu-subtitle">Explore. Fight. Survive.</p>
         <div class="menu-buttons">
-            <button class="menu-btn" onclick="goToGame()">START GAME</button>
+            <button class="menu-btn" onclick="startGame()">START GAME</button>
             <button class="menu-btn secondary" onclick="openPartyModal()">👥 PARTY</button>
             <button class="menu-btn settings" onclick="openSettings()">⚙️ SETTINGS</button>
         </div>
     </div>
 
-    <div id="mainScreen" style="display: none;">
-        <div class="section-title">🚀 AVAILABLE MISSIONS</div>
-        <div class="grid" id="planets"></div>
-        <div class="section-title">⚔️ WEAPON SHOP</div>
-        <div class="grid" id="shop"></div>
-    </div>
-
-    <div id="combatUI">
-        <div class="bar-container">
-            <div class="bar-label">SHIELD</div>
-            <div class="bar"><div class="bar-fill shield-fill" id="shield" style="width: 100%"></div></div>
-        </div>
-        <div class="bar-container">
-            <div class="bar-label">HEALTH</div>
-            <div class="bar"><div class="bar-fill health-fill" id="health" style="width: 100%"></div></div>
-        </div>
-        <div style="text-align: center; flex: 1;">
-            <div style="font-size: 16px; color: #ffaa00;">ALIENS: <span id="alienCount">0</span></div>
-        </div>
-        <div class="timer" id="timer">25:00</div>
-        <div class="tools">
-            <button class="tool-btn" id="orbBtn" onclick="useTool('orbital')">ORB<br><span id="orbCount">0</span></button>
-            <button class="tool-btn" id="bombBtn" onclick="useTool('bomb')">BOMB<br><span id="bombCount">0</span></button>
-            <button class="tool-btn" id="laserBtn" onclick="useTool('laser')">LASER<br><span id="laserCount">0</span></button>
+    <div id="header">
+        <div class="header-content">
+            <div class="header-stat"><div class="stat-label">CREDITS</div><div class="stat-value" id="credits">500</div></div>
+            <button onclick="exitToMenu()" style="background: #ff4444; color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold;">← MENU</button>
         </div>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
-
-    <div id="modal">
-        <div class="modalBox" id="modalBox">
-            <div class="modalTitle" id="modalTitle">Mission Complete</div>
-            <div class="modalReward" id="modalReward"></div>
-            <button class="returnBtn" onclick="returnToShop()">Return to Mothership</button>
-        </div>
-    </div>
+    <canvas id="shipCanvas"></canvas>
 
     <div id="partyModal">
         <button class="close-modal" onclick="closePartyModal()">✕</button>
@@ -197,7 +90,7 @@
 
             <div id="createForm" class="party-form">
                 <label style="color: #ffaa00;">Party Type:</label>
-                <select id="partyType" style="width: 100%; padding: 10px; margin: 10px 0; background: #1a1f3a; border: 1px solid #444; color: #e0e0e0;">
+                <select id="partyType">
                     <option value="public">🌍 PUBLIC (anyone can join)</option>
                     <option value="private">🔒 PRIVATE (need code)</option>
                 </select>
@@ -210,46 +103,9 @@
         </div>
     </div>
 
-    <div id="partyLobby">
-        <div class="lobby-header">
-            <div>
-                <div class="lobby-title" id="lobbyTitle">Party Lobby</div>
-                <div style="font-size: 12px; color: #aaa;">You're the party leader</div>
-            </div>
-            <div class="lobby-code" id="lobbyCode"></div>
-            <button class="close-modal" onclick="leaveParty()">✕</button>
-        </div>
-
-        <div class="players-section">
-            <h3>👥 PLAYERS</h3>
-            <div class="player-list" id="playerList"></div>
-        </div>
-
-        <div>
-            <h3 style="color: #00ff88; margin-bottom: 10px;">💬 CHAT</h3>
-            <div class="chat-section" id="chatBox"></div>
-            <div class="chat-input-area">
-                <input type="text" id="chatInput" placeholder="Say something..." onkeypress="if(event.key==='Enter') sendMessage()">
-                <button onclick="sendMessage()">Send</button>
-            </div>
-        </div>
-
-        <div class="lobby-buttons">
-            <button class="ready-btn" id="readyBtn" onclick="toggleReady()">Ready Up!</button>
-            <button class="leave-btn" onclick="leaveParty()">Leave Party</button>
-        </div>
-    </div>
-
     <script>
         const game = {
-            credits: 500, weapon: 'basic', missions: 0, cleared: [],
-            inventory: { orbital: 5, bomb: 5, laser: 5 },
-            weapons: {
-                basic: { name: 'Basic Laser', damage: 10, price: 0 },
-                plasma: { name: 'Plasma Rifle', damage: 20, price: 150 },
-                pulse: { name: 'Pulse Cannon', damage: 35, price: 350 },
-                nova: { name: 'Nova Blaster', damage: 50, price: 700 }
-            },
+            credits: 500,
             planets: [
                 { id: 1, name: 'Kepler-452b', desc: 'Desert world', diff: 'easy', aliens: 5, reward: 100 },
                 { id: 2, name: 'Proxima-3', desc: 'Ice planet', diff: 'medium', aliens: 8, reward: 200 },
@@ -259,205 +115,168 @@
             ]
         };
 
-        let currentParty = null;
-        let playerName = 'Player_' + Math.floor(Math.random() * 10000);
-        let isReady = false;
+        const canvas = document.getElementById('shipCanvas');
+        const ctx = canvas.getContext('2d');
+        let cw = 0, ch = 0;
 
-        const combat = {
-            planet: null, time: 1500, running: false,
-            player: { x: 400, y: 300, shield: 100, health: 100, damage: 10 },
-            aliens: [], complete: false
+        // Ship interior state
+        const ship = {
+            player: { x: 400, y: 500, w: 20, h: 20, speed: 5 },
+            rooms: [
+                { name: 'BRIDGE', x: 150, y: 100, w: 150, h: 120, icon: '🖥️', color: '#4444ff' },
+                { name: 'ARMORY', x: 450, y: 100, w: 150, h: 120, icon: '⚔️', color: '#ff6600' },
+                { name: 'MISSIONS', x: 750, y: 100, w: 150, h: 120, icon: '🚀', color: '#00ff88' },
+                { name: 'CARGO', x: 150, y: 280, w: 150, h: 120, icon: '📦', color: '#ffaa00' },
+                { name: 'ENGINE', x: 450, y: 280, w: 150, h: 120, icon: '⚡', color: '#ff4444' },
+                { name: 'COMM', x: 750, y: 280, w: 150, h: 120, icon: '📡', color: '#00aaff' }
+            ],
+            keys: {}
         };
 
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        let gw = 0, gh = 0;
-
-        function load() { const s = localStorage.getItem('gameData'); if (s) Object.assign(game, JSON.parse(s)); }
-        function save() { localStorage.setItem('gameData', JSON.stringify({ credits: game.credits, weapon: game.weapon, missions: game.missions, cleared: game.cleared, inventory: game.inventory })); }
-
-        function goToGame() {
+        function startGame() {
             document.getElementById('mainMenu').style.display = 'none';
-            document.getElementById('header').style.display = 'flex';
-            document.getElementById('mainScreen').style.display = 'block';
-            updateUI();
-        }
-
-        function updateUI() {
-            document.getElementById('credits').textContent = game.credits;
-            document.getElementById('weapon').textContent = game.weapons[game.weapon].name;
-            document.getElementById('missions').textContent = game.missions;
-            renderPlanets(); renderShop();
-        }
-
-        function renderPlanets() {
-            const div = document.getElementById('planets');
-            div.innerHTML = '';
-            game.planets.forEach(p => {
-                const cleared = game.cleared.includes(p.id);
-                div.innerHTML += `<div class="card ${cleared ? 'cleared' : ''}"><div class="card-title">🪐 ${p.name}</div><div class="card-text">${p.desc}</div><div class="difficulty ${p.diff}">${p.diff.toUpperCase()}</div><div class="card-text">${p.aliens} aliens | ${p.reward} credits</div><button class="mission-btn" ${cleared ? 'disabled' : ''} onclick="startMission(${p.id})">${cleared ? 'CLEARED' : 'START'}</button></div>`;
-            });
-        }
-
-        function renderShop() {
-            const div = document.getElementById('shop');
-            div.innerHTML = '';
-            for (const [k, w] of Object.entries(game.weapons)) {
-                const owned = game.weapon === k;
-                const afford = game.credits >= w.price;
-                div.innerHTML += `<div class="card"><div class="card-title">⚔️ ${w.name}</div><div class="card-text">${w.price === 0 ? 'STARTER' : w.price + ' CREDITS'}</div><button class="buy-btn" ${owned || !afford ? 'disabled' : ''} onclick="buyWeapon('${k}')">${owned ? 'EQUIPPED' : afford ? 'BUY' : 'CANT AFFORD'}</button></div>`;
-            }
-        }
-
-        function buyWeapon(k) {
-            const w = game.weapons[k];
-            if (game.credits >= w.price) { game.credits -= w.price; game.weapon = k; combat.player.damage = w.damage; save(); updateUI(); }
-        }
-
-        function startMission(id) {
-            const p = game.planets.find(x => x.id === id);
-            if (!p) return;
-            combat.planet = p; combat.time = 1500; combat.complete = false; combat.running = true;
-            combat.player.shield = 100; combat.player.health = 100; combat.player.damage = game.weapons[game.weapon].damage;
-            combat.aliens = [];
-            document.getElementById('mainScreen').style.display = 'none';
-            document.getElementById('header').style.display = 'none';
-            document.getElementById('combatUI').classList.add('show');
-            document.getElementById('gameCanvas').classList.add('show');
-            gw = canvas.clientWidth; gh = canvas.clientHeight;
-            canvas.width = gw; canvas.height = gh;
-            for (let i = 0; i < p.aliens; i++) spawnAlien();
+            document.getElementById('header').style.display = 'block';
+            document.getElementById('shipCanvas').style.display = 'block';
+            cw = canvas.clientWidth;
+            ch = canvas.clientHeight;
+            canvas.width = cw;
+            canvas.height = ch;
             gameLoop();
         }
 
-        function spawnAlien() {
-            const sizes = ['small', 'medium', 'large'];
-            const s = sizes[Math.floor(Math.random() * 3)];
-            let w, h, hp, dmg, spd;
-            if (s === 'small') { w = 15; h = 15; hp = 20; dmg = 5; spd = 2; }
-            else if (s === 'medium') { w = 25; h = 25; hp = 40; dmg = 10; spd = 1.5; }
-            else { w = 40; h = 40; hp = 80; dmg = 20; spd = 1; }
-            combat.aliens.push({ x: Math.random() * (gw - w), y: Math.random() * (gh * 0.65), w, h, hp, maxHp: hp, dmg, spd, size: s, angle: 0, attackCooldown: 0 });
+        function exitToMenu() {
+            document.getElementById('mainMenu').style.display = 'flex';
+            document.getElementById('header').style.display = 'none';
+            document.getElementById('shipCanvas').style.display = 'none';
         }
 
-        let frameCount = 0;
-        function gameLoop() { frameCount++; update(); draw(); if (combat.running && !combat.complete) requestAnimationFrame(gameLoop); }
+        function gameLoop() {
+            update();
+            draw();
+            if (document.getElementById('shipCanvas').style.display !== 'none') {
+                requestAnimationFrame(gameLoop);
+            }
+        }
 
         function update() {
-            combat.time--;
-            if (combat.time <= 0) endMission(false);
-            combat.aliens = combat.aliens.filter(a => a.hp > 0);
-            
-            for (let a of combat.aliens) {
-                const dx = combat.player.x - a.x, dy = combat.player.y - a.y, d = Math.sqrt(dx*dx + dy*dy);
-                if (d > 0) { a.x += (dx / d) * a.spd; a.y += (dy / d) * a.spd; a.angle = Math.atan2(dy, dx); }
-                if (a.y > gh * 0.65) a.y = gh * 0.65;
-                
-                a.attackCooldown--;
-                if (d < 80 && a.attackCooldown <= 0) {
-                    if (combat.player.shield > 0) combat.player.shield = Math.max(0, combat.player.shield - a.dmg);
-                    else combat.player.health = Math.max(0, combat.player.health - a.dmg);
-                    if (combat.player.health <= 0) endMission(false);
-                    a.attackCooldown = a.size === 'small' ? 10 : a.size === 'medium' ? 20 : 30;
-                }
-            }
-            
-            if (combat.player.shield < 100) combat.player.shield = Math.min(100, combat.player.shield + 1);
-            if (combat.aliens.length === 0 && !combat.complete) endMission(true);
+            // Player movement
+            if (ship.keys['ArrowUp'] || ship.keys['w']) ship.player.y -= ship.player.speed;
+            if (ship.keys['ArrowDown'] || ship.keys['s']) ship.player.y += ship.player.speed;
+            if (ship.keys['ArrowLeft'] || ship.keys['a']) ship.player.x -= ship.player.speed;
+            if (ship.keys['ArrowRight'] || ship.keys['d']) ship.player.x += ship.player.speed;
+
+            // Boundary check
+            ship.player.x = Math.max(0, Math.min(cw - ship.player.w, ship.player.x));
+            ship.player.y = Math.max(0, Math.min(ch - ship.player.h, ship.player.y));
         }
 
         function draw() {
-            ctx.fillStyle = '#0a0e27'; ctx.fillRect(0, 0, gw, gh);
-            
-            for (let a of combat.aliens) {
-                ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.angle);
-                if (a.size === 'small') ctx.fillStyle = '#00ff88';
-                else if (a.size === 'medium') ctx.fillStyle = '#ffaa00';
-                else ctx.fillStyle = '#ff4444';
-                ctx.fillRect(-a.w/2, -a.h/2, a.w, a.h); ctx.restore();
-                
-                const healthPercent = (a.hp / a.maxHp) * 100;
-                const barWidth = a.w + 10;
-                const barHeight = 6;
-                ctx.fillStyle = '#333';
-                ctx.fillRect(a.x - barWidth/2, a.y - a.h/2 - 15, barWidth, barHeight);
-                ctx.fillStyle = healthPercent > 50 ? '#00ff88' : healthPercent > 25 ? '#ffaa00' : '#ff4444';
-                ctx.fillRect(a.x - barWidth/2, a.y - a.h/2 - 15, (barWidth * healthPercent) / 100, barHeight);
-                ctx.strokeStyle = '#666';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(a.x - barWidth/2, a.y - a.h/2 - 15, barWidth, barHeight);
+            // Background
+            ctx.fillStyle = '#0a0e27';
+            ctx.fillRect(0, 0, cw, ch);
+
+            // Draw grid
+            ctx.strokeStyle = '#1a1f3a';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < cw; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, ch);
+                ctx.stroke();
             }
-            
-            ctx.fillStyle = '#4444ff'; ctx.fillRect(combat.player.x - 15, combat.player.y - 15, 30, 30);
-            
-            for (let a of combat.aliens) {
-                const dx = combat.player.x - a.x, dy = combat.player.y - a.y, d = Math.sqrt(dx*dx + dy*dy);
-                if (d < 80) {
-                    ctx.strokeStyle = 'rgba(255, 50, 50, 0.5)';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(a.x, a.y, 80, 0, Math.PI * 2);
-                    ctx.stroke();
+            for (let i = 0; i < ch; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(cw, i);
+                ctx.stroke();
+            }
+
+            // Draw rooms
+            ship.rooms.forEach(room => {
+                ctx.fillStyle = room.color;
+                ctx.globalAlpha = 0.15;
+                ctx.fillRect(room.x, room.y, room.w, room.h);
+                ctx.globalAlpha = 1.0;
+
+                // Room border
+                ctx.strokeStyle = room.color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(room.x, room.y, room.w, room.h);
+
+                // Room label
+                ctx.fillStyle = room.color;
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(room.icon, room.x + room.w / 2, room.y + room.h / 2 - 10);
+                ctx.fillText(room.name, room.x + room.w / 2, room.y + room.h / 2 + 15);
+            });
+
+            // Draw player
+            ctx.fillStyle = '#00ff88';
+            ctx.beginPath();
+            ctx.arc(ship.player.x + ship.player.w / 2, ship.player.y + ship.player.h / 2, ship.player.w, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw HUD
+            ctx.fillStyle = '#00ff88';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Use ARROW KEYS or WASD to move', 20, 30);
+            ctx.fillText('Click on a room to enter', 20, 50);
+
+            // Check if player is in a room
+            let inRoom = null;
+            ship.rooms.forEach(room => {
+                if (ship.player.x + ship.player.w > room.x &&
+                    ship.player.x < room.x + room.w &&
+                    ship.player.y + ship.player.h > room.y &&
+                    ship.player.y < room.y + room.h) {
+                    inRoom = room;
                 }
+            });
+
+            if (inRoom) {
+                ctx.fillStyle = '#ffaa00';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`Click or Press E to enter ${inRoom.name}`, cw / 2, ch - 40);
             }
-            
-            document.getElementById('shield').style.width = combat.player.shield + '%';
-            document.getElementById('health').style.width = combat.player.health + '%';
-            document.getElementById('alienCount').textContent = combat.aliens.length;
-            const m = Math.floor(combat.time / 60), s = combat.time % 60, t = document.getElementById('timer');
-            t.textContent = m + ':' + (s < 10 ? '0' : '') + s;
-            if (combat.time < 300) t.classList.add('warning');
-            document.getElementById('orbCount').textContent = game.inventory.orbital;
-            document.getElementById('bombCount').textContent = game.inventory.bomb;
-            document.getElementById('laserCount').textContent = game.inventory.laser;
-            document.getElementById('orbBtn').disabled = game.inventory.orbital === 0;
-            document.getElementById('bombBtn').disabled = game.inventory.bomb === 0;
-            document.getElementById('laserBtn').disabled = game.inventory.laser === 0;
         }
 
-        canvas.addEventListener('click', (e) => {
-            const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-            for (let a of combat.aliens) {
-                const dx = x - a.x, dy = y - a.y, d = Math.sqrt(dx*dx + dy*dy);
-                if (d < 50) { a.hp -= combat.player.damage; break; }
+        document.addEventListener('keydown', (e) => {
+            ship.keys[e.key] = true;
+            if (e.key === 'e' || e.key === 'E') {
+                ship.rooms.forEach(room => {
+                    if (ship.player.x + ship.player.w > room.x &&
+                        ship.player.x < room.x + room.w &&
+                        ship.player.y + ship.player.h > room.y &&
+                        ship.player.y < room.y + room.h) {
+                        roomClicked(room.name);
+                    }
+                });
             }
         });
 
-        function useTool(t) {
-            if (game.inventory[t] <= 0) return;
-            game.inventory[t]--;
-            let dmg = t === 'orbital' ? 50 : t === 'bomb' ? 40 : 30;
-            const ex = Math.random() * (gw - 100) + 50, ey = Math.random() * (gh * 0.65 - 100) + 50;
-            for (let a of combat.aliens) {
-                const d = Math.sqrt((a.x - ex)**2 + (a.y - ey)**2);
-                if (d < 100) a.hp -= dmg;
-            }
+        document.addEventListener('keyup', (e) => {
+            ship.keys[e.key] = false;
+        });
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ship.rooms.forEach(room => {
+                if (x > room.x && x < room.x + room.w && y > room.y && y < room.y + room.h) {
+                    roomClicked(room.name);
+                }
+            });
+        });
+
+        function roomClicked(roomName) {
+            alert(`🚧 ${roomName} coming soon!`);
         }
 
-        function endMission(success) {
-            combat.complete = true; combat.running = false;
-            const box = document.getElementById('modalBox'), title = document.getElementById('modalTitle'), reward = document.getElementById('modalReward');
-            if (success) {
-                box.classList.remove('fail'); title.textContent = 'MISSION COMPLETE!';
-                const r = combat.planet.reward;
-                game.credits += r; game.missions++; game.cleared.push(combat.planet.id);
-                reward.textContent = '+' + r + ' CREDITS';
-            } else {
-                box.classList.add('fail'); title.textContent = 'MISSION FAILED'; reward.textContent = '';
-            }
-            save(); document.getElementById('modal').classList.add('show');
-        }
-
-        function returnToShop() {
-            document.getElementById('modal').classList.remove('show');
-            document.getElementById('combatUI').classList.remove('show');
-            document.getElementById('gameCanvas').classList.remove('show');
-            document.getElementById('header').style.display = 'flex';
-            document.getElementById('mainScreen').style.display = 'block';
-            updateUI();
-        }
-
-        // Party System
         function openPartyModal() {
             document.getElementById('partyModal').classList.add('show');
             loadPublicParties();
@@ -483,7 +302,7 @@
                 list.innerHTML = '<p style="color: #888; text-align: center;">No public parties yet. Create one!</p>';
             } else {
                 parties.forEach(p => {
-                    list.innerHTML += `<div class="party-item"><div class="party-item-name">🚀 ${p.name}</div><div class="party-item-info">👤 ${p.players}/${p.maxPlayers} players</div><div class="party-item-info">📍 ${p.type === 'public' ? 'PUBLIC' : 'PRIVATE'}</div><button class="party-item-btn" onclick="joinPartyLobby('${p.id}', '${p.name}')">Join Party</button></div>`;
+                    list.innerHTML += `<div class="party-item"><div class="party-item-name">🚀 ${p.name}</div><div class="party-item-info">👤 ${p.players}/${p.maxPlayers} players</div><button class="party-item-btn" onclick="alert('Joining party: ' + '${p.id}')">Join Party</button></div>`;
                 });
             }
         }
@@ -496,17 +315,12 @@
             if (!name || !pName) { alert('Fill in all fields!'); return; }
             
             const partyId = Math.random().toString(36).substr(2, 6).toUpperCase();
-            playerName = pName;
             const party = { 
                 id: partyId, 
                 name, 
                 type, 
                 players: 1, 
-                maxPlayers: 4, 
-                leader: pName,
-                members: [{ name: pName, ready: false }],
-                chat: [],
-                code: partyId 
+                maxPlayers: 4
             };
             
             if (type === 'public') {
@@ -515,119 +329,19 @@
                 localStorage.setItem('publicParties', JSON.stringify(parties));
             }
             
-            currentParty = party;
+            alert(`Party created! Code: ${partyId}`);
             closePartyModal();
-            showPartyLobby();
-        }
-
-        function joinPartyLobby(id, name) {
-            const parties = JSON.parse(localStorage.getItem('publicParties') || '[]');
-            const party = parties.find(p => p.id === id);
-            if (party && party.players < party.maxPlayers) {
-                party.players++;
-                const pName = prompt('Enter your name:');
-                if (pName) {
-                    playerName = pName;
-                    party.members.push({ name: pName, ready: false });
-                    localStorage.setItem('publicParties', JSON.stringify(parties));
-                    currentParty = party;
-                    closePartyModal();
-                    showPartyLobby();
-                }
-            } else {
-                alert('Party is full!');
-            }
         }
 
         function joinPrivateParty() {
             const code = document.getElementById('privateCode').value;
             if (!code) { alert('Enter a party code!'); return; }
-            
-            const pName = prompt('Enter your name:');
-            if (!pName) return;
-            
-            const storedParties = JSON.parse(localStorage.getItem('privateParties') || '{}');
-            if (storedParties[code]) {
-                const party = storedParties[code];
-                if (party.players < party.maxPlayers) {
-                    party.players++;
-                    playerName = pName;
-                    party.members.push({ name: pName, ready: false });
-                    localStorage.setItem('privateParties', JSON.stringify(storedParties));
-                    currentParty = party;
-                    closePartyModal();
-                    showPartyLobby();
-                } else {
-                    alert('Party is full!');
-                }
-            } else {
-                alert('Party code not found!');
-            }
-        }
-
-        function showPartyLobby() {
-            document.getElementById('partyModal').classList.remove('show');
-            document.getElementById('mainMenu').style.display = 'none';
-            document.getElementById('partyLobby').classList.add('show');
-            document.getElementById('lobbyTitle').textContent = currentParty.name;
-            document.getElementById('lobbyCode').textContent = `Code: ${currentParty.code}`;
-            updatePartyLobby();
-        }
-
-        function updatePartyLobby() {
-            const playerList = document.getElementById('playerList');
-            playerList.innerHTML = '';
-            currentParty.members.forEach(m => {
-                const isLeader = m.name === currentParty.leader;
-                playerList.innerHTML += `
-                    <div class="player-card ${isLeader ? 'leader' : ''}">
-                        <div class="player-name">${m.name}</div>
-                        <div class="player-status">${isLeader ? '👑 LEADER' : 'Ready'}</div>
-                        <div class="player-ready" style="color: ${m.ready ? '#00ff88' : '#ff4444'};">${m.ready ? '✓ READY' : '○ Not Ready'}</div>
-                    </div>
-                `;
-            });
-        }
-
-        function toggleReady() {
-            const member = currentParty.members.find(m => m.name === playerName);
-            if (member) {
-                member.ready = !member.ready;
-                const btn = document.getElementById('readyBtn');
-                btn.textContent = member.ready ? 'Ready! ✓' : 'Ready Up!';
-                btn.classList.toggle('ready', member.ready);
-                updatePartyLobby();
-                addChatMessage('System', `${playerName} is ${member.ready ? 'READY' : 'NOT ready'}`);
-            }
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const msg = input.value.trim();
-            if (msg) {
-                addChatMessage(playerName, msg);
-                input.value = '';
-            }
-        }
-
-        function addChatMessage(sender, msg) {
-            const chat = document.getElementById('chatBox');
-            chat.innerHTML += `<div class="chat-message"><strong>${sender}:</strong> ${msg}</div>`;
-            chat.scrollTop = chat.scrollHeight;
-        }
-
-        function leaveParty() {
-            currentParty = null;
-            isReady = false;
-            document.getElementById('partyLobby').classList.remove('show');
-            document.getElementById('mainMenu').style.display = 'flex';
+            alert('Joining private party with code: ' + code);
         }
 
         function openSettings() {
-            alert('⚙️ Settings coming soon!\nWe\'ll add audio, difficulty, and more here.');
+            alert('⚙️ Settings coming soon!');
         }
-
-        load();
     </script>
 </body>
 </html>
