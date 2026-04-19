@@ -103,6 +103,47 @@
         </div>
     </div>
 
+    <div id="armoryModal" class="modal">
+        <button class="close-modal" onclick="exitArmory()">✕</button>
+        <div class="modalBox" style="min-width: 800px; max-height: 90vh;">
+            <h2>⚡ ARMORY - WEAPONS & LOADOUTS</h2>
+            
+            <div style="display: flex; gap: 20px; height: 100%;">
+                <!-- Weapon List -->
+                <div style="flex: 1; border-right: 2px solid #444; padding-right: 20px;">
+                    <h3 style="color: #00ff88; margin-bottom: 15px;">AVAILABLE WEAPONS</h3>
+                    <div style="color: #ffaa00; font-size: 12px; margin-bottom: 15px;">💰 Credits: <span id="creditsDisplay">500</span></div>
+                    <div id="weaponsList" style="max-height: 500px; overflow-y: auto;"></div>
+                </div>
+                
+                <!-- Weapon Details & Loadout -->
+                <div style="flex: 1;">
+                    <h3 style="color: #4444ff; margin-bottom: 15px;">WEAPON DETAILS</h3>
+                    <div id="weaponDetails" style="background: #1a1f3a; padding: 15px; border-radius: 5px; margin-bottom: 20px; min-height: 200px;">
+                        <div style="color: #aaa; text-align: center; padding: 40px 0;">Select a weapon to view details</div>
+                    </div>
+                    
+                    <h3 style="color: #00ff88; margin-bottom: 15px;">CURRENT LOADOUT</h3>
+                    <div id="loadoutDisplay" style="background: #1a1f3a; padding: 15px; border-radius: 5px;">
+                        <div style="margin-bottom: 10px;">
+                            <div style="color: #aaa; font-size: 12px;">Slot 1 (Always):</div>
+                            <div style="color: #00ff88; font-weight: bold;" id="slot1Display">AR-X</div>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <div style="color: #aaa; font-size: 12px;">Slot 2 (Choose):</div>
+                            <div style="color: #ffaa00; font-weight: bold;" id="slot2Display">Pistol</div>
+                            <button onclick="changeSlot(2)" style="background: #4444ff; color: white; padding: 5px 10px; margin-top: 5px; border: none; cursor: pointer; border-radius: 3px; font-size: 11px;">CHANGE</button>
+                        </div>
+                        <div>
+                            <div style="color: #aaa; font-size: 12px;">Slot 3 (Locked):</div>
+                            <div style="color: #666;" id="slot3Display">LOCKED</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="controlRoomModal" class="modal">
         <button class="close-modal" onclick="exitControlRoom()">✕</button>
         <div class="modalBox" style="min-width: 600px;">
@@ -147,9 +188,10 @@
             cleared: [],
             currentMission: null,
             isReady: false,
-            isLeader: true,  // Player is the leader
-            playersReady: 0,  // Track how many players are ready
-            maxPlayers: 1,    // Can increase with multiplayer
+            isLeader: true,
+            playersReady: 0,
+            maxPlayers: 1,
+            loadout: { slot1: 'AR-X', slot2: 'Pistol', slot3: null },
             planets: [
                 { id: 1, name: 'Kepler-452b', desc: 'Desert world', diff: 'easy', aliens: 5, reward: 100 },
                 { id: 2, name: 'Proxima-3', desc: 'Ice planet', diff: 'medium', aliens: 8, reward: 200 },
@@ -318,8 +360,114 @@
                 openMissionModal();
             } else if (room === ship.controlRoom) {
                 openControlRoom();
+            } else if (room === ship.armory) {
+                openArmory();
             }
             // Other rooms coming soon
+        }
+
+        function openArmory() {
+            updateArmoryDisplay();
+            document.getElementById('armoryModal').classList.add('show');
+        }
+
+        function exitArmory() {
+            document.getElementById('armoryModal').classList.remove('show');
+        }
+
+        function updateArmoryDisplay() {
+            document.getElementById('creditsDisplay').textContent = game.credits;
+            
+            const weaponsList = document.getElementById('weaponsList');
+            weaponsList.innerHTML = '';
+            
+            // All available weapons
+            const allWeapons = [
+                // TIER 1
+                { id: 'ar-x', name: 'AR-X', tier: 1, owned: true, price: 0 },
+                { id: 'pistol', name: 'Energy Pistol', tier: 1, owned: true, price: 0 },
+                { id: 'smg', name: 'Pulse SMG', tier: 1, owned: true, price: 0 },
+                // TIER 2
+                { id: 'burst', name: 'Burst Rifle', tier: 2, owned: false, price: 500 },
+                { id: 'shotgun', name: 'Plasma Shotgun', tier: 2, owned: false, price: 600 },
+                { id: 'sniper', name: 'Laser Sniper', tier: 2, owned: false, price: 700 },
+                // TIER 3
+                { id: 'pulse', name: 'Pulse Rifle', tier: 3, owned: false, price: 1000 },
+                { id: 'gauss', name: 'Gauss Rifle', tier: 3, owned: false, price: 1200 },
+                { id: 'railgun', name: 'Railgun', tier: 3, owned: false, price: 1500 },
+                // TIER 4
+                { id: 'rocket', name: 'Rocket Launcher', tier: 4, owned: false, price: 2000 },
+                { id: 'plasma', name: 'Plasma Launcher', tier: 4, owned: false, price: 1800 },
+                { id: 'auto', name: 'Auto Cannon', tier: 4, owned: false, price: 1600 },
+                { id: 'grenade', name: 'Grenade Launcher', tier: 4, owned: false, price: 1700 }
+            ];
+            
+            allWeapons.forEach(w => {
+                const tierColor = ['', '#00ff88', '#4444ff', '#ffaa00', '#ff4444'][w.tier];
+                const owned = w.owned ? '✓' : (game.credits >= w.price ? '✓' : '✗');
+                const btnColor = w.owned ? '#00ff88' : (game.credits >= w.price ? '#4444ff' : '#666');
+                const btnText = w.owned ? 'OWNED' : `${w.price} ¢`;
+                
+                weaponsList.innerHTML += `
+                    <div class="planet-card" onclick="selectWeapon('${w.id}', '${w.name}')" style="cursor: pointer;">
+                        <div style="color: ${tierColor}; font-weight: bold;">🔫 ${w.name}</div>
+                        <div style="font-size: 11px; color: #aaa; margin-top: 5px;">TIER ${w.tier}</div>
+                        <button style="background: ${btnColor}; color: #0a0e27; padding: 5px 10px; margin-top: 8px; border: none; cursor: pointer; border-radius: 3px; font-weight: bold; width: 100%; font-size: 11px;">${btnText}</button>
+                    </div>
+                `;
+            });
+        }
+
+        function selectWeapon(weaponId, weaponName) {
+            // Show weapon details
+            const details = getWeaponDetails(weaponId, weaponName);
+            document.getElementById('weaponDetails').innerHTML = details;
+        }
+
+        function getWeaponDetails(weaponId, weaponName) {
+            const weaponInfo = {
+                'ar-x': { dmg: 20, mag: 30, ammo: 360, desc: 'A standard-issue Astra Rifle deployed across human frontier colonies and deep-space expedition forces. It fires stabilized energy rounds designed to perform reliably in vacuum, harsh atmospheres, and zero-gravity combat zones. Known for its simplicity, durability, and consistent battlefield performance.' },
+                'pistol': { dmg: 15, mag: 12, ammo: 240, desc: 'A compact emergency sidearm issued to explorers, engineers, and colonial personnel operating beyond core systems. Lightweight and easy to handle, it is designed as a dependable last-resort weapon when primary equipment is unavailable or depleted during hostile encounters.' },
+                'smg': { dmg: 10, mag: 30, ammo: 420, desc: 'A close-quarters suppression weapon widely used by assault squads engaging hostile alien lifeforms. Its rapid pulse core generates a continuous stream of charged energy bolts, making it highly effective for controlling swarms and maintaining pressure in confined combat environments.' },
+                'burst': { dmg: 18, mag: 24, ammo: 300, desc: 'A tactical mid-range rifle engineered for disciplined fire control. It releases energy in precise 3-round bursts, allowing trained operators to maintain accuracy while conserving power reserves during extended planetary engagements.' },
+                'shotgun': { dmg: 64, mag: 6, ammo: 72, desc: 'A devastating short-range weapon designed for boarding operations and hive-clearing missions. It disperses unstable plasma clusters in a wide spread, delivering overwhelming force in close encounters with heavily clustered alien targets.' },
+                'sniper': { dmg: 90, mag: 5, ammo: 40, desc: 'A long-range precision weapon calibrated for extreme-distance engagements across planetary terrain. It compresses high-energy beams into a focused laser shot capable of eliminating targets before they can detect the shooter\'s position.' },
+                'pulse': { dmg: 22, mag: 27, ammo: 360, desc: 'An advanced military rifle upgraded from early frontier designs, built for prolonged combat operations in deep-space warzones. Its enhanced pulse core generates stronger, more stable energy bursts, improving both damage output and firing consistency.' },
+                'gauss': { dmg: 60, mag: 10, ammo: 120, desc: 'A magnetically accelerated precision weapon used by elite orbital and planetary strike units. It fires hyper-velocity projectiles that retain lethal energy over long distances, making it ideal for high-value target elimination.' },
+                'railgun': { dmg: 130, mag: 3, ammo: 24, desc: 'A heavily classified experimental weapon that channels immense electromagnetic force into a single piercing shot. Designed to penetrate advanced alien armor, shielding systems, and multiple biological targets in a straight-line trajectory.' },
+                'rocket': { dmg: 120, mag: 1, ammo: 12, desc: 'A heavy ordnance system used by demolition specialists and frontline breaching units. It fires guided micro-warheads engineered to obliterate clustered alien formations and heavily fortified enemy positions.' },
+                'plasma': { dmg: 100, mag: 4, ammo: 40, desc: 'An experimental explosive weapon that launches unstable plasma spheres toward targets. Upon impact, the energy destabilizes violently, releasing a wide-area thermal shockwave capable of clearing dense combat zones.' },
+                'auto': { dmg: 20, mag: 50, ammo: 600, desc: 'A rapid-fire suppression system adapted for infantry deployment in extreme warfare environments. It unleashes continuous streams of kinetic energy rounds, designed to hold ground against overwhelming alien forces.' },
+                'grenade': { dmg: 90, mag: 6, ammo: 60, desc: 'A tactical area-denial weapon used to control battlefield movement in hostile alien environments. It fires bouncing plasma grenades that detonate with delayed timing, flushing enemies from cover and controlling territory.' }
+            };
+            
+            const w = weaponInfo[weaponId];
+            if (!w) return '<div style="color: #aaa;">Select a weapon</div>';
+            
+            return `
+                <div style="margin-bottom: 15px;">
+                    <div style="color: #00ff88; font-size: 18px; font-weight: bold; margin-bottom: 10px;">🔫 ${weaponName}</div>
+                    <div style="color: #aaa; line-height: 1.5; font-size: 12px;">${w.desc}</div>
+                </div>
+                <div style="border-top: 1px solid #444; padding-top: 15px; margin-top: 15px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div><div style="color: #aaa; font-size: 11px;">DAMAGE</div><div style="color: #ff4444; font-weight: bold;">${w.dmg}</div></div>
+                        <div><div style="color: #aaa; font-size: 11px;">MAGAZINE</div><div style="color: #ffaa00; font-weight: bold;">${w.mag}</div></div>
+                        <div><div style="color: #aaa; font-size: 11px;">TOTAL AMMO</div><div style="color: #4444ff; font-weight: bold;">${w.ammo}</div></div>
+                    </div>
+                </div>
+                <button onclick="equipWeapon('${weaponId}', '${weaponName}')" style="background: #00ff88; color: #0a0e27; padding: 10px; margin-top: 15px; border: none; cursor: pointer; border-radius: 3px; font-weight: bold; width: 100%;">EQUIP TO SLOT 2</button>
+            `;
+        }
+
+        function equipWeapon(weaponId, weaponName) {
+            game.loadout = game.loadout || {};
+            game.loadout.slot2 = weaponName;
+            document.getElementById('slot2Display').textContent = weaponName;
+        }
+
+        function changeSlot(slot) {
+            alert('Loadout management coming soon!');
         }
 
         function openMissionModal() {
