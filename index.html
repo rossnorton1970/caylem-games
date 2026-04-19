@@ -109,10 +109,19 @@
                 <div id="crewList"></div>
             </div>
 
-            <button class="ready-btn" id="readyBtn" onclick="togglePlayerReady()">NOT READY ○</button>
+            <div id="playerControls">
+                <button class="ready-btn" id="readyBtn" onclick="togglePlayerReady()">NOT READY ○</button>
+                <div class="launch-msg" id="launchMessage">Mark yourself READY</div>
+            </div>
 
-            <button class="launch-btn" id="launchBtn" onclick="startMission()">🚀 LAUNCH MISSION</button>
-            <div class="launch-msg" id="launchMessage">Select a mission first</div>
+            <div id="leaderControls" style="display: none;">
+                <div class="control-section">
+                    <h3>🎮 LAUNCH CONTROLS</h3>
+                    <div id="readyStatus" style="color: #ffaa00; margin-bottom: 10px;"></div>
+                </div>
+                <button class="launch-btn" id="launchBtn" onclick="startMission()">🚀 DESCEND - START MISSION</button>
+                <div class="launch-msg" id="launchMessage2">Waiting for crew to be ready...</div>
+            </div>
         </div>
     </div>
 
@@ -123,6 +132,9 @@
             cleared: [],
             currentMission: null,
             isReady: false,
+            isLeader: true,  // Player is the leader
+            playersReady: 0,  // Track how many players are ready
+            maxPlayers: 1,    // Can increase with multiplayer
             planets: [
                 { id: 1, name: 'Kepler-452b', desc: 'Desert world', diff: 'easy', aliens: 5, reward: 100 },
                 { id: 2, name: 'Proxima-3', desc: 'Ice planet', diff: 'medium', aliens: 8, reward: 200 },
@@ -322,7 +334,11 @@
             game.currentMission = planetId;
             game.isReady = false;
             const planet = game.planets.find(p => p.id === planetId);
-            alert(`Mission selected: ${planet.name}\n\nGo to the CONTROL ROOM to ready up and launch!`);
+            if (game.isLeader) {
+                alert(`Mission selected: ${planet.name}\n\nGo to the CONTROL ROOM, ready up, and DESCEND when crew is ready!`);
+            } else {
+                alert(`Mission selected: ${planet.name}\n\nWaiting for leader to move to Control Room...`);
+            }
             closeMissionModal();
         }
 
@@ -330,6 +346,9 @@
             if (!game.currentMission) {
                 alert('Select a mission from the Mission Table first!');
                 return;
+            }
+            if (game.isLeader) {
+                alert('🖥️ Control Room - As LEADER, press DESCEND to start the mission!\n(Make sure all crew is ready)');
             }
             updateControlRoomDisplay();
             document.getElementById('controlRoomModal').classList.add('show');
@@ -344,42 +363,85 @@
             document.getElementById('targetPlanet').textContent = `🪐 ${planet.name}`;
             document.getElementById('targetInfo').textContent = `${planet.desc} • ${planet.diff.toUpperCase()} • ${planet.aliens} aliens`;
             
+            // Update crew list
             const crewList = document.getElementById('crewList');
             crewList.innerHTML = `
                 <div class="crew-member ${game.isReady ? 'ready' : 'notready'}">
-                    <div class="crew-name">You (Player 1)</div>
+                    <div class="crew-name">👤 You (Player 1) ${game.isLeader ? '👑 LEADER' : ''}</div>
                     <div class="crew-status">${game.isReady ? '✓ READY' : '○ NOT READY'}</div>
                 </div>
             `;
             
-            const readyBtn = document.getElementById('readyBtn');
-            if (game.isReady) {
-                readyBtn.textContent = 'READY ✓';
-                readyBtn.classList.add('is-ready');
+            if (game.isLeader) {
+                // LEADER VIEW
+                document.getElementById('playerControls').style.display = 'none';
+                document.getElementById('leaderControls').style.display = 'block';
+                
+                const readyCount = game.isReady ? 1 : 0;
+                const totalPlayers = 1;
+                const allReady = readyCount === totalPlayers && totalPlayers > 0;
+                
+                document.getElementById('readyStatus').innerHTML = `
+                    Crew Ready: <strong>${readyCount}/${totalPlayers}</strong>
+                `;
+                
+                const launchBtn = document.getElementById('launchBtn');
+                const launchMsg = document.getElementById('launchMessage2');
+                
+                if (allReady) {
+                    launchBtn.style.display = 'block';
+                    launchBtn.style.background = '#00ff88';
+                    launchBtn.style.color = '#0a0e27';
+                    launchMsg.textContent = 'All crew ready! Press DESCEND to start!';
+                    launchMsg.style.color = '#00ff88';
+                } else {
+                    launchBtn.style.display = 'block';
+                    launchBtn.style.background = '#666';
+                    launchBtn.style.color = '#ccc';
+                    launchBtn.style.cursor = 'not-allowed';
+                    launchMsg.textContent = 'Waiting for all crew to be ready...';
+                    launchMsg.style.color = '#ffaa00';
+                }
             } else {
-                readyBtn.textContent = 'NOT READY ○';
-                readyBtn.classList.remove('is-ready');
-            }
-            
-            const launchBtn = document.getElementById('launchBtn');
-            const launchMsg = document.getElementById('launchMessage');
-            if (game.isReady) {
-                launchBtn.classList.add('show');
-                launchMsg.textContent = 'All systems ready! Launch when ready.';
-            } else {
-                launchBtn.classList.remove('show');
-                launchMsg.textContent = 'Mark yourself READY to enable launch';
+                // PLAYER VIEW
+                document.getElementById('playerControls').style.display = 'block';
+                document.getElementById('leaderControls').style.display = 'none';
+                
+                const readyBtn = document.getElementById('readyBtn');
+                const launchMsg = document.getElementById('launchMessage');
+                
+                if (game.isReady) {
+                    readyBtn.textContent = 'READY ✓';
+                    readyBtn.classList.add('is-ready');
+                    launchMsg.textContent = 'Ready! Waiting for leader to start...';
+                } else {
+                    readyBtn.textContent = 'NOT READY ○';
+                    readyBtn.classList.remove('is-ready');
+                    launchMsg.textContent = 'Mark yourself READY';
+                }
             }
         }
 
         function togglePlayerReady() {
-            game.isReady = !game.isReady;
-            updateControlRoomDisplay();
+            if (game.isLeader) {
+                game.isReady = !game.isReady;
+                updateControlRoomDisplay();
+            }
         }
 
         function startMission() {
+            if (!game.isLeader) {
+                alert('Only the leader can start the mission!');
+                return;
+            }
+            
+            if (!game.isReady) {
+                alert('Leader must be ready to descend!');
+                return;
+            }
+            
             const planet = game.planets.find(p => p.id === game.currentMission);
-            alert(`🚀 LAUNCHING TO ${planet.name}!\n(Combat coming soon!)`);
+            alert(`🚀 DESCENDING TO ${planet.name}!\n(Combat coming soon!)`);
             exitControlRoom();
         }
 
