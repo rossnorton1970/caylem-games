@@ -57,19 +57,57 @@
         .modalReward { font-size: 18px; color: #ffaa00; margin: 20px 0; }
         .returnBtn { background: #00ff88; color: #0a0e27; margin-top: 20px; padding: 12px; width: 100%; font-size: 16px; }
         .returnBtn:hover { background: #00dd77; }
+        
+        /* Main Menu */
+        #mainMenu { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); }
+        .menu-title { font-size: 64px; color: #00ff88; margin-bottom: 20px; text-shadow: 0 0 20px #00ff88; }
+        .menu-subtitle { font-size: 20px; color: #ffaa00; margin-bottom: 40px; }
+        .menu-buttons { display: flex; gap: 15px; flex-direction: column; width: 300px; }
+        .menu-btn { background: #00ff88; color: #0a0e27; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; }
+        .menu-btn:hover { background: #00dd77; }
+        .menu-btn.secondary { background: #4444ff; color: white; }
+        .menu-btn.secondary:hover { background: #3333dd; }
+        .menu-btn.settings { background: #ffaa00; color: #0a0e27; }
+        .menu-btn.settings:hover { background: #ff9900; }
+        
+        /* Party Modal */
+        #partyModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 101; align-items: center; justify-content: center; }
+        #partyModal.show { display: flex; }
+        .partyBox { background: rgba(10, 14, 39, 0.98); padding: 40px; border: 2px solid #00ff88; border-radius: 10px; min-width: 400px; max-height: 80vh; overflow-y: auto; }
+        .partyBox h2 { color: #00ff88; margin-bottom: 20px; font-size: 28px; }
+        .party-options { display: flex; gap: 10px; margin-bottom: 20px; }
+        .party-option-btn { flex: 1; padding: 10px; background: #1a1f3a; border: 2px solid #444; color: #e0e0e0; cursor: pointer; font-weight: bold; }
+        .party-option-btn.active { background: #00ff88; color: #0a0e27; border-color: #00ff88; }
+        .party-form { display: none; }
+        .party-form.show { display: block; }
+        .party-form input { width: 100%; padding: 10px; margin: 10px 0; background: #1a1f3a; border: 1px solid #444; color: #e0e0e0; }
+        .party-form input::placeholder { color: #666; }
+        .party-form button { width: 100%; padding: 12px; background: #00ff88; color: #0a0e27; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; }
+        .party-form button:hover { background: #00dd77; }
+        .party-list { margin-top: 20px; }
+        .party-item { background: #1a1f3a; padding: 15px; margin: 10px 0; border: 1px solid #444; border-radius: 5px; }
+        .party-item-name { color: #00ff88; font-weight: bold; margin-bottom: 5px; }
+        .party-item-info { font-size: 12px; color: #aaa; margin: 5px 0; }
+        .party-item-btn { background: #4444ff; color: white; padding: 8px; width: 100%; margin-top: 10px; border: none; cursor: pointer; }
+        .party-item-btn:hover { background: #3333dd; }
+        .close-modal { position: absolute; top: 20px; right: 20px; background: #ff4444; color: white; border: none; width: 40px; height: 40px; font-size: 24px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div id="header">
+    <div id="header" style="display: none;">
         <div class="stat"><div class="stat-label">CREDITS</div><div class="stat-value" id="credits">500</div></div>
         <div class="stat"><div class="stat-label">WEAPON</div><div class="stat-value" id="weapon">Basic Laser</div></div>
         <div class="stat"><div class="stat-label">MISSIONS</div><div class="stat-value" id="missions">0</div></div>
     </div>
 
-    <div id="mainMenu" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);">
-        <h1 style="font-size: 64px; color: #00ff88; margin-bottom: 20px; text-shadow: 0 0 20px #00ff88;">⭐ PLANET HUNTERS ⭐</h1>
-        <p style="font-size: 20px; color: #ffaa00; margin-bottom: 40px;">Explore. Fight. Survive.</p>
-        <button onclick="startGame()" style="background: #00ff88; color: #0a0e27; padding: 20px 60px; font-size: 24px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer;" onmouseover="this.style.background='#00dd77'" onmouseout="this.style.background='#00ff88'">START GAME</button>
+    <div id="mainMenu">
+        <h1 class="menu-title">⭐ PLANET HUNTERS ⭐</h1>
+        <p class="menu-subtitle">Explore. Fight. Survive.</p>
+        <div class="menu-buttons">
+            <button class="menu-btn" onclick="goToGame()">START GAME</button>
+            <button class="menu-btn secondary" onclick="openPartyModal()">👥 PARTY</button>
+            <button class="menu-btn settings" onclick="openSettings()">⚙️ SETTINGS</button>
+        </div>
     </div>
 
     <div id="mainScreen" style="display: none;">
@@ -109,6 +147,39 @@
         </div>
     </div>
 
+    <div id="partyModal">
+        <button class="close-modal" onclick="closePartyModal()">✕</button>
+        <div class="partyBox">
+            <h2>👥 PARTY SYSTEM</h2>
+            <div class="party-options">
+                <button class="party-option-btn active" onclick="switchPartyTab('join')">Join Party</button>
+                <button class="party-option-btn" onclick="switchPartyTab('create')">Create Party</button>
+            </div>
+
+            <div id="joinForm" class="party-form show">
+                <h3 style="color: #ffaa00; margin-bottom: 15px;">PUBLIC PARTIES</h3>
+                <div id="publicPartiesList" class="party-list"></div>
+                
+                <h3 style="color: #ffaa00; margin-bottom: 15px; margin-top: 20px;">PRIVATE PARTY (NEED CODE)</h3>
+                <input type="text" id="privateCode" placeholder="Enter party code" maxlength="6">
+                <button onclick="joinPrivateParty()">Join Private Party</button>
+            </div>
+
+            <div id="createForm" class="party-form">
+                <label style="color: #ffaa00;">Party Type:</label>
+                <select id="partyType" style="width: 100%; padding: 10px; margin: 10px 0; background: #1a1f3a; border: 1px solid #444; color: #e0e0e0;">
+                    <option value="public">🌍 PUBLIC (anyone can join)</option>
+                    <option value="private">🔒 PRIVATE (need code)</option>
+                </select>
+                
+                <input type="text" id="partyName" placeholder="Party name (e.g. Cool Hunters)" maxlength="20">
+                <input type="text" id="playerName" placeholder="Your name" maxlength="20">
+                
+                <button onclick="createParty()">Create Party</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const game = {
             credits: 500, weapon: 'basic', missions: 0, cleared: [],
@@ -138,13 +209,15 @@
         const ctx = canvas.getContext('2d');
         let gw = 0, gh = 0;
 
-        function startGame() {
-            document.getElementById('mainMenu').style.display = 'none';
-            document.getElementById('mainScreen').style.display = 'block';
-        }
-
-        function load() { const s = localStorage.getItem('gameData'); if (s) Object.assign(game, JSON.parse(s)); updateUI(); }
+        function load() { const s = localStorage.getItem('gameData'); if (s) Object.assign(game, JSON.parse(s)); }
         function save() { localStorage.setItem('gameData', JSON.stringify({ credits: game.credits, weapon: game.weapon, missions: game.missions, cleared: game.cleared, inventory: game.inventory })); }
+
+        function goToGame() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('header').style.display = 'flex';
+            document.getElementById('mainScreen').style.display = 'block';
+            updateUI();
+        }
 
         function updateUI() {
             document.getElementById('credits').textContent = game.credits;
@@ -184,6 +257,7 @@
             combat.player.shield = 100; combat.player.health = 100; combat.player.damage = game.weapons[game.weapon].damage;
             combat.aliens = [];
             document.getElementById('mainScreen').style.display = 'none';
+            document.getElementById('header').style.display = 'none';
             document.getElementById('combatUI').classList.add('show');
             document.getElementById('gameCanvas').classList.add('show');
             gw = canvas.clientWidth; gh = canvas.clientHeight;
@@ -202,7 +276,6 @@
             combat.aliens.push({ x: Math.random() * (gw - w), y: Math.random() * (gh * 0.65), w, h, hp, maxHp: hp, dmg, spd, size: s, angle: 0, attackCooldown: 0 });
         }
 
-        let frameCount = 0;
         function gameLoop() { frameCount++; update(); draw(); if (combat.running && !combat.complete) requestAnimationFrame(gameLoop); }
 
         function update() {
@@ -215,13 +288,11 @@
                 if (d > 0) { a.x += (dx / d) * a.spd; a.y += (dy / d) * a.spd; a.angle = Math.atan2(dy, dx); }
                 if (a.y > gh * 0.65) a.y = gh * 0.65;
                 
-                // MELEE DAMAGE: Only when close
                 a.attackCooldown--;
                 if (d < 80 && a.attackCooldown <= 0) {
                     if (combat.player.shield > 0) combat.player.shield = Math.max(0, combat.player.shield - a.dmg);
                     else combat.player.health = Math.max(0, combat.player.health - a.dmg);
                     if (combat.player.health <= 0) endMission(false);
-                    // Attack speed: small=fast(10 frames), medium=medium(20 frames), big=slow(30 frames)
                     a.attackCooldown = a.size === 'small' ? 10 : a.size === 'medium' ? 20 : 30;
                 }
             }
@@ -255,7 +326,6 @@
             
             ctx.fillStyle = '#4444ff'; ctx.fillRect(combat.player.x - 15, combat.player.y - 15, 30, 30);
             
-            // Draw attack range circles
             for (let a of combat.aliens) {
                 const dx = combat.player.x - a.x, dy = combat.player.y - a.y, d = Math.sqrt(dx*dx + dy*dy);
                 if (d < 80) {
@@ -318,15 +388,80 @@
             document.getElementById('modal').classList.remove('show');
             document.getElementById('combatUI').classList.remove('show');
             document.getElementById('gameCanvas').classList.remove('show');
+            document.getElementById('header').style.display = 'flex';
             document.getElementById('mainScreen').style.display = 'block';
             updateUI();
         }
-        
-        function showMainMenu() {
-            document.getElementById('mainScreen').style.display = 'none';
-            document.getElementById('mainMenu').style.display = 'flex';
+
+        // Party System
+        function openPartyModal() {
+            document.getElementById('partyModal').classList.add('show');
+            loadPublicParties();
         }
 
+        function closePartyModal() {
+            document.getElementById('partyModal').classList.remove('show');
+        }
+
+        function switchPartyTab(tab) {
+            document.querySelectorAll('.party-option-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('joinForm').classList.toggle('show', tab === 'join');
+            document.getElementById('createForm').classList.toggle('show', tab === 'create');
+            if (tab === 'join') loadPublicParties();
+        }
+
+        function loadPublicParties() {
+            const list = document.getElementById('publicPartiesList');
+            const parties = JSON.parse(localStorage.getItem('publicParties') || '[]');
+            list.innerHTML = '';
+            if (parties.length === 0) {
+                list.innerHTML = '<p style="color: #888; text-align: center;">No public parties yet. Create one!</p>';
+            } else {
+                parties.forEach(p => {
+                    list.innerHTML += `<div class="party-item"><div class="party-item-name">🚀 ${p.name}</div><div class="party-item-info">Players: ${p.players}/${p.maxPlayers}</div><button class="party-item-btn" onclick="joinPublicParty('${p.id}')">Join Party</button></div>`;
+                });
+            }
+        }
+
+        function createParty() {
+            const type = document.getElementById('partyType').value;
+            const name = document.getElementById('partyName').value;
+            const playerName = document.getElementById('playerName').value;
+            
+            if (!name || !playerName) { alert('Fill in all fields!'); return; }
+            
+            const partyId = Math.random().toString(36).substr(2, 6).toUpperCase();
+            const party = { id: partyId, name, playerName, type, players: 1, maxPlayers: 4, code: type === 'private' ? partyId : null };
+            
+            if (type === 'public') {
+                const parties = JSON.parse(localStorage.getItem('publicParties') || '[]');
+                parties.push(party);
+                localStorage.setItem('publicParties', JSON.stringify(parties));
+            }
+            
+            alert(`Party created! ${type === 'private' ? 'Code: ' + partyId : ''}`);
+            closePartyModal();
+            goToGame();
+        }
+
+        function joinPublicParty(id) {
+            alert('Joining party: ' + id + '\n(Multiplayer coming soon!)');
+            goToGame();
+        }
+
+        function joinPrivateParty() {
+            const code = document.getElementById('privateCode').value;
+            if (!code) { alert('Enter a party code!'); return; }
+            alert('Joining private party with code: ' + code + '\n(Multiplayer coming soon!)');
+            goToGame();
+        }
+
+        function openSettings() {
+            alert('⚙️ Settings coming soon!\nWe\'ll add audio, difficulty, and more here.');
+        }
+
+        let frameCount = 0;
         load();
     </script>
 </body>
