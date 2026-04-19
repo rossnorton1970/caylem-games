@@ -318,9 +318,8 @@
                 openMissionModal();
             } else if (room === ship.controlRoom) {
                 openControlRoom();
-            } else {
-                alert(`🚧 ${room.name} coming soon!`);
             }
+            // Other rooms coming soon
         }
 
         function openMissionModal() {
@@ -360,25 +359,14 @@
             
             game.currentMission = planetId;
             game.isReady = false;
-            const planet = game.planets.find(p => p.id === planetId);
             
             // Refresh the modal to show updated button states
             openMissionModal();
-            
-            if (game.isLeader) {
-                alert(`Mission selected: ${planet.name}\n\nGo to the CONTROL ROOM, ready up, and DESCEND when crew is ready!`);
-            } else {
-                alert(`Mission selected: ${planet.name}\n\nWaiting for leader to move to Control Room...`);
-            }
         }
 
         function openControlRoom() {
             if (!game.currentMission) {
-                alert('Select a mission from the Mission Table first!');
                 return;
-            }
-            if (game.isLeader) {
-                alert('🖥️ Control Room - As LEADER, press DESCEND to start the mission!\n(Make sure all crew is ready)');
             }
             updateControlRoomDisplay();
             document.getElementById('controlRoomModal').classList.add('show');
@@ -473,13 +461,7 @@
         }
 
         function startMission() {
-            if (!game.isLeader) {
-                alert('Only the leader can start the mission!');
-                return;
-            }
-            
-            if (!game.isReady) {
-                alert('Leader must be ready to descend!');
+            if (!game.isLeader || !game.isReady) {
                 return;
             }
             
@@ -526,15 +508,15 @@
 
         function launchMission(planet) {
             document.getElementById('countdownScreen').style.display = 'none';
-            alert(`🚀 DESCENDING TO ${planet.name}!\n(Combat coming soon!)`);
+            // Combat coming soon!
         }
 
         function openPartyModal() {
-            alert('👥 Party system coming soon!');
+            // Party system coming soon
         }
 
         function openSettings() {
-            alert('⚙️ Settings coming soon!');
+            // Settings coming soon
         }
     </script>
 </body>
