@@ -118,12 +118,12 @@
             </div>
 
             <div id="playerControls">
-                <button class="ready-btn" id="readyBtn" onclick="togglePlayerReady()">NOT READY ○</button>
+                <button class="ready-btn" id="readyBtn" onclick="togglePlayerReady()">UNREADY ○</button>
                 <div class="launch-msg" id="launchMessage">Mark yourself READY</div>
             </div>
 
             <div id="leaderControls" style="display: none;">
-                <button class="ready-btn" id="leaderReadyBtn" onclick="togglePlayerReady()">NOT READY ○</button>
+                <button class="ready-btn" id="leaderReadyBtn" onclick="togglePlayerReady()">UNREADY ○</button>
                 
                 <div class="control-section">
                     <h3>🎮 LAUNCH CONTROLS</h3>
@@ -401,7 +401,7 @@
                     leaderReadyBtn.textContent = 'READY ✓';
                     leaderReadyBtn.classList.add('is-ready');
                 } else {
-                    leaderReadyBtn.textContent = 'NOT READY ○';
+                    leaderReadyBtn.textContent = 'UNREADY ○';
                     leaderReadyBtn.classList.remove('is-ready');
                 }
                 
@@ -443,7 +443,7 @@
                     readyBtn.classList.add('is-ready');
                     launchMsg.textContent = 'Ready! Waiting for leader to start...';
                 } else {
-                    readyBtn.textContent = 'NOT READY ○';
+                    readyBtn.textContent = 'UNREADY ○';
                     readyBtn.classList.remove('is-ready');
                     launchMsg.textContent = 'Mark yourself READY';
                 }
