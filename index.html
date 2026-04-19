@@ -73,14 +73,14 @@
         /* Party Modal */
         #partyModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 101; align-items: center; justify-content: center; }
         #partyModal.show { display: flex; }
-        .partyBox { background: rgba(10, 14, 39, 0.98); padding: 40px; border: 2px solid #00ff88; border-radius: 10px; min-width: 400px; max-height: 80vh; overflow-y: auto; }
+        .partyBox { background: rgba(10, 14, 39, 0.98); padding: 40px; border: 2px solid #00ff88; border-radius: 10px; min-width: 500px; max-height: 80vh; overflow-y: auto; }
         .partyBox h2 { color: #00ff88; margin-bottom: 20px; font-size: 28px; }
         .party-options { display: flex; gap: 10px; margin-bottom: 20px; }
         .party-option-btn { flex: 1; padding: 10px; background: #1a1f3a; border: 2px solid #444; color: #e0e0e0; cursor: pointer; font-weight: bold; }
         .party-option-btn.active { background: #00ff88; color: #0a0e27; border-color: #00ff88; }
         .party-form { display: none; }
         .party-form.show { display: block; }
-        .party-form input { width: 100%; padding: 10px; margin: 10px 0; background: #1a1f3a; border: 1px solid #444; color: #e0e0e0; }
+        .party-form input, .party-form select { width: 100%; padding: 10px; margin: 10px 0; background: #1a1f3a; border: 1px solid #444; color: #e0e0e0; }
         .party-form input::placeholder { color: #666; }
         .party-form button { width: 100%; padding: 12px; background: #00ff88; color: #0a0e27; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; }
         .party-form button:hover { background: #00dd77; }
@@ -90,7 +90,37 @@
         .party-item-info { font-size: 12px; color: #aaa; margin: 5px 0; }
         .party-item-btn { background: #4444ff; color: white; padding: 8px; width: 100%; margin-top: 10px; border: none; cursor: pointer; }
         .party-item-btn:hover { background: #3333dd; }
-        .close-modal { position: absolute; top: 20px; right: 20px; background: #ff4444; color: white; border: none; width: 40px; height: 40px; font-size: 24px; cursor: pointer; }
+        .close-modal { position: absolute; top: 20px; right: 20px; background: #ff4444; color: white; border: none; width: 40px; height: 40px; font-size: 24px; cursor: pointer; border-radius: 5px; }
+        
+        /* Party Lobby */
+        #partyLobby { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); z-index: 102; flex-direction: column; padding: 20px; overflow-y: auto; }
+        #partyLobby.show { display: flex; }
+        .lobby-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ff88; padding-bottom: 20px; margin-bottom: 20px; }
+        .lobby-title { font-size: 28px; color: #00ff88; }
+        .lobby-code { font-size: 14px; color: #ffaa00; background: #1a1f3a; padding: 10px 15px; border-radius: 5px; }
+        .players-section { flex: 1; }
+        .players-section h3 { color: #00ff88; margin-bottom: 15px; }
+        .player-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .player-card { background: #1a1f3a; border: 2px solid #444; padding: 15px; border-radius: 5px; text-align: center; }
+        .player-card.leader { border-color: #ffaa00; background: rgba(255, 170, 0, 0.1); }
+        .player-name { color: #00ff88; font-weight: bold; margin-bottom: 5px; }
+        .player-status { font-size: 12px; color: #aaa; }
+        .player-ready { color: #00ff88; font-weight: bold; }
+        .chat-section { background: #1a1f3a; border: 1px solid #444; border-radius: 5px; padding: 15px; margin-bottom: 20px; height: 150px; overflow-y: auto; }
+        .chat-message { margin: 8px 0; padding: 8px; background: #0a0e27; border-radius: 3px; font-size: 12px; }
+        .chat-message strong { color: #00ff88; }
+        .chat-input-area { display: flex; gap: 10px; margin-bottom: 20px; }
+        .chat-input-area input { flex: 1; padding: 10px; background: #1a1f3a; border: 1px solid #444; color: #e0e0e0; border-radius: 5px; }
+        .chat-input-area button { flex: 0 0 60px; background: #00ff88; color: #0a0e27; font-weight: bold; border: none; cursor: pointer; border-radius: 5px; }
+        .chat-input-area button:hover { background: #00dd77; }
+        .lobby-buttons { display: flex; gap: 10px; }
+        .lobby-buttons button { flex: 1; padding: 15px; font-size: 16px; font-weight: bold; border: none; cursor: pointer; border-radius: 5px; }
+        .ready-btn { background: #4444ff; color: white; }
+        .ready-btn:hover { background: #3333dd; }
+        .ready-btn.ready { background: #00ff88; color: #0a0e27; }
+        .ready-btn.ready:hover { background: #00dd77; }
+        .leave-btn { background: #ff4444; color: white; }
+        .leave-btn:hover { background: #dd3333; }
     </style>
 </head>
 <body>
@@ -152,8 +182,8 @@
         <div class="partyBox">
             <h2>👥 PARTY SYSTEM</h2>
             <div class="party-options">
-                <button class="party-option-btn active" onclick="switchPartyTab('join')">Join Party</button>
-                <button class="party-option-btn" onclick="switchPartyTab('create')">Create Party</button>
+                <button class="party-option-btn active" onclick="switchPartyTab(event, 'join')">Join Party</button>
+                <button class="party-option-btn" onclick="switchPartyTab(event, 'create')">Create Party</button>
             </div>
 
             <div id="joinForm" class="party-form show">
@@ -180,6 +210,36 @@
         </div>
     </div>
 
+    <div id="partyLobby">
+        <div class="lobby-header">
+            <div>
+                <div class="lobby-title" id="lobbyTitle">Party Lobby</div>
+                <div style="font-size: 12px; color: #aaa;">You're the party leader</div>
+            </div>
+            <div class="lobby-code" id="lobbyCode"></div>
+            <button class="close-modal" onclick="leaveParty()">✕</button>
+        </div>
+
+        <div class="players-section">
+            <h3>👥 PLAYERS</h3>
+            <div class="player-list" id="playerList"></div>
+        </div>
+
+        <div>
+            <h3 style="color: #00ff88; margin-bottom: 10px;">💬 CHAT</h3>
+            <div class="chat-section" id="chatBox"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Say something..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <div class="lobby-buttons">
+            <button class="ready-btn" id="readyBtn" onclick="toggleReady()">Ready Up!</button>
+            <button class="leave-btn" onclick="leaveParty()">Leave Party</button>
+        </div>
+    </div>
+
     <script>
         const game = {
             credits: 500, weapon: 'basic', missions: 0, cleared: [],
@@ -198,6 +258,10 @@
                 { id: 5, name: 'Wolf-1061c', desc: 'Dense jungle', diff: 'hard', aliens: 15, reward: 500 }
             ]
         };
+
+        let currentParty = null;
+        let playerName = 'Player_' + Math.floor(Math.random() * 10000);
+        let isReady = false;
 
         const combat = {
             planet: null, time: 1500, running: false,
@@ -276,6 +340,7 @@
             combat.aliens.push({ x: Math.random() * (gw - w), y: Math.random() * (gh * 0.65), w, h, hp, maxHp: hp, dmg, spd, size: s, angle: 0, attackCooldown: 0 });
         }
 
+        let frameCount = 0;
         function gameLoop() { frameCount++; update(); draw(); if (combat.running && !combat.complete) requestAnimationFrame(gameLoop); }
 
         function update() {
@@ -311,7 +376,6 @@
                 else ctx.fillStyle = '#ff4444';
                 ctx.fillRect(-a.w/2, -a.h/2, a.w, a.h); ctx.restore();
                 
-                // Draw health bar above alien
                 const healthPercent = (a.hp / a.maxHp) * 100;
                 const barWidth = a.w + 10;
                 const barHeight = 6;
@@ -403,9 +467,9 @@
             document.getElementById('partyModal').classList.remove('show');
         }
 
-        function switchPartyTab(tab) {
+        function switchPartyTab(e, tab) {
             document.querySelectorAll('.party-option-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
+            e.target.classList.add('active');
             document.getElementById('joinForm').classList.toggle('show', tab === 'join');
             document.getElementById('createForm').classList.toggle('show', tab === 'create');
             if (tab === 'join') loadPublicParties();
@@ -419,7 +483,7 @@
                 list.innerHTML = '<p style="color: #888; text-align: center;">No public parties yet. Create one!</p>';
             } else {
                 parties.forEach(p => {
-                    list.innerHTML += `<div class="party-item"><div class="party-item-name">🚀 ${p.name}</div><div class="party-item-info">Players: ${p.players}/${p.maxPlayers}</div><button class="party-item-btn" onclick="joinPublicParty('${p.id}')">Join Party</button></div>`;
+                    list.innerHTML += `<div class="party-item"><div class="party-item-name">🚀 ${p.name}</div><div class="party-item-info">👤 ${p.players}/${p.maxPlayers} players</div><div class="party-item-info">📍 ${p.type === 'public' ? 'PUBLIC' : 'PRIVATE'}</div><button class="party-item-btn" onclick="joinPartyLobby('${p.id}', '${p.name}')">Join Party</button></div>`;
                 });
             }
         }
@@ -427,12 +491,23 @@
         function createParty() {
             const type = document.getElementById('partyType').value;
             const name = document.getElementById('partyName').value;
-            const playerName = document.getElementById('playerName').value;
+            const pName = document.getElementById('playerName').value;
             
-            if (!name || !playerName) { alert('Fill in all fields!'); return; }
+            if (!name || !pName) { alert('Fill in all fields!'); return; }
             
             const partyId = Math.random().toString(36).substr(2, 6).toUpperCase();
-            const party = { id: partyId, name, playerName, type, players: 1, maxPlayers: 4, code: type === 'private' ? partyId : null };
+            playerName = pName;
+            const party = { 
+                id: partyId, 
+                name, 
+                type, 
+                players: 1, 
+                maxPlayers: 4, 
+                leader: pName,
+                members: [{ name: pName, ready: false }],
+                chat: [],
+                code: partyId 
+            };
             
             if (type === 'public') {
                 const parties = JSON.parse(localStorage.getItem('publicParties') || '[]');
@@ -440,28 +515,118 @@
                 localStorage.setItem('publicParties', JSON.stringify(parties));
             }
             
-            alert(`Party created! ${type === 'private' ? 'Code: ' + partyId : ''}`);
+            currentParty = party;
             closePartyModal();
-            goToGame();
+            showPartyLobby();
         }
 
-        function joinPublicParty(id) {
-            alert('Joining party: ' + id + '\n(Multiplayer coming soon!)');
-            goToGame();
+        function joinPartyLobby(id, name) {
+            const parties = JSON.parse(localStorage.getItem('publicParties') || '[]');
+            const party = parties.find(p => p.id === id);
+            if (party && party.players < party.maxPlayers) {
+                party.players++;
+                const pName = prompt('Enter your name:');
+                if (pName) {
+                    playerName = pName;
+                    party.members.push({ name: pName, ready: false });
+                    localStorage.setItem('publicParties', JSON.stringify(parties));
+                    currentParty = party;
+                    closePartyModal();
+                    showPartyLobby();
+                }
+            } else {
+                alert('Party is full!');
+            }
         }
 
         function joinPrivateParty() {
             const code = document.getElementById('privateCode').value;
             if (!code) { alert('Enter a party code!'); return; }
-            alert('Joining private party with code: ' + code + '\n(Multiplayer coming soon!)');
-            goToGame();
+            
+            const pName = prompt('Enter your name:');
+            if (!pName) return;
+            
+            const storedParties = JSON.parse(localStorage.getItem('privateParties') || '{}');
+            if (storedParties[code]) {
+                const party = storedParties[code];
+                if (party.players < party.maxPlayers) {
+                    party.players++;
+                    playerName = pName;
+                    party.members.push({ name: pName, ready: false });
+                    localStorage.setItem('privateParties', JSON.stringify(storedParties));
+                    currentParty = party;
+                    closePartyModal();
+                    showPartyLobby();
+                } else {
+                    alert('Party is full!');
+                }
+            } else {
+                alert('Party code not found!');
+            }
+        }
+
+        function showPartyLobby() {
+            document.getElementById('partyModal').classList.remove('show');
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('partyLobby').classList.add('show');
+            document.getElementById('lobbyTitle').textContent = currentParty.name;
+            document.getElementById('lobbyCode').textContent = `Code: ${currentParty.code}`;
+            updatePartyLobby();
+        }
+
+        function updatePartyLobby() {
+            const playerList = document.getElementById('playerList');
+            playerList.innerHTML = '';
+            currentParty.members.forEach(m => {
+                const isLeader = m.name === currentParty.leader;
+                playerList.innerHTML += `
+                    <div class="player-card ${isLeader ? 'leader' : ''}">
+                        <div class="player-name">${m.name}</div>
+                        <div class="player-status">${isLeader ? '👑 LEADER' : 'Ready'}</div>
+                        <div class="player-ready" style="color: ${m.ready ? '#00ff88' : '#ff4444'};">${m.ready ? '✓ READY' : '○ Not Ready'}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleReady() {
+            const member = currentParty.members.find(m => m.name === playerName);
+            if (member) {
+                member.ready = !member.ready;
+                const btn = document.getElementById('readyBtn');
+                btn.textContent = member.ready ? 'Ready! ✓' : 'Ready Up!';
+                btn.classList.toggle('ready', member.ready);
+                updatePartyLobby();
+                addChatMessage('System', `${playerName} is ${member.ready ? 'READY' : 'NOT ready'}`);
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (msg) {
+                addChatMessage(playerName, msg);
+                input.value = '';
+            }
+        }
+
+        function addChatMessage(sender, msg) {
+            const chat = document.getElementById('chatBox');
+            chat.innerHTML += `<div class="chat-message"><strong>${sender}:</strong> ${msg}</div>`;
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function leaveParty() {
+            currentParty = null;
+            isReady = false;
+            document.getElementById('partyLobby').classList.remove('show');
+            document.getElementById('mainMenu').style.display = 'flex';
         }
 
         function openSettings() {
             alert('⚙️ Settings coming soon!\nWe\'ll add audio, difficulty, and more here.');
         }
 
-        let frameCount = 0;
         load();
     </script>
 </body>
