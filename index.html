@@ -123,6 +123,8 @@
             </div>
 
             <div id="leaderControls" style="display: none;">
+                <button class="ready-btn" id="leaderReadyBtn" onclick="togglePlayerReady()">NOT READY ○</button>
+                
                 <div class="control-section">
                     <h3>🎮 LAUNCH CONTROLS</h3>
                     <div id="readyStatus" style="color: #ffaa00; margin-bottom: 10px;"></div>
@@ -393,6 +395,16 @@
                 document.getElementById('playerControls').style.display = 'none';
                 document.getElementById('leaderControls').style.display = 'block';
                 
+                // Update leader ready button
+                const leaderReadyBtn = document.getElementById('leaderReadyBtn');
+                if (game.isReady) {
+                    leaderReadyBtn.textContent = 'READY ✓';
+                    leaderReadyBtn.classList.add('is-ready');
+                } else {
+                    leaderReadyBtn.textContent = 'NOT READY ○';
+                    leaderReadyBtn.classList.remove('is-ready');
+                }
+                
                 const readyCount = game.isReady ? 1 : 0;
                 const totalPlayers = 1;
                 const allReady = readyCount === totalPlayers && totalPlayers > 0;
@@ -439,10 +451,8 @@
         }
 
         function togglePlayerReady() {
-            if (game.isLeader) {
-                game.isReady = !game.isReady;
-                updateControlRoomDisplay();
-            }
+            game.isReady = !game.isReady;
+            updateControlRoomDisplay();
         }
 
         function startMission() {
