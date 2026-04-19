@@ -42,6 +42,8 @@
         .difficulty.hard { color: #ff4444; }
         .planet-btn { background: #00ff88; color: #0a0e27; padding: 10px; margin-top: 10px; border: none; cursor: pointer; font-weight: bold; border-radius: 3px; width: 100%; }
         .planet-btn:hover { background: #00dd77; }
+        .planet-btn:disabled { background: #666; color: #aaa; cursor: not-allowed; }
+        .planet-btn.selected { background: #666; color: #aaa; cursor: not-allowed; }
         .close-modal { position: absolute; top: 20px; right: 20px; background: #ff4444; color: white; border: none; width: 40px; height: 40px; font-size: 24px; cursor: pointer; border-radius: 5px; }
         
         .control-section { background: #1a1f3a; padding: 20px; border-radius: 5px; margin: 20px 0; border: 2px solid #444; }
@@ -326,13 +328,14 @@
             list.innerHTML = '';
             game.planets.forEach(p => {
                 const cleared = game.cleared.includes(p.id);
+                const isSelected = game.currentMission === p.id;
                 list.innerHTML += `
                     <div class="planet-card" onclick="selectMission(${p.id})">
                         <div class="planet-name">🪐 ${p.name}</div>
                         <div class="planet-info">${p.desc}</div>
                         <div class="difficulty ${p.diff}">${p.diff.toUpperCase()}</div>
                         <div class="planet-info">👽 ${p.aliens} aliens | 💰 ${p.reward} credits</div>
-                        <button class="planet-btn" ${cleared ? 'disabled' : ''}>${cleared ? 'CLEARED' : 'SELECT MISSION'}</button>
+                        <button class="planet-btn ${isSelected ? 'selected' : ''}" ${cleared || isSelected ? 'disabled' : ''}>${cleared ? 'CLEARED' : isSelected ? 'SELECTED' : 'SELECT MISSION'}</button>
                     </div>
                 `;
             });
@@ -341,18 +344,32 @@
 
         function closeMissionModal() {
             document.getElementById('missionModal').classList.remove('show');
+            // Refresh mission modal when it closes so button states update
+            setTimeout(() => {
+                if (document.getElementById('missionModal').classList.contains('show')) {
+                    openMissionModal();
+                }
+            }, 100);
         }
 
         function selectMission(planetId) {
+            // If already selected, don't change it
+            if (game.currentMission === planetId) {
+                return;
+            }
+            
             game.currentMission = planetId;
             game.isReady = false;
             const planet = game.planets.find(p => p.id === planetId);
+            
+            // Refresh the modal to show updated button states
+            openMissionModal();
+            
             if (game.isLeader) {
                 alert(`Mission selected: ${planet.name}\n\nGo to the CONTROL ROOM, ready up, and DESCEND when crew is ready!`);
             } else {
                 alert(`Mission selected: ${planet.name}\n\nWaiting for leader to move to Control Room...`);
             }
-            closeMissionModal();
         }
 
         function openControlRoom() {
