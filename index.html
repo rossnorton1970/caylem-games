@@ -28,10 +28,10 @@
         .stat-label { font-size: 12px; color: #888; }
         .stat-value { font-size: 24px; color: #00ff88; font-weight: bold; }
         
-        #missionModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 101; align-items: center; justify-content: center; }
-        #missionModal.show { display: flex; }
-        .missionBox { background: rgba(10, 14, 39, 0.98); padding: 40px; border: 2px solid #00ff88; border-radius: 10px; min-width: 400px; max-height: 80vh; overflow-y: auto; }
-        .missionBox h2 { color: #00ff88; margin-bottom: 20px; font-size: 32px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 101; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modalBox { background: rgba(10, 14, 39, 0.98); padding: 40px; border: 2px solid #00ff88; border-radius: 10px; min-width: 400px; max-height: 80vh; overflow-y: auto; position: relative; }
+        .modalBox h2 { color: #00ff88; margin-bottom: 20px; font-size: 28px; }
         .planet-card { background: #1a1f3a; border: 2px solid #444; padding: 20px; margin: 15px 0; border-radius: 5px; cursor: pointer; transition: all 0.3s; }
         .planet-card:hover { border-color: #00ff88; background: #2a2f4a; }
         .planet-name { color: #00ff88; font-weight: bold; font-size: 18px; margin-bottom: 10px; }
@@ -43,6 +43,26 @@
         .planet-btn { background: #00ff88; color: #0a0e27; padding: 10px; margin-top: 10px; border: none; cursor: pointer; font-weight: bold; border-radius: 3px; width: 100%; }
         .planet-btn:hover { background: #00dd77; }
         .close-modal { position: absolute; top: 20px; right: 20px; background: #ff4444; color: white; border: none; width: 40px; height: 40px; font-size: 24px; cursor: pointer; border-radius: 5px; }
+        
+        .control-section { background: #1a1f3a; padding: 20px; border-radius: 5px; margin: 20px 0; border: 2px solid #444; }
+        .control-section.highlight { border-color: #00ff88; }
+        .control-section h3 { color: #00ff88; margin-bottom: 15px; font-size: 16px; }
+        .crew-member { padding: 10px; background: #0a0e27; border-radius: 3px; margin-bottom: 5px; }
+        .crew-member.ready { border-left: 4px solid #00ff88; }
+        .crew-member.notready { border-left: 4px solid #ff4444; }
+        .crew-name { color: #00ff88; font-weight: bold; }
+        .crew-status { font-size: 12px; color: #aaa; margin-top: 5px; }
+        
+        .ready-btn { background: #4444ff; color: white; padding: 15px; font-size: 16px; font-weight: bold; border: none; cursor: pointer; border-radius: 5px; width: 100%; margin: 20px 0; }
+        .ready-btn:hover { background: #3333dd; }
+        .ready-btn.is-ready { background: #00ff88; color: #0a0e27; }
+        .ready-btn.is-ready:hover { background: #00dd77; }
+        
+        .launch-btn { background: #00ff88; color: #0a0e27; padding: 15px; font-size: 16px; font-weight: bold; border: none; cursor: pointer; border-radius: 5px; width: 100%; display: none; }
+        .launch-btn:hover { background: #00dd77; }
+        .launch-btn.show { display: block; }
+        
+        .launch-msg { color: #ffaa00; text-align: center; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -65,11 +85,34 @@
 
     <canvas id="shipCanvas"></canvas>
 
-    <div id="missionModal">
+    <div id="missionModal" class="modal">
         <button class="close-modal" onclick="closeMissionModal()">✕</button>
-        <div class="missionBox">
+        <div class="modalBox">
             <h2>🚀 SELECT MISSION</h2>
             <div id="planetsList"></div>
+        </div>
+    </div>
+
+    <div id="controlRoomModal" class="modal">
+        <button class="close-modal" onclick="exitControlRoom()">✕</button>
+        <div class="modalBox" style="min-width: 600px;">
+            <h2>🖥️ CONTROL ROOM - LAUNCH SEQUENCE</h2>
+            
+            <div class="control-section highlight">
+                <h3>📍 MISSION TARGET</h3>
+                <div style="font-size: 24px; color: #ffaa00; font-weight: bold;" id="targetPlanet">No mission selected</div>
+                <div style="font-size: 12px; color: #aaa; margin-top: 5px;" id="targetInfo"></div>
+            </div>
+
+            <div class="control-section">
+                <h3>👥 CREW STATUS</h3>
+                <div id="crewList"></div>
+            </div>
+
+            <button class="ready-btn" id="readyBtn" onclick="togglePlayerReady()">NOT READY ○</button>
+
+            <button class="launch-btn" id="launchBtn" onclick="startMission()">🚀 LAUNCH MISSION</button>
+            <div class="launch-msg" id="launchMessage">Select a mission first</div>
         </div>
     </div>
 
@@ -78,6 +121,8 @@
             credits: 500,
             missions: 0,
             cleared: [],
+            currentMission: null,
+            isReady: false,
             planets: [
                 { id: 1, name: 'Kepler-452b', desc: 'Desert world', diff: 'easy', aliens: 5, reward: 100 },
                 { id: 2, name: 'Proxima-3', desc: 'Ice planet', diff: 'medium', aliens: 8, reward: 200 },
@@ -95,11 +140,8 @@
         const ship = {
             player: { x: 400, y: 400, w: 15, h: 15, speed: 4 },
             keys: {},
-            // FRONT (Control Room)
             controlRoom: { x: 200, y: 50, w: 400, h: 120, name: 'CONTROL ROOM', icon: '🖥️', color: '#4444ff' },
-            // CENTER (Mission Table)
             missionTable: { x: 150, y: 220, w: 500, h: 150, name: 'MISSION TABLE', icon: '🗺️', color: '#00ff88' },
-            // BACK (Other Rooms)
             armory: { x: 50, y: 420, w: 150, h: 100, name: 'ARMORY', icon: '⚔️', color: '#ff6600' },
             engineering: { x: 250, y: 420, w: 150, h: 100, name: 'ENGINEERING', icon: '⚡', color: '#ff4444' },
             cargo: { x: 450, y: 420, w: 150, h: 100, name: 'CARGO BAY', icon: '📦', color: '#ffaa00' },
@@ -115,7 +157,6 @@
             canvas.width = cw;
             canvas.height = ch;
             
-            // Start player at center
             ship.player.x = cw / 2 - ship.player.w / 2;
             ship.player.y = ch / 2;
             
@@ -137,26 +178,22 @@
         }
 
         function update() {
-            // Player movement
             if (ship.keys['ArrowUp'] || ship.keys['w'] || ship.keys['W']) ship.player.y -= ship.player.speed;
             if (ship.keys['ArrowDown'] || ship.keys['s'] || ship.keys['S']) ship.player.y += ship.player.speed;
             if (ship.keys['ArrowLeft'] || ship.keys['a'] || ship.keys['A']) ship.player.x -= ship.player.speed;
             if (ship.keys['ArrowRight'] || ship.keys['d'] || ship.keys['D']) ship.player.x += ship.player.speed;
 
-            // Boundary check
             ship.player.x = Math.max(0, Math.min(cw - ship.player.w, ship.player.x));
             ship.player.y = Math.max(0, Math.min(ch - ship.player.h, ship.player.y));
         }
 
         function draw() {
-            // Background with gradient
             const gradient = ctx.createLinearGradient(0, 0, 0, ch);
             gradient.addColorStop(0, '#0a0e27');
             gradient.addColorStop(1, '#1a1f3a');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, cw, ch);
 
-            // Draw rooms
             drawRoom(ship.controlRoom);
             drawRoom(ship.missionTable);
             drawRoom(ship.armory);
@@ -164,7 +201,6 @@
             drawRoom(ship.cargo);
             drawRoom(ship.comm);
 
-            // Draw player
             ctx.fillStyle = '#00ff88';
             ctx.beginPath();
             ctx.arc(ship.player.x + ship.player.w / 2, ship.player.y + ship.player.h / 2, ship.player.w, 0, Math.PI * 2);
@@ -173,13 +209,11 @@
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            // Draw HUD
             ctx.fillStyle = '#00ff88';
             ctx.font = '14px Arial';
             ctx.textAlign = 'left';
             ctx.fillText('WASD or ARROW KEYS to move | E or CLICK to interact', 20, 30);
 
-            // Check if player is in a room
             let inRoom = null;
             const rooms = [ship.controlRoom, ship.missionTable, ship.armory, ship.engineering, ship.cargo, ship.comm];
             rooms.forEach(room => {
@@ -200,24 +234,20 @@
         }
 
         function drawRoom(room) {
-            // Room background
             ctx.fillStyle = room.color;
             ctx.globalAlpha = 0.15;
             ctx.fillRect(room.x, room.y, room.w, room.h);
             ctx.globalAlpha = 1.0;
 
-            // Room border
             ctx.strokeStyle = room.color;
             ctx.lineWidth = 3;
             ctx.strokeRect(room.x, room.y, room.w, room.h);
 
-            // Room icon
             ctx.fillStyle = room.color;
             ctx.font = 'bold 32px Arial';
             ctx.textAlign = 'center';
             ctx.fillText(room.icon, room.x + room.w / 2, room.y + room.h / 2 - 5);
 
-            // Room name
             ctx.fillStyle = room.color;
             ctx.font = 'bold 14px Arial';
             ctx.textAlign = 'center';
@@ -259,6 +289,8 @@
         function roomClicked(room) {
             if (room === ship.missionTable) {
                 openMissionModal();
+            } else if (room === ship.controlRoom) {
+                openControlRoom();
             } else {
                 alert(`🚧 ${room.name} coming soon!`);
             }
@@ -275,7 +307,7 @@
                         <div class="planet-info">${p.desc}</div>
                         <div class="difficulty ${p.diff}">${p.diff.toUpperCase()}</div>
                         <div class="planet-info">👽 ${p.aliens} aliens | 💰 ${p.reward} credits</div>
-                        <button class="planet-btn" ${cleared ? 'disabled' : ''}>${cleared ? 'CLEARED' : 'LAUNCH MISSION'}</button>
+                        <button class="planet-btn" ${cleared ? 'disabled' : ''}>${cleared ? 'CLEARED' : 'SELECT MISSION'}</button>
                     </div>
                 `;
             });
@@ -287,8 +319,68 @@
         }
 
         function selectMission(planetId) {
-            alert(`🚀 Launching mission to planet ${planetId}!\n(Gameplay coming soon!)`);
+            game.currentMission = planetId;
+            game.isReady = false;
+            const planet = game.planets.find(p => p.id === planetId);
+            alert(`Mission selected: ${planet.name}\n\nGo to the CONTROL ROOM to ready up and launch!`);
             closeMissionModal();
+        }
+
+        function openControlRoom() {
+            if (!game.currentMission) {
+                alert('Select a mission from the Mission Table first!');
+                return;
+            }
+            updateControlRoomDisplay();
+            document.getElementById('controlRoomModal').classList.add('show');
+        }
+
+        function exitControlRoom() {
+            document.getElementById('controlRoomModal').classList.remove('show');
+        }
+
+        function updateControlRoomDisplay() {
+            const planet = game.planets.find(p => p.id === game.currentMission);
+            document.getElementById('targetPlanet').textContent = `🪐 ${planet.name}`;
+            document.getElementById('targetInfo').textContent = `${planet.desc} • ${planet.diff.toUpperCase()} • ${planet.aliens} aliens`;
+            
+            const crewList = document.getElementById('crewList');
+            crewList.innerHTML = `
+                <div class="crew-member ${game.isReady ? 'ready' : 'notready'}">
+                    <div class="crew-name">You (Player 1)</div>
+                    <div class="crew-status">${game.isReady ? '✓ READY' : '○ NOT READY'}</div>
+                </div>
+            `;
+            
+            const readyBtn = document.getElementById('readyBtn');
+            if (game.isReady) {
+                readyBtn.textContent = 'READY ✓';
+                readyBtn.classList.add('is-ready');
+            } else {
+                readyBtn.textContent = 'NOT READY ○';
+                readyBtn.classList.remove('is-ready');
+            }
+            
+            const launchBtn = document.getElementById('launchBtn');
+            const launchMsg = document.getElementById('launchMessage');
+            if (game.isReady) {
+                launchBtn.classList.add('show');
+                launchMsg.textContent = 'All systems ready! Launch when ready.';
+            } else {
+                launchBtn.classList.remove('show');
+                launchMsg.textContent = 'Mark yourself READY to enable launch';
+            }
+        }
+
+        function togglePlayerReady() {
+            game.isReady = !game.isReady;
+            updateControlRoomDisplay();
+        }
+
+        function startMission() {
+            const planet = game.planets.find(p => p.id === game.currentMission);
+            alert(`🚀 LAUNCHING TO ${planet.name}!\n(Combat coming soon!)`);
+            exitControlRoom();
         }
 
         function openPartyModal() {
