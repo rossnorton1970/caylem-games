@@ -87,6 +87,67 @@
 
     <canvas id="shipCanvas"></canvas>
 
+
+    <div id="engineeringModal" class="modal">
+        <button class="close-modal" onclick="exitEngineering()">✕</button>
+        <div class="modalBox" style="min-width: 1200px; max-height: 90vh; display: flex; flex-direction: column;">
+            <h2 style="margin-bottom: 25px;">🔧 ENGINEERING - WEAPON UPGRADES</h2>
+            
+            <!-- Credits Bar -->
+            <div style="background: #0a0e27; padding: 12px 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #ffaa00;">
+                <span style="color: #ffaa00; font-weight: bold;">💰 CREDITS: </span>
+                <span style="color: #00ff88; font-weight: bold; font-size: 18px;" id="engineeringCreditsDisplay">500</span>
+            </div>
+            
+            <!-- 3-Column Layout -->
+            <div style="display: flex; gap: 25px; flex: 1; overflow: hidden;">
+                <!-- LEFT: Owned Weapons List -->
+                <div style="width: 200px; border-right: 2px solid #444; padding-right: 15px; overflow-y: auto;">
+                    <h3 style="color: #00ff88; margin-bottom: 15px; font-size: 14px;">OWNED WEAPONS</h3>
+                    <div id="upgradeWeaponsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                </div>
+                
+                <!-- CENTER: Weapon Preview -->
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <h3 style="color: #4444ff; margin-bottom: 15px; font-size: 14px;">WEAPON PREVIEW</h3>
+                    <div id="upgradeWeaponPreview" style="background: linear-gradient(135deg, #1a1f3a 0%, #0a0e27 100%); border: 2px solid #444; border-radius: 5px; padding: 30px; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 80px; margin-bottom: 20px;" id="upgradeWeaponEmoji">🔫</div>
+                            <div style="color: #00ff88; font-size: 24px; font-weight: bold;" id="upgradePreviewName">Select a weapon</div>
+                            <div style="color: #aaa; font-size: 12px; margin-top: 10px;" id="upgradePreviewTier"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RIGHT: Upgrade Stats Panel -->
+                <div style="width: 300px; display: flex; flex-direction: column; gap: 15px;">
+                    <div style="background: #1a1f3a; border: 2px solid #444; border-radius: 5px; padding: 15px; flex: 1; overflow-y: auto;">
+                        <h3 style="color: #ffaa00; margin-bottom: 15px; font-size: 12px;">UPGRADE STATS</h3>
+                        <div id="upgradeStatsPanel" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="color: #aaa; font-size: 11px;">Select a weapon to upgrade</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- BOTTOM: Mini Loadout -->
+            <div style="border-top: 2px solid #444; padding-top: 20px; margin-top: 20px;">
+                <h3 style="color: #00ff88; margin-bottom: 12px; font-size: 12px;">⚙️ CURRENT LOADOUT</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div style="background: #1a1f3a; border: 2px solid #00ff88; border-radius: 5px; padding: 12px;">
+                        <div style="color: #aaa; font-size: 10px; margin-bottom: 5px;">PRIMARY</div>
+                        <div style="color: #00ff88; font-weight: bold; font-size: 12px;" id="engineeringSlot1Display">AR-X</div>
+                    </div>
+                    <div style="background: #1a1f3a; border: 2px solid #ffaa00; border-radius: 5px; padding: 12px;">
+                        <div style="color: #aaa; font-size: 10px; margin-bottom: 5px;">SECONDARY</div>
+                        <div style="color: #ffaa00; font-weight: bold; font-size: 12px;" id="engineeringSlot2Display">Pistol</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <div id="missionModal" class="modal">
         <button class="close-modal" onclick="closeMissionModal()">✕</button>
         <div class="modalBox">
@@ -402,6 +463,8 @@
             } else if (room === ship.armory) {
                 openArmory();
             }
+            } else if (room === ship.engineering) {
+                openEngineering();
             // Other rooms coming soon
         }
 
@@ -412,6 +475,219 @@
 
         function exitArmory() {
             document.getElementById('armoryModal').classList.remove('show');
+        }
+
+        function openEngineering() {
+            updateUpgradeDisplay();
+            document.getElementById('engineeringModal').classList.add('show');
+        }
+
+        function exitEngineering() {
+            document.getElementById('engineeringModal').classList.remove('show');
+        }
+
+        function updateUpgradeDisplay() {
+            // Initialize upgrade tracking if needed
+            if (!game.weaponUpgrades) {
+                game.weaponUpgrades = {};
+            }
+            
+            document.getElementById('engineeringCreditsDisplay').textContent = game.credits;
+            document.getElementById('engineeringSlot1Display').textContent = game.loadout.slot1 || 'AR-X';
+            document.getElementById('engineeringSlot2Display').textContent = game.loadout.slot2 || 'Pistol';
+            
+            // Get all weapon data
+            const allWeapons = [];
+            const weaponCategories = [
+                {
+                    weapons: [
+                        { id: 'ar-x', name: 'AR-X', tier: 1, owned: true, price: 0, dmg: 20, mag: 30, ammo: 360, fireRate: 600 },
+                        { id: 'burst', name: 'Burst Rifle', tier: 2, owned: false, price: 500, dmg: 20, mag: 24, ammo: 300, fireRate: 400 },
+                        { id: 'carbine', name: 'Combat Carbine', tier: 3, owned: false, price: 9000, dmg: 32, mag: 28, ammo: 336, fireRate: 550 },
+                        { id: 'lmg', name: 'Heavy Pulse LMG', tier: 3.5, owned: false, price: 12000, dmg: 22, mag: 60, ammo: 600, fireRate: 700 },
+                        { id: 'auto', name: 'Auto Cannon', tier: 4, owned: false, price: 1600, dmg: 20, mag: 50, ammo: 600, fireRate: 750 }
+                    ]
+                },
+                {
+                    weapons: [
+                        { id: 'pistol', name: 'Energy Pistol', tier: 1, owned: true, price: 0, dmg: 15, mag: 12, ammo: 240, fireRate: 400 },
+                        { id: 'smg', name: 'Pulse SMG', tier: 1, owned: true, price: 0, dmg: 10, mag: 30, ammo: 420, fireRate: 650 },
+                        { id: 'stabilizer', name: 'Energy Stabilizer', tier: 3, owned: false, price: 7500, dmg: 15, mag: 20, ammo: 240, fireRate: 350 },
+                        { id: 'suppression-smg', name: 'Suppression SMG', tier: 3, owned: false, price: 8500, dmg: 18, mag: 35, ammo: 420, fireRate: 680 }
+                    ]
+                },
+                {
+                    weapons: [
+                        { id: 'sniper', name: 'Laser Sniper', tier: 2, owned: false, price: 700, dmg: 90, mag: 5, ammo: 40, fireRate: 200 },
+                        { id: 'gauss', name: 'Gauss Rifle', tier: 3, owned: false, price: 1200, dmg: 60, mag: 10, ammo: 120, fireRate: 300 },
+                        { id: 'laser-rifle', name: 'Marksman Laser Rifle', tier: 3, owned: false, price: 11500, dmg: 85, mag: 12, ammo: 120, fireRate: 250 },
+                        { id: 'railgun', name: 'Railgun', tier: 3, owned: false, price: 1500, dmg: 130, mag: 3, ammo: 24, fireRate: 150 }
+                    ]
+                },
+                {
+                    weapons: [
+                        { id: 'shotgun', name: 'Plasma Shotgun', tier: 2, owned: false, price: 600, dmg: 60, mag: 6, ammo: 72, fireRate: 250 },
+                        { id: 'pulse', name: 'Pulse Rifle', tier: 3, owned: false, price: 1000, dmg: 20, mag: 27, ammo: 360, fireRate: 500 },
+                        { id: 'rocket', name: 'Rocket Launcher', tier: 4, owned: false, price: 2000, dmg: 120, mag: 1, ammo: 12, fireRate: 100 },
+                        { id: 'plasma', name: 'Plasma Launcher', tier: 4, owned: false, price: 1800, dmg: 100, mag: 4, ammo: 40, fireRate: 120 },
+                        { id: 'grenade', name: 'Grenade Launcher', tier: 4, owned: false, price: 1700, dmg: 90, mag: 6, ammo: 60, fireRate: 140 },
+                        { id: 'cluster', name: 'Cluster Launcher', tier: 4, owned: false, price: 15500, dmg: 110, mag: 5, ammo: 50, fireRate: 110 }
+                    ]
+                }
+            ];
+            
+            // Collect all weapons and filter owned
+            weaponCategories.forEach(cat => {
+                cat.weapons.forEach(w => {
+                    if (w.owned || (game.inventory && game.inventory[w.id])) {
+                        allWeapons.push(w);
+                    }
+                });
+            });
+            
+            // Build weapon list
+            const weaponsList = document.getElementById('upgradeWeaponsList');
+            weaponsList.innerHTML = '';
+            
+            if (allWeapons.length === 0) {
+                weaponsList.innerHTML = '<div style="color: #aaa; font-size: 11px;">No owned weapons yet</div>';
+                return;
+            }
+            
+            allWeapons.forEach(w => {
+                const btn = document.createElement('button');
+                btn.style.cssText = `background: #1a1f3a; border: 2px solid #666; color: #00ff88; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 11px; transition: all 0.2s; text-align: left;`;
+                btn.textContent = w.name;
+                btn.onclick = () => selectUpgradeWeapon(w);
+                weaponsList.appendChild(btn);
+            });
+            
+            // Select first weapon by default
+            if (allWeapons.length > 0) {
+                selectUpgradeWeapon(allWeapons[0]);
+            }
+        }
+        
+        let selectedUpgradeWeapon = null;
+        
+        function selectUpgradeWeapon(weapon) {
+            selectedUpgradeWeapon = weapon;
+            
+            // Update preview
+            document.getElementById('upgradePreviewName').textContent = weapon.name;
+            document.getElementById('upgradePreviewTier').textContent = ['', 'TIER 1', 'TIER 2', 'TIER 3', 'TIER 4'][Math.floor(weapon.tier)] || '';
+            
+            // Initialize upgrade levels for this weapon
+            if (!game.weaponUpgrades[weapon.id]) {
+                game.weaponUpgrades[weapon.id] = {
+                    damage: 0,
+                    fireRate: 0,
+                    magSize: 0,
+                    reloadSpeed: 0
+                };
+            }
+            
+            const upgrades = game.weaponUpgrades[weapon.id];
+            
+            // Build upgrade stats panel
+            const statsPanel = document.getElementById('upgradeStatsPanel');
+            statsPanel.innerHTML = `
+                <div style="background: #0a0e27; border: 1px solid #444; border-radius: 3px; padding: 10px; margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div>
+                            <div style="color: #aaa; font-size: 10px;">DAMAGE</div>
+                            <div style="color: #ff4444; font-weight: bold; font-size: 14px;">${weapon.dmg + (upgrades.damage * 3)}</div>
+                        </div>
+                        <div style="color: #666; font-size: 10px;">Lv ${upgrades.damage}/5</div>
+                    </div>
+                    <div style="background: #1a1f3a; border: 1px solid #444; border-radius: 2px; padding: 3px; margin-bottom: 8px;">
+                        <div style="background: #ff4444; height: 6px; border-radius: 1px; width: ${upgrades.damage * 20}%;"></div>
+                    </div>
+                    <button onclick="upgradeWeaponStat('${weapon.id}', 'damage')" style="background: #ff4444; color: white; padding: 6px 8px; border: none; cursor: pointer; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">UPGRADE - $${getUpgradeCost('damage', upgrades.damage)}</button>
+                </div>
+                
+                <div style="background: #0a0e27; border: 1px solid #444; border-radius: 3px; padding: 10px; margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div>
+                            <div style="color: #aaa; font-size: 10px;">FIRE RATE</div>
+                            <div style="color: #ffaa00; font-weight: bold; font-size: 14px;">${weapon.fireRate + (upgrades.fireRate * 25)}</div>
+                        </div>
+                        <div style="color: #666; font-size: 10px;">Lv ${upgrades.fireRate}/5</div>
+                    </div>
+                    <div style="background: #1a1f3a; border: 1px solid #444; border-radius: 2px; padding: 3px; margin-bottom: 8px;">
+                        <div style="background: #ffaa00; height: 6px; border-radius: 1px; width: ${upgrades.fireRate * 20}%;"></div>
+                    </div>
+                    <button onclick="upgradeWeaponStat('${weapon.id}', 'fireRate')" style="background: #ffaa00; color: #0a0e27; padding: 6px 8px; border: none; cursor: pointer; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">UPGRADE - $${getUpgradeCost('fireRate', upgrades.fireRate)}</button>
+                </div>
+                
+                <div style="background: #0a0e27; border: 1px solid #444; border-radius: 3px; padding: 10px; margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div>
+                            <div style="color: #aaa; font-size: 10px;">MAGAZINE SIZE</div>
+                            <div style="color: #4444ff; font-weight: bold; font-size: 14px;">${weapon.mag + (upgrades.magSize * 2)}</div>
+                        </div>
+                        <div style="color: #666; font-size: 10px;">Lv ${upgrades.magSize}/5</div>
+                    </div>
+                    <div style="background: #1a1f3a; border: 1px solid #444; border-radius: 2px; padding: 3px; margin-bottom: 8px;">
+                        <div style="background: #4444ff; height: 6px; border-radius: 1px; width: ${upgrades.magSize * 20}%;"></div>
+                    </div>
+                    <button onclick="upgradeWeaponStat('${weapon.id}', 'magSize')" style="background: #4444ff; color: white; padding: 6px 8px; border: none; cursor: pointer; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">UPGRADE - $${getUpgradeCost('magSize', upgrades.magSize)}</button>
+                </div>
+                
+                <div style="background: #0a0e27; border: 1px solid #444; border-radius: 3px; padding: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div>
+                            <div style="color: #aaa; font-size: 10px;">RELOAD SPEED</div>
+                            <div style="color: #00ff88; font-weight: bold; font-size: 14px;">+${upgrades.reloadSpeed * 5}%</div>
+                        </div>
+                        <div style="color: #666; font-size: 10px;">Lv ${upgrades.reloadSpeed}/5</div>
+                    </div>
+                    <div style="background: #1a1f3a; border: 1px solid #444; border-radius: 2px; padding: 3px; margin-bottom: 8px;">
+                        <div style="background: #00ff88; height: 6px; border-radius: 1px; width: ${upgrades.reloadSpeed * 20}%;"></div>
+                    </div>
+                    <button onclick="upgradeWeaponStat('${weapon.id}', 'reloadSpeed')" style="background: #00ff88; color: #0a0e27; padding: 6px 8px; border: none; cursor: pointer; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">UPGRADE - $${getUpgradeCost('reloadSpeed', upgrades.reloadSpeed)}</button>
+                </div>
+            `;
+        }
+        
+        function getUpgradeCost(stat, currentLevel) {
+            if (currentLevel >= 5) return 0;
+            const baseCosts = { damage: 500, fireRate: 400, magSize: 300, reloadSpeed: 250 };
+            return baseCosts[stat] * (currentLevel + 1);
+        }
+        
+        function upgradeWeaponStat(weaponId, stat) {
+            const weapon = selectedUpgradeWeapon;
+            if (!weapon || weapon.id !== weaponId) return;
+            
+            const upgrades = game.weaponUpgrades[weaponId];
+            if (upgrades[stat] >= 5) {
+                alert('Already at max level 5!');
+                return;
+            }
+            
+            const cost = getUpgradeCost(stat, upgrades[stat]);
+            if (game.credits < cost) {
+                alert(`Need $${cost - game.credits} more credits!`);
+                return;
+            }
+            
+            // Upgrade!
+            game.credits -= cost;
+            upgrades[stat]++;
+            
+            // Visual feedback
+            document.getElementById('engineeringCreditsDisplay').textContent = game.credits;
+            
+            // Flash effect
+            const statsPanel = document.getElementById('upgradeStatsPanel');
+            statsPanel.style.opacity = '0.5';
+            setTimeout(() => statsPanel.style.opacity = '1', 100);
+            
+            // Re-render
+            selectUpgradeWeapon(weapon);
+            
+            alert(`✅ ${stat.toUpperCase()} upgraded to level ${upgrades[stat]}!`);
         }
 
         function updateArmoryDisplay() {
