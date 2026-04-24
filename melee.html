@@ -381,40 +381,70 @@
             const weaponsList = document.getElementById('weaponsList');
             weaponsList.innerHTML = '';
             
-            // All available weapons
-            const allWeapons = [
-                // TIER 1
-                { id: 'ar-x', name: 'AR-X', tier: 1, owned: true, price: 0 },
-                { id: 'pistol', name: 'Energy Pistol', tier: 1, owned: true, price: 0 },
-                { id: 'smg', name: 'Pulse SMG', tier: 1, owned: true, price: 0 },
-                // TIER 2
-                { id: 'burst', name: 'Burst Rifle', tier: 2, owned: false, price: 500 },
-                { id: 'shotgun', name: 'Plasma Shotgun', tier: 2, owned: false, price: 600 },
-                { id: 'sniper', name: 'Laser Sniper', tier: 2, owned: false, price: 700 },
-                // TIER 3
-                { id: 'pulse', name: 'Pulse Rifle', tier: 3, owned: false, price: 1000 },
-                { id: 'gauss', name: 'Gauss Rifle', tier: 3, owned: false, price: 1200 },
-                { id: 'railgun', name: 'Railgun', tier: 3, owned: false, price: 1500 },
-                // TIER 4
-                { id: 'rocket', name: 'Rocket Launcher', tier: 4, owned: false, price: 2000 },
-                { id: 'plasma', name: 'Plasma Launcher', tier: 4, owned: false, price: 1800 },
-                { id: 'auto', name: 'Auto Cannon', tier: 4, owned: false, price: 1600 },
-                { id: 'grenade', name: 'Grenade Launcher', tier: 4, owned: false, price: 1700 }
+            // Organized by category
+            const weaponCategories = [
+                {
+                    name: '⚔️ ASSAULT OPERATORS',
+                    color: '#ff6600',
+                    weapons: [
+                        { id: 'ar-x', name: 'AR-X', tier: 1, owned: true, price: 0 },
+                        { id: 'carbine', name: 'Combat Carbine', tier: 3, owned: false, price: 9000 },
+                        { id: 'lmg', name: 'Heavy Pulse LMG', tier: 3.5, owned: false, price: 12000 },
+                        { id: 'burst', name: 'Burst Rifle', tier: 2, owned: false, price: 500 },
+                        { id: 'auto', name: 'Auto Cannon', tier: 4, owned: false, price: 1600 }
+                    ]
+                },
+                {
+                    name: '🛡️ SUPPORT UNITS',
+                    color: '#4444ff',
+                    weapons: [
+                        { id: 'pistol', name: 'Energy Pistol', tier: 1, owned: true, price: 0 },
+                        { id: 'smg', name: 'Pulse SMG', tier: 1, owned: true, price: 0 },
+                        { id: 'stabilizer', name: 'Energy Stabilizer', tier: 3, owned: false, price: 7500 },
+                        { id: 'suppression-smg', name: 'Suppression SMG', tier: 3, owned: false, price: 8500 }
+                    ]
+                },
+                {
+                    name: '🎯 PRECISION STRIKE',
+                    color: '#00ff88',
+                    weapons: [
+                        { id: 'sniper', name: 'Laser Sniper', tier: 2, owned: false, price: 700 },
+                        { id: 'gauss', name: 'Gauss Rifle', tier: 3, owned: false, price: 1200 },
+                        { id: 'laser-rifle', name: 'Marksman Laser Rifle', tier: 3, owned: false, price: 11500 },
+                        { id: 'railgun', name: 'Railgun', tier: 3, owned: false, price: 1500 }
+                    ]
+                },
+                {
+                    name: '💥 ORDNANCE',
+                    color: '#ff4444',
+                    weapons: [
+                        { id: 'shotgun', name: 'Plasma Shotgun', tier: 2, owned: false, price: 600 },
+                        { id: 'pulse', name: 'Pulse Rifle', tier: 3, owned: false, price: 1000 },
+                        { id: 'rocket', name: 'Rocket Launcher', tier: 4, owned: false, price: 2000 },
+                        { id: 'plasma', name: 'Plasma Launcher', tier: 4, owned: false, price: 1800 },
+                        { id: 'grenade', name: 'Grenade Launcher', tier: 4, owned: false, price: 1700 },
+                        { id: 'cluster', name: 'Cluster Launcher', tier: 4, owned: false, price: 15500 }
+                    ]
+                }
             ];
             
-            allWeapons.forEach(w => {
-                const tierColor = ['', '#00ff88', '#4444ff', '#ffaa00', '#ff4444'][w.tier];
-                const owned = w.owned ? '✓' : (game.credits >= w.price ? '✓' : '✗');
-                const btnColor = w.owned ? '#00ff88' : (game.credits >= w.price ? '#4444ff' : '#666');
-                const btnText = w.owned ? 'OWNED' : `${w.price} ¢`;
+            weaponCategories.forEach(category => {
+                weaponsList.innerHTML += `<div style="color: ${category.color}; font-weight: bold; font-size: 14px; margin: 20px 0 10px 0; border-bottom: 2px solid ${category.color}; padding-bottom: 8px;">${category.name}</div>`;
                 
-                weaponsList.innerHTML += `
-                    <div class="planet-card" onclick="selectWeapon('${w.id}', '${w.name}')" style="cursor: pointer;">
-                        <div style="color: ${tierColor}; font-weight: bold;">🔫 ${w.name}</div>
-                        <div style="font-size: 11px; color: #aaa; margin-top: 5px;">TIER ${w.tier}</div>
-                        <button style="background: ${btnColor}; color: #0a0e27; padding: 5px 10px; margin-top: 8px; border: none; cursor: pointer; border-radius: 3px; font-weight: bold; width: 100%; font-size: 11px;">${btnText}</button>
-                    </div>
-                `;
+                category.weapons.forEach(w => {
+                    const tierColor = ['', '#00ff88', '#4444ff', '#ffaa00', '#ff4444'][Math.floor(w.tier)];
+                    const owned = w.owned ? '✓' : (game.credits >= w.price ? '✓' : '✗');
+                    const btnColor = w.owned ? '#00ff88' : (game.credits >= w.price ? '#4444ff' : '#666');
+                    const btnText = w.owned ? 'OWNED' : `${w.price} ¢`;
+                    
+                    weaponsList.innerHTML += `
+                        <div class="planet-card" onclick="selectWeapon('${w.id}', '${w.name}')" style="cursor: pointer;">
+                            <div style="color: ${tierColor}; font-weight: bold;">🔫 ${w.name}</div>
+                            <div style="font-size: 11px; color: #aaa; margin-top: 5px;">TIER ${w.tier}</div>
+                            <button style="background: ${btnColor}; color: #0a0e27; padding: 5px 10px; margin-top: 8px; border: none; cursor: pointer; border-radius: 3px; font-weight: bold; width: 100%; font-size: 11px;">${btnText}</button>
+                        </div>
+                    `;
+                });
             });
         }
 
@@ -438,7 +468,13 @@
                 'rocket': { dmg: 120, mag: 1, ammo: 12, desc: 'A heavy ordnance system used by demolition specialists and frontline breaching units. It fires guided micro-warheads engineered to obliterate clustered alien formations and heavily fortified enemy positions.' },
                 'plasma': { dmg: 100, mag: 4, ammo: 40, desc: 'An experimental explosive weapon that launches unstable plasma spheres toward targets. Upon impact, the energy destabilizes violently, releasing a wide-area thermal shockwave capable of clearing dense combat zones.' },
                 'auto': { dmg: 20, mag: 50, ammo: 600, desc: 'A rapid-fire suppression system adapted for infantry deployment in extreme warfare environments. It unleashes continuous streams of kinetic energy rounds, designed to hold ground against overwhelming alien forces.' },
-                'grenade': { dmg: 90, mag: 6, ammo: 60, desc: 'A tactical area-denial weapon used to control battlefield movement in hostile alien environments. It fires bouncing plasma grenades that detonate with delayed timing, flushing enemies from cover and controlling territory.' }
+                'grenade': { dmg: 90, mag: 6, ammo: 60, desc: 'A tactical area-denial weapon used to control battlefield movement in hostile alien environments. It fires bouncing plasma grenades that detonate with delayed timing, flushing enemies from cover and controlling territory.' },
+                'carbine': { dmg: 35, mag: 20, ammo: 280, desc: 'A compact yet powerful combat rifle developed for elite rapid-response units operating in hostile alien environments. Lighter than standard assault rifles but hitting harder than SMGs, it bridges the gap between speed and stopping power in mid-range engagements.' },
+                'lmg': { dmg: 25, mag: 75, ammo: 900, desc: 'A heavy sustained-fire weapon designed for squad-level suppression across wide combat fronts. Its high-capacity pulse magazine allows continuous fire during prolonged alien assaults, making it the backbone of defensive perimeter operations on colonial outposts.' },
+                'stabilizer': { dmg: 30, mag: 24, ammo: 312, desc: 'A precision-balanced energy rifle engineered for operators who prioritise accuracy over volume of fire. Its integrated gyro-stabilisation system eliminates recoil drift during extended firefights, delivering consistent shot placement even under sustained combat stress.' },
+                'suppression-smg': { dmg: 15, mag: 45, ammo: 540, desc: 'An upgraded close-quarters weapon built for sustained urban and corridor combat. Its overclocked pulse core fires rapid suppressive bursts that disorient alien swarms and deny movement in confined shipboard and bunker environments.' },
+                'laser-rifle': { dmg: 80, mag: 8, ammo: 64, desc: 'A high-precision directed-energy weapon favoured by marksmen and forward scouts operating at extreme range. It focuses a tightly collimated laser beam capable of burning through alien carapace armour and penetrating environmental shielding on hostile worlds.' },
+                'cluster': { dmg: 110, mag: 2, ammo: 16, desc: 'A devastatingly powerful area-saturation weapon that launches fragmentation warheads detonating mid-air above targets. Upon burst, each warhead disperses a pattern of superheated submunitions across a wide kill zone, eliminating clustered alien formations and exposed infantry positions simultaneously.' }
             };
             
             const w = weaponInfo[weaponId];
