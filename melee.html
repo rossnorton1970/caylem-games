@@ -656,6 +656,78 @@
             `;
         }
         
+
+        // Weapon type and stat scaling configuration
+        const WEAPON_CONFIGS = {
+            // SMGs - fast, mag focused
+            'smg': { type: 'SMG', damageScale: 0.8, fireRateCap: 60, fireRateScale: 1.2, magScale: 1.3, reloadScale: 0.9 },
+            'suppression-smg': { type: 'SMG', damageScale: 0.8, fireRateCap: 60, fireRateScale: 1.2, magScale: 1.3, reloadScale: 0.9 },
+            
+            // Rifles - balanced
+            'ar-x': { type: 'Rifle', damageScale: 1.0, fireRateCap: 75, fireRateScale: 1.0, magScale: 1.0, reloadScale: 1.0 },
+            'burst': { type: 'Rifle', damageScale: 1.0, fireRateCap: 75, fireRateScale: 1.0, magScale: 1.0, reloadScale: 1.0 },
+            'carbine': { type: 'Rifle', damageScale: 1.0, fireRateCap: 75, fireRateScale: 1.0, magScale: 1.0, reloadScale: 1.0 },
+            'pulse': { type: 'Rifle', damageScale: 1.0, fireRateCap: 75, fireRateScale: 1.0, magScale: 1.0, reloadScale: 1.0 },
+            
+            // Heavy - slow, dmg focused
+            'lmg': { type: 'Heavy', damageScale: 1.2, fireRateCap: 50, fireRateScale: 0.8, magScale: 1.4, reloadScale: 0.8 },
+            'auto': { type: 'Heavy', damageScale: 1.2, fireRateCap: 50, fireRateScale: 0.8, magScale: 1.3, reloadScale: 0.8 },
+            
+            // Snipers - one-shot, damage + precision
+            'sniper': { type: 'Sniper', damageScale: 1.5, fireRateCap: 40, fireRateScale: 0.6, magScale: 0.5, reloadScale: 1.2 },
+            'laser-rifle': { type: 'Sniper', damageScale: 1.5, fireRateCap: 40, fireRateScale: 0.6, magScale: 0.7, reloadScale: 1.1 },
+            'railgun': { type: 'Sniper', damageScale: 1.5, fireRateCap: 40, fireRateScale: 0.5, magScale: 0.3, reloadScale: 1.0 },
+            
+            // Shotguns - medium, burst damage
+            'shotgun': { type: 'Shotgun', damageScale: 1.3, fireRateCap: 50, fireRateScale: 0.8, magScale: 0.8, reloadScale: 1.1 },
+            
+            // Pistols - utility
+            'pistol': { type: 'Pistol', damageScale: 0.9, fireRateCap: 70, fireRateScale: 1.1, magScale: 1.0, reloadScale: 1.0 },
+            'stabilizer': { type: 'Pistol', damageScale: 0.9, fireRateCap: 70, fireRateScale: 1.0, magScale: 1.0, reloadScale: 1.1 },
+            
+            // Ordnance - area, dmg
+            'rocket': { type: 'Ordnance', damageScale: 1.6, fireRateCap: 30, fireRateScale: 0.5, magScale: 0.2, reloadScale: 0.9 },
+            'plasma': { type: 'Ordnance', damageScale: 1.5, fireRateCap: 35, fireRateScale: 0.6, magScale: 0.3, reloadScale: 0.9 },
+            'grenade': { type: 'Ordnance', damageScale: 1.5, fireRateCap: 35, fireRateScale: 0.6, magScale: 0.4, reloadScale: 0.9 },
+            'cluster': { type: 'Ordnance', damageScale: 1.6, fireRateCap: 30, fireRateScale: 0.5, magScale: 0.3, reloadScale: 0.8 }
+        };
+        
+        // Diminishing returns multiplier for levels 4-5
+        function getDiminishingReturnMultiplier(level) {
+            if (level <= 3) return 1.0;
+            if (level === 4) return 0.85;
+            if (level === 5) return 0.75;
+            return 1.0;
+        }
+        
+        // Get actual stat increase with weapon type and diminishing returns
+        function getActualStatIncrease(weaponId, stat, level) {
+            const config = WEAPON_CONFIGS[weaponId] || { damageScale: 1.0, fireRateScale: 1.0, magScale: 1.0, reloadScale: 1.0 };
+            const diminish = getDiminishingReturnMultiplier(level);
+            
+            const baseIncreases = {
+                damage: 3,
+                fireRate: 15,
+                magSize: 2,
+                reloadSpeed: 1
+            };
+            
+            const scales = {
+                damage: config.damageScale,
+                fireRate: config.fireRateScale,
+                magSize: config.magScale,
+                reloadSpeed: config.reloadScale
+            };
+            
+            return Math.floor(baseIncreases[stat] * scales[stat] * diminish);
+        }
+        
+        // Calculate fire rate cap per weapon
+        function getFireRateCap(weaponId) {
+            const config = WEAPON_CONFIGS[weaponId] || { fireRateCap: 75 };
+            return config.fireRateCap;
+        }
+
         function getUpgradeCost(stat, currentLevel) {
             if (currentLevel >= 5) return 0;
             const baseCosts = { damage: 500, fireRate: 400, magSize: 300, reloadSpeed: 250 };
@@ -670,6 +742,19 @@
             if (upgrades[stat] >= 5) {
                 alert('Already at max level 5!');
                 return;
+            }
+            
+            // Special check for fire rate cap
+            if (stat === 'fireRate') {
+                const cap = getFireRateCap(weaponId);
+                const fireRateIncrease = getActualStatIncrease(weaponId, 'fireRate', upgrades.fireRate);
+                const currentFireRateIncrease = getActualStatIncrease(weaponId, 'fireRate', upgrades.fireRate - 1) || 0;
+                const maxFireRateIncrease = Math.floor((weapon.fireRate / 100) * cap);
+                
+                if (currentFireRateIncrease >= maxFireRateIncrease) {
+                    alert(`⚠️ Fire Rate has reached its cap for this weapon type!\n\nCap: +${cap}% (${weapon.fireRate + maxFireRateIncrease})`);
+                    return;
+                }
             }
             
             const cost = getUpgradeCost(stat, upgrades[stat]);
@@ -693,7 +778,7 @@
             // Check if stat reached max level 5
             let maxMessage = '';
             if (upgrades[stat] === 5) {
-                maxMessage = `\n🌟 STAT MAXED! +10% bonus applied!`;
+                maxMessage = `\n🌟 STAT MAXED! Unlock Focus bonus!`;
             }
             
             // Visual feedback
