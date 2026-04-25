@@ -134,15 +134,21 @@
             <!-- BOTTOM: Mini Loadout -->
             <div style="border-top: 2px solid #444; padding-top: 20px; margin-top: 20px;">
                 <h3 style="color: #00ff88; margin-bottom: 12px; font-size: 12px;">⚙️ CURRENT LOADOUT</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 12px;">
                     <div style="background: #1a1f3a; border: 2px solid #00ff88; border-radius: 5px; padding: 12px;">
                         <div style="color: #aaa; font-size: 10px; margin-bottom: 5px;">PRIMARY</div>
                         <div style="color: #00ff88; font-weight: bold; font-size: 12px;" id="engineeringSlot1Display">AR-X</div>
+                        <div style="color: #666; font-size: 9px; margin-top: 4px;" id="engineeringSlot1Focus"></div>
                     </div>
                     <div style="background: #1a1f3a; border: 2px solid #ffaa00; border-radius: 5px; padding: 12px;">
                         <div style="color: #aaa; font-size: 10px; margin-bottom: 5px;">SECONDARY</div>
                         <div style="color: #ffaa00; font-weight: bold; font-size: 12px;" id="engineeringSlot2Display">Pistol</div>
+                        <div style="color: #666; font-size: 9px; margin-top: 4px;" id="engineeringSlot2Focus"></div>
                     </div>
+                </div>
+                <div style="background: #1a1f3a; border: 1px solid #ffaa00; border-radius: 3px; padding: 8px; text-align: center;">
+                    <div style="color: #aaa; font-size: 9px; margin-bottom: 3px;">ACTIVE FOCUS</div>
+                    <div style="color: #ffaa00; font-weight: bold; font-size: 11px;" id="activeFocusDisplay">None selected</div>
                 </div>
             </div>
         </div>
@@ -493,9 +499,41 @@
                 game.weaponUpgrades = {};
             }
             
+            // Initialize focus system
+            if (!game.weaponFocus) {
+                game.weaponFocus = {};
+            }
+            
             document.getElementById('engineeringCreditsDisplay').textContent = game.credits;
-            document.getElementById('engineeringSlot1Display').textContent = game.loadout.slot1 || 'AR-X';
-            document.getElementById('engineeringSlot2Display').textContent = game.loadout.slot2 || 'Pistol';
+            const slot1Name = game.loadout.slot1 || 'AR-X';
+            const slot2Name = game.loadout.slot2 || 'Pistol';
+            document.getElementById('engineeringSlot1Display').textContent = slot1Name;
+            document.getElementById('engineeringSlot2Display').textContent = slot2Name;
+            
+            // Show focus status in loadout
+            const slot1Weapon = getWeaponByName(slot1Name);
+            const slot2Weapon = getWeaponByName(slot2Name);
+            
+            if (slot1Weapon && game.weaponFocus[slot1Weapon.id] && game.weaponFocus[slot1Weapon.id].activeFocus) {
+                const focusType = game.weaponFocus[slot1Weapon.id].activeFocus;
+                const focusInfo = FOCUS_BONUSES[focusType];
+                document.getElementById('engineeringSlot1Focus').textContent = `${focusInfo.icon} ${focusInfo.name}`;
+            }
+            
+            if (slot2Weapon && game.weaponFocus[slot2Weapon.id] && game.weaponFocus[slot2Weapon.id].activeFocus) {
+                const focusType = game.weaponFocus[slot2Weapon.id].activeFocus;
+                const focusInfo = FOCUS_BONUSES[focusType];
+                document.getElementById('engineeringSlot2Focus').textContent = `${focusInfo.icon} ${focusInfo.name}`;
+            }
+            
+            // Show active focus in loadout
+            let activeFocusText = 'None selected';
+            if (slot2Weapon && game.weaponFocus[slot2Weapon.id] && game.weaponFocus[slot2Weapon.id].activeFocus) {
+                const focusType = game.weaponFocus[slot2Weapon.id].activeFocus;
+                const focusInfo = FOCUS_BONUSES[focusType];
+                activeFocusText = `${focusInfo.icon} ${focusInfo.name}`;
+            }
+            document.getElementById('activeFocusDisplay').textContent = activeFocusText;
             
             // Get all weapon data
             const allWeapons = [];
@@ -653,9 +691,98 @@
                     </div>
                     ${upgrades.reloadSpeed >= 5 ? '<button style="background: #333; color: #666; padding: 6px 8px; border: none; cursor: not-allowed; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">✓ MAX LEVEL</button>' : '<button onclick="upgradeWeaponStat(\'${weapon.id}\', \'reloadSpeed\')" style="background: #00ff88; color: #0a0e27; padding: 6px 8px; border: none; cursor: pointer; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">UPGRADE - $${getUpgradeCost(\'reloadSpeed\', upgrades.reloadSpeed)}</button>'}
                 </div>
+                
+                <!-- FOCUS SELECTION PANEL -->
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #ffaa00;">
+                    <h4 style="color: #ffaa00; font-size: 11px; margin-bottom: 10px;">🎯 FOCUS SYSTEM</h4>
+                    ${(() => {
+                        const unlocked = getUnlockedFocuses(weapon.id);
+                        const focus = initializeWeaponFocus(weapon.id);
+                        
+                        if (unlocked.length === 0) {
+                            return '<div style="color: #666; font-size: 10px;">Upgrade any stat to Level 5 to unlock Focus</div>';
+                        }
+                        
+                        let focusHTML = '';
+                        unlocked.forEach(focusType => {
+                            const focusInfo = FOCUS_BONUSES[focusType];
+                            const isActive = focus.activeFocus === focusType;
+                            const btnBg = isActive ? '#ffaa00' : '#1a1f3a';
+                            const btnColor = isActive ? '#0a0e27' : '#ffaa00';
+                            const btnText = isActive ? '✓ ACTIVE' : 'ACTIVATE';
+                            
+                            focusHTML += `
+                                <div style="background: #0a0e27; border: 1px solid #ffaa00; border-radius: 3px; padding: 8px; margin-bottom: 8px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                        <div style="color: #ffaa00; font-weight: bold; font-size: 11px;">${focusInfo.icon} ${focusInfo.name}</div>
+                                        <button onclick="activateFocus('${weapon.id}', '${focusType}')" style="background: ${btnBg}; color: ${btnColor}; padding: 3px 6px; border: 1px solid #ffaa00; cursor: pointer; border-radius: 2px; font-size: 9px; font-weight: bold;">${btnText}</button>
+                                    </div>
+                                    <div style="color: #aaa; font-size: 9px; line-height: 1.3;">${focusInfo.bonus}</div>
+                                </div>
+                            `;
+                        });
+                        
+                        return focusHTML;
+                    })()}
+                </div>
             `;
         }
         
+
+
+        // Focus System - One active focus per weapon
+        const FOCUS_BONUSES = {
+            damage: {
+                name: 'Damage Focus',
+                icon: '💥',
+                bonus: '+10% damage + crit chance',
+                description: 'Gain increased damage and occasional critical hits (1.5x damage)'
+            },
+            fireRate: {
+                name: 'Fire Rate Focus',
+                icon: '⚡',
+                bonus: '+10% fire rate + stability',
+                description: 'Fire faster and with improved accuracy'
+            },
+            magSize: {
+                name: 'Magazine Focus',
+                icon: '📦',
+                bonus: '+20% mag + reload speed',
+                description: 'Larger magazine and faster reloads'
+            },
+            reloadSpeed: {
+                name: 'Reload Focus',
+                icon: '🔄',
+                bonus: 'Reload buff for 3s',
+                description: 'After reloading, gain +10% damage for 3 seconds'
+            }
+        };
+        
+        function initializeWeaponFocus(weaponId) {
+            if (!game.weaponFocus) {
+                game.weaponFocus = {};
+            }
+            if (!game.weaponFocus[weaponId]) {
+                game.weaponFocus[weaponId] = {
+                    unlockedFocuses: [],
+                    activeFocus: null
+                };
+            }
+            return game.weaponFocus[weaponId];
+        }
+        
+        function getUnlockedFocuses(weaponId) {
+            const upgrades = game.weaponUpgrades[weaponId];
+            const unlocked = [];
+            
+            if (upgrades.damage >= 5) unlocked.push('damage');
+            if (upgrades.fireRate >= 5) unlocked.push('fireRate');
+            if (upgrades.magSize >= 5) unlocked.push('magSize');
+            if (upgrades.reloadSpeed >= 5) unlocked.push('reloadSpeed');
+            
+            return unlocked;
+        }
+
 
         // Weapon type and stat scaling configuration
         const WEAPON_CONFIGS = {
@@ -734,6 +861,77 @@
             return baseCosts[stat] * (currentLevel + 1);
         }
         
+
+        
+        
+        function getWeaponByName(name) {
+            const weaponCategories = [
+                {
+                    weapons: [
+                        { id: 'ar-x', name: 'AR-X', tier: 1, owned: true, price: 0, dmg: 20, mag: 30, ammo: 360, fireRate: 600 },
+                        { id: 'burst', name: 'Burst Rifle', tier: 2, owned: false, price: 500, dmg: 20, mag: 24, ammo: 300, fireRate: 400 },
+                        { id: 'carbine', name: 'Combat Carbine', tier: 3, owned: false, price: 9000, dmg: 32, mag: 28, ammo: 336, fireRate: 550 },
+                        { id: 'lmg', name: 'Heavy Pulse LMG', tier: 3.5, owned: false, price: 12000, dmg: 22, mag: 60, ammo: 600, fireRate: 700 },
+                        { id: 'auto', name: 'Auto Cannon', tier: 4, owned: false, price: 1600, dmg: 20, mag: 50, ammo: 600, fireRate: 750 }
+                    ]
+                },
+                {
+                    weapons: [
+                        { id: 'pistol', name: 'Energy Pistol', tier: 1, owned: true, price: 0, dmg: 15, mag: 12, ammo: 240, fireRate: 400 },
+                        { id: 'smg', name: 'Pulse SMG', tier: 1, owned: true, price: 0, dmg: 10, mag: 30, ammo: 420, fireRate: 650 },
+                        { id: 'stabilizer', name: 'Energy Stabilizer', tier: 3, owned: false, price: 7500, dmg: 15, mag: 20, ammo: 240, fireRate: 350 },
+                        { id: 'suppression-smg', name: 'Suppression SMG', tier: 3, owned: false, price: 8500, dmg: 18, mag: 35, ammo: 420, fireRate: 680 }
+                    ]
+                },
+                {
+                    weapons: [
+                        { id: 'sniper', name: 'Laser Sniper', tier: 2, owned: false, price: 700, dmg: 90, mag: 5, ammo: 40, fireRate: 200 },
+                        { id: 'gauss', name: 'Gauss Rifle', tier: 3, owned: false, price: 1200, dmg: 60, mag: 10, ammo: 120, fireRate: 300 },
+                        { id: 'laser-rifle', name: 'Marksman Laser Rifle', tier: 3, owned: false, price: 11500, dmg: 85, mag: 12, ammo: 120, fireRate: 250 },
+                        { id: 'railgun', name: 'Railgun', tier: 3, owned: false, price: 1500, dmg: 130, mag: 3, ammo: 24, fireRate: 150 }
+                    ]
+                },
+                {
+                    weapons: [
+                        { id: 'shotgun', name: 'Plasma Shotgun', tier: 2, owned: false, price: 600, dmg: 60, mag: 6, ammo: 72, fireRate: 250 },
+                        { id: 'pulse', name: 'Pulse Rifle', tier: 3, owned: false, price: 1000, dmg: 20, mag: 27, ammo: 360, fireRate: 500 },
+                        { id: 'rocket', name: 'Rocket Launcher', tier: 4, owned: false, price: 2000, dmg: 120, mag: 1, ammo: 12, fireRate: 100 },
+                        { id: 'plasma', name: 'Plasma Launcher', tier: 4, owned: false, price: 1800, dmg: 100, mag: 4, ammo: 40, fireRate: 120 },
+                        { id: 'grenade', name: 'Grenade Launcher', tier: 4, owned: false, price: 1700, dmg: 90, mag: 6, ammo: 60, fireRate: 140 },
+                        { id: 'cluster', name: 'Cluster Launcher', tier: 4, owned: false, price: 15500, dmg: 110, mag: 5, ammo: 50, fireRate: 110 }
+                    ]
+                }
+            ];
+            
+            for (let cat of weaponCategories) {
+                for (let w of cat.weapons) {
+                    if (w.name === name) return w;
+                }
+            }
+            return null;
+        }
+
+        function activateFocus(weaponId, focusType) {
+            const focus = initializeWeaponFocus(weaponId);
+            const weapon = selectedUpgradeWeapon;
+            
+            if (!weapon || weapon.id !== weaponId) return;
+            
+            // Toggle if already active
+            if (focus.activeFocus === focusType) {
+                focus.activeFocus = null;
+                alert(`✓ ${focusType.toUpperCase()} Focus deactivated`);
+            } else {
+                // Activate new focus
+                focus.activeFocus = focusType;
+                const focusInfo = FOCUS_BONUSES[focusType];
+                alert(`🎯 ${focusInfo.name} ACTIVATED!\n\n${focusInfo.bonus}\n\nBuild your playstyle! ⚡`);
+            }
+            
+            // Re-render to update UI
+            selectUpgradeWeapon(weapon);
+        }
+
         function upgradeWeaponStat(weaponId, stat) {
             const weapon = selectedUpgradeWeapon;
             if (!weapon || weapon.id !== weaponId) return;
