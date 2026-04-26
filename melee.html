@@ -497,9 +497,9 @@
                 openControlRoom();
             } else if (room === ship.armory) {
                 openArmory();
-            }
             } else if (room === ship.engineering) {
                 openEngineering();
+            }
             // Other rooms coming soon
         }
 
@@ -644,11 +644,6 @@
             document.getElementById('upgradePreviewName').textContent = weapon.name;
             document.getElementById('upgradePreviewTier').textContent = ['', 'TIER 1', 'TIER 2', 'TIER 3', 'TIER 4'][Math.floor(weapon.tier)] || '';
             
-            // Calculate and display total weapon level
-            const upgrades = game.weaponUpgrades[weapon.id];
-            const totalLevel = (upgrades.damage || 0) + (upgrades.fireRate || 0) + (upgrades.magSize || 0) + (upgrades.reloadSpeed || 0);
-            document.getElementById('totalWeaponLevel').textContent = `Total Level: ${totalLevel}/20`;
-            
             // Initialize upgrade levels for this weapon
             if (!game.weaponUpgrades[weapon.id]) {
                 game.weaponUpgrades[weapon.id] = {
@@ -660,6 +655,10 @@
             }
             
             const upgrades = game.weaponUpgrades[weapon.id];
+            
+            // Calculate and display total weapon level
+            const totalLevel = (upgrades.damage || 0) + (upgrades.fireRate || 0) + (upgrades.magSize || 0) + (upgrades.reloadSpeed || 0);
+            document.getElementById('totalWeaponLevel').textContent = `Total Level: ${totalLevel}/20`;
             
             // Build upgrade stats panel
             const statsPanel = document.getElementById('upgradeStatsPanel');
