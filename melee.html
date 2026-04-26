@@ -308,6 +308,34 @@
             ]
         };
 
+        // Focus System - One active focus per weapon
+        const FOCUS_BONUSES = {
+            damage: {
+                name: 'Damage Focus',
+                icon: '💥',
+                bonus: '+10% damage + crit chance',
+                description: 'Gain increased damage and occasional critical hits (1.5x damage)'
+            },
+            fireRate: {
+                name: 'Fire Rate Focus',
+                icon: '⚡',
+                bonus: '+10% fire rate + stability',
+                description: 'Fire faster and with improved accuracy'
+            },
+            magSize: {
+                name: 'Magazine Focus',
+                icon: '📦',
+                bonus: '+20% mag + reload speed',
+                description: 'Larger magazine and faster reloads'
+            },
+            reloadSpeed: {
+                name: 'Reload Focus',
+                icon: '🔄',
+                bonus: 'Reload buff for 3s',
+                description: 'After reloading, gain +10% damage for 3 seconds'
+            }
+        };
+
         const canvas = document.getElementById('shipCanvas');
         const ctx = canvas.getContext('2d');
         let cw = 0, ch = 0;
@@ -730,33 +758,7 @@
         
 
 
-        // Focus System - One active focus per weapon
-        const FOCUS_BONUSES = {
-            damage: {
-                name: 'Damage Focus',
-                icon: '💥',
-                bonus: '+10% damage + crit chance',
-                description: 'Gain increased damage and occasional critical hits (1.5x damage)'
-            },
-            fireRate: {
-                name: 'Fire Rate Focus',
-                icon: '⚡',
-                bonus: '+10% fire rate + stability',
-                description: 'Fire faster and with improved accuracy'
-            },
-            magSize: {
-                name: 'Magazine Focus',
-                icon: '📦',
-                bonus: '+20% mag + reload speed',
-                description: 'Larger magazine and faster reloads'
-            },
-            reloadSpeed: {
-                name: 'Reload Focus',
-                icon: '🔄',
-                bonus: 'Reload buff for 3s',
-                description: 'After reloading, gain +10% damage for 3 seconds'
-            }
-        };
+
 
         function getWeaponByName(name) {
             const weaponCategories = [
