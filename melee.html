@@ -757,6 +757,53 @@
                 description: 'After reloading, gain +10% damage for 3 seconds'
             }
         };
+
+        function getWeaponByName(name) {
+            const weaponCategories = [
+                {
+                    weapons: [
+                        { id: 'ar-x', name: 'AR-X', tier: 1, owned: true, price: 0, dmg: 20, mag: 30, ammo: 360, fireRate: 600 },
+                        { id: 'burst', name: 'Burst Rifle', tier: 2, owned: false, price: 500, dmg: 20, mag: 24, ammo: 300, fireRate: 400 },
+                        { id: 'carbine', name: 'Combat Carbine', tier: 3, owned: false, price: 9000, dmg: 32, mag: 28, ammo: 336, fireRate: 550 },
+                        { id: 'lmg', name: 'Heavy Pulse LMG', tier: 3.5, owned: false, price: 12000, dmg: 22, mag: 60, ammo: 600, fireRate: 700 },
+                        { id: 'auto', name: 'Auto Cannon', tier: 4, owned: false, price: 1600, dmg: 20, mag: 50, ammo: 600, fireRate: 750 }
+                    ]
+                },
+                {
+                    weapons: [
+                        { id: 'pistol', name: 'Energy Pistol', tier: 1, owned: true, price: 0, dmg: 15, mag: 12, ammo: 240, fireRate: 400 },
+                        { id: 'smg', name: 'Pulse SMG', tier: 1, owned: true, price: 0, dmg: 10, mag: 30, ammo: 420, fireRate: 650 },
+                        { id: 'stabilizer', name: 'Energy Stabilizer', tier: 3, owned: false, price: 7500, dmg: 15, mag: 20, ammo: 240, fireRate: 350 },
+                        { id: 'suppression-smg', name: 'Suppression SMG', tier: 3, owned: false, price: 8500, dmg: 18, mag: 35, ammo: 420, fireRate: 680 }
+                    ]
+                },
+                {
+                    weapons: [
+                        { id: 'sniper', name: 'Laser Sniper', tier: 2, owned: false, price: 700, dmg: 90, mag: 5, ammo: 40, fireRate: 200 },
+                        { id: 'gauss', name: 'Gauss Rifle', tier: 3, owned: false, price: 1200, dmg: 60, mag: 10, ammo: 120, fireRate: 300 },
+                        { id: 'laser-rifle', name: 'Marksman Laser Rifle', tier: 3, owned: false, price: 11500, dmg: 85, mag: 12, ammo: 120, fireRate: 250 },
+                        { id: 'railgun', name: 'Railgun', tier: 3, owned: false, price: 1500, dmg: 130, mag: 3, ammo: 24, fireRate: 150 }
+                    ]
+                },
+                {
+                    weapons: [
+                        { id: 'shotgun', name: 'Plasma Shotgun', tier: 2, owned: false, price: 600, dmg: 60, mag: 6, ammo: 72, fireRate: 250 },
+                        { id: 'pulse', name: 'Pulse Rifle', tier: 3, owned: false, price: 1000, dmg: 20, mag: 27, ammo: 360, fireRate: 500 },
+                        { id: 'rocket', name: 'Rocket Launcher', tier: 4, owned: false, price: 2000, dmg: 120, mag: 1, ammo: 12, fireRate: 100 },
+                        { id: 'plasma', name: 'Plasma Launcher', tier: 4, owned: false, price: 1800, dmg: 100, mag: 4, ammo: 40, fireRate: 120 },
+                        { id: 'grenade', name: 'Grenade Launcher', tier: 4, owned: false, price: 1700, dmg: 90, mag: 6, ammo: 60, fireRate: 140 },
+                        { id: 'cluster', name: 'Cluster Launcher', tier: 4, owned: false, price: 15500, dmg: 110, mag: 5, ammo: 50, fireRate: 110 }
+                    ]
+                }
+            ];
+            
+            for (let cat of weaponCategories) {
+                for (let w of cat.weapons) {
+                    if (w.name === name) return w;
+                }
+            }
+            return null;
+        }
         
         function initializeWeaponFocus(weaponId) {
             if (!game.weaponFocus) {
@@ -864,52 +911,7 @@
 
         
         
-        function getWeaponByName(name) {
-            const weaponCategories = [
-                {
-                    weapons: [
-                        { id: 'ar-x', name: 'AR-X', tier: 1, owned: true, price: 0, dmg: 20, mag: 30, ammo: 360, fireRate: 600 },
-                        { id: 'burst', name: 'Burst Rifle', tier: 2, owned: false, price: 500, dmg: 20, mag: 24, ammo: 300, fireRate: 400 },
-                        { id: 'carbine', name: 'Combat Carbine', tier: 3, owned: false, price: 9000, dmg: 32, mag: 28, ammo: 336, fireRate: 550 },
-                        { id: 'lmg', name: 'Heavy Pulse LMG', tier: 3.5, owned: false, price: 12000, dmg: 22, mag: 60, ammo: 600, fireRate: 700 },
-                        { id: 'auto', name: 'Auto Cannon', tier: 4, owned: false, price: 1600, dmg: 20, mag: 50, ammo: 600, fireRate: 750 }
-                    ]
-                },
-                {
-                    weapons: [
-                        { id: 'pistol', name: 'Energy Pistol', tier: 1, owned: true, price: 0, dmg: 15, mag: 12, ammo: 240, fireRate: 400 },
-                        { id: 'smg', name: 'Pulse SMG', tier: 1, owned: true, price: 0, dmg: 10, mag: 30, ammo: 420, fireRate: 650 },
-                        { id: 'stabilizer', name: 'Energy Stabilizer', tier: 3, owned: false, price: 7500, dmg: 15, mag: 20, ammo: 240, fireRate: 350 },
-                        { id: 'suppression-smg', name: 'Suppression SMG', tier: 3, owned: false, price: 8500, dmg: 18, mag: 35, ammo: 420, fireRate: 680 }
-                    ]
-                },
-                {
-                    weapons: [
-                        { id: 'sniper', name: 'Laser Sniper', tier: 2, owned: false, price: 700, dmg: 90, mag: 5, ammo: 40, fireRate: 200 },
-                        { id: 'gauss', name: 'Gauss Rifle', tier: 3, owned: false, price: 1200, dmg: 60, mag: 10, ammo: 120, fireRate: 300 },
-                        { id: 'laser-rifle', name: 'Marksman Laser Rifle', tier: 3, owned: false, price: 11500, dmg: 85, mag: 12, ammo: 120, fireRate: 250 },
-                        { id: 'railgun', name: 'Railgun', tier: 3, owned: false, price: 1500, dmg: 130, mag: 3, ammo: 24, fireRate: 150 }
-                    ]
-                },
-                {
-                    weapons: [
-                        { id: 'shotgun', name: 'Plasma Shotgun', tier: 2, owned: false, price: 600, dmg: 60, mag: 6, ammo: 72, fireRate: 250 },
-                        { id: 'pulse', name: 'Pulse Rifle', tier: 3, owned: false, price: 1000, dmg: 20, mag: 27, ammo: 360, fireRate: 500 },
-                        { id: 'rocket', name: 'Rocket Launcher', tier: 4, owned: false, price: 2000, dmg: 120, mag: 1, ammo: 12, fireRate: 100 },
-                        { id: 'plasma', name: 'Plasma Launcher', tier: 4, owned: false, price: 1800, dmg: 100, mag: 4, ammo: 40, fireRate: 120 },
-                        { id: 'grenade', name: 'Grenade Launcher', tier: 4, owned: false, price: 1700, dmg: 90, mag: 6, ammo: 60, fireRate: 140 },
-                        { id: 'cluster', name: 'Cluster Launcher', tier: 4, owned: false, price: 15500, dmg: 110, mag: 5, ammo: 50, fireRate: 110 }
-                    ]
-                }
-            ];
-            
-            for (let cat of weaponCategories) {
-                for (let w of cat.weapons) {
-                    if (w.name === name) return w;
-                }
-            }
-            return null;
-        }
+
 
         function activateFocus(weaponId, focusType) {
             const focus = initializeWeaponFocus(weaponId);
