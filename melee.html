@@ -1851,8 +1851,8 @@
         
         function selectMissionDifficulty(difficulty) {
             game.currentMissionDifficulty = difficulty;
-            // Just update difficulty, don't auto-open control room
-            // Let player decide when to proceed
+            // Refresh mission modal to show updated selection
+            openMissionModal();
         }
 
         function openControlRoom() {
