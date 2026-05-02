@@ -428,7 +428,7 @@
 
         // Helper: Update enemy behavior
         function updateEnemies() {
-            if (!mission.type) return;
+            if (mission.state !== 'IN_PROGRESS') return;
             for (let i = mission.enemies.length - 1; i >= 0; i--) {
                 const enemy = mission.enemies[i];
                 const dx = ship.player.x - enemy.x;
@@ -673,8 +673,8 @@
             ship.player.x = Math.max(0, Math.min(cw - ship.player.w, ship.player.x));
             ship.player.y = Math.max(0, Math.min(ch - ship.player.h, ship.player.y));
 
-            // Mission system updates
-            if (game.inMission) {
+            // Mission system updates (only when mission is actively running)
+            if (game.inMission && mission.state === 'IN_PROGRESS') {
                 spawnEnemies();
                 updateEnemies();
                 checkMissionCompletion();
@@ -1646,8 +1646,8 @@
         }
 
         function startMission() {
-            if (!game.isLeader || !game.isReady) {
-                return;
+            if (!game.isLeader || !game.isReady || mission.state === 'IN_PROGRESS') {
+                return; // Prevent double starts
             }
             
             const planet = game.planets.find(p => p.id === game.currentMission);
