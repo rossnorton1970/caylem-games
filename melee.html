@@ -920,16 +920,20 @@
 
             let inRoom = null;
             const rooms = [ship.controlRoom, ship.missionTable, ship.armory, ship.engineering, ship.cargo, ship.comm];
+            const playerCenterX = ship.player.x + ship.player.w / 2;
+            const playerCenterY = ship.player.y + ship.player.h / 2;
+            
+            // Check if player center is inside a room (not just touching edge)
             rooms.forEach(room => {
-                if (ship.player.x + ship.player.w > room.x &&
-                    ship.player.x < room.x + room.w &&
-                    ship.player.y + ship.player.h > room.y &&
-                    ship.player.y < room.y + room.h) {
+                if (playerCenterX > room.x + 20 &&
+                    playerCenterX < room.x + room.w - 20 &&
+                    playerCenterY > room.y + 20 &&
+                    playerCenterY < room.y + room.h - 20) {
                     inRoom = room;
                 }
             });
 
-            if (inRoom) {
+            if (inRoom && inRoom.name) {
                 ctx.fillStyle = '#ffaa00';
                 ctx.font = 'bold 16px Arial';
                 ctx.textAlign = 'center';
