@@ -461,13 +461,14 @@
                 ctx.beginPath();
                 ctx.arc(enemy.x, enemy.y, enemy.size, 0, Math.PI * 2);
                 ctx.fill();
-                if (enemy.health < enemy.maxHealth) {
-                    const healthPercent = enemy.health / enemy.maxHealth;
-                    ctx.fillStyle = '#666';
-                    ctx.fillRect(enemy.x - enemy.size, enemy.y - enemy.size - 8, enemy.size * 2, 3);
-                    ctx.fillStyle = healthPercent > 0.3 ? '#00ff88' : '#ff4444';
-                    ctx.fillRect(enemy.x - enemy.size, enemy.y - enemy.size - 8, enemy.size * 2 * healthPercent, 3);
-                }
+                
+                // Always draw health bar
+                const healthPercent = enemy.health / enemy.maxHealth;
+                ctx.fillStyle = '#333';
+                ctx.fillRect(enemy.x - enemy.size, enemy.y - enemy.size - 8, enemy.size * 2, 3);
+                ctx.fillStyle = healthPercent > 0.3 ? '#00ff88' : '#ff4444';
+                ctx.fillRect(enemy.x - enemy.size, enemy.y - enemy.size - 8, enemy.size * 2 * healthPercent, 3);
+                
                 ctx.font = '14px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -843,7 +844,7 @@
         function shootAt(clickX, clickY) {
             // Find closest enemy to click location
             let closestEnemy = null;
-            let closestDist = 80; // Hit radius
+            let closestDist = 120; // Hit radius (increased for easier targeting)
             
             mission.enemies.forEach(enemy => {
                 const dx = (enemy.x + enemy.size/2) - clickX;
@@ -857,8 +858,9 @@
             
             // If hit an enemy, damage it
             if (closestEnemy) {
-                const damage = 10; // Base damage (will scale with weapons later)
+                const damage = 15; // Base damage
                 closestEnemy.health -= damage;
+                console.log(`Shot! Damage: ${damage}, Enemy health: ${closestEnemy.health}`);
                 
                 // If enemy dies
                 if (closestEnemy.health <= 0) {
@@ -866,8 +868,11 @@
                     if (index > -1) {
                         mission.enemies.splice(index, 1);
                         mission.killed++;
+                        console.log(`Enemy killed! Total kills: ${mission.killed}`);
                     }
                 }
+            } else {
+                console.log(`Miss! No enemies in range. Enemies on map: ${mission.enemies.length}`);
             }
         }
 
