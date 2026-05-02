@@ -1786,22 +1786,6 @@
                 });
                 
                 list.innerHTML += `</div>`;
-                
-                // Show difficulty selector for selected mission type
-                if (game.currentMissionType) {
-                    list.innerHTML += `
-                        <div style="background: #1a1f3a; border: 2px solid #ffaa00; border-radius: 5px; padding: 15px; margin-bottom: 20px;">
-                            <div style="color: #ffaa00; font-weight: bold; font-size: 14px; margin-bottom: 10px;">SELECT DIFFICULTY</div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
-                                <button onclick="selectMissionDifficulty('easy')" style="background: ${game.currentMissionDifficulty === 'easy' ? '#00ff88' : '#0a0e27'}; color: ${game.currentMissionDifficulty === 'easy' ? '#0a0e27' : '#00ff88'}; border: 2px solid #00ff88; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">EASY</button>
-                                <button onclick="selectMissionDifficulty('medium')" style="background: ${game.currentMissionDifficulty === 'medium' ? '#ffaa00' : '#0a0e27'}; color: ${game.currentMissionDifficulty === 'medium' ? '#0a0e27' : '#ffaa00'}; border: 2px solid #ffaa00; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">MEDIUM</button>
-                                <button onclick="selectMissionDifficulty('hard')" style="background: ${game.currentMissionDifficulty === 'hard' ? '#ff4444' : '#0a0e27'}; color: ${game.currentMissionDifficulty === 'hard' ? '#fff' : '#ff4444'}; border: 2px solid #ff4444; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">HARD</button>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                list.innerHTML += `</div>`;
             }
             
             game.planets.forEach(p => {
@@ -1824,8 +1808,11 @@
         
         function selectMissionType(type) {
             game.currentMissionType = type;
-            game.currentMissionDifficulty = 'easy'; // Default difficulty
-            openMissionModal(); // Refresh to show selection
+            // Difficulty is determined by the planet, not user choice
+            const planet = game.planets.find(p => p.id === game.currentMission);
+            if (planet) {
+                game.currentMissionDifficulty = planet.diff;
+            }
         }
 
         function closeMissionModal() {
@@ -1846,7 +1833,11 @@
             
             game.currentMission = planetId;
             game.currentMissionType = 'elimination'; // Default mission type
-            game.currentMissionDifficulty = 'easy'; // Default difficulty
+            
+            // Get planet difficulty
+            const planet = game.planets.find(p => p.id === planetId);
+            game.currentMissionDifficulty = planet ? planet.diff : 'easy';
+            
             game.isReady = false;
             
             // Refresh the modal to show updated button states
