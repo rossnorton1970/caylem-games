@@ -302,11 +302,11 @@
             maxPlayers: 1,
             loadout: { slot1: 'AR-X', slot2: 'Pistol', slot3: null },
             planets: [
-                { id: 1, name: 'Kepler-452b', desc: 'Desert world', diff: 'easy', aliens: 5, reward: 100, threat: 0 },
-                { id: 2, name: 'Proxima-3', desc: 'Ice planet', diff: 'medium', aliens: 8, reward: 200, threat: 0 },
-                { id: 3, name: 'TRAPPIST-1e', desc: 'Volcanic hellscape', diff: 'hard', aliens: 12, reward: 400, threat: 0 },
-                { id: 4, name: 'Gliese-667', desc: 'Toxic atmosphere', diff: 'medium', aliens: 10, reward: 250, threat: 0 },
-                { id: 5, name: 'Wolf-1061c', desc: 'Dense jungle', diff: 'hard', aliens: 15, reward: 500, threat: 0 }
+                { id: 1, name: 'Kepler-452b', desc: 'Desert world', diff: 'easy', aliens: 5, reward: 100, threat: 0, missions: ['elimination', 'survival'] },
+                { id: 2, name: 'Proxima-3', desc: 'Ice planet', diff: 'medium', aliens: 8, reward: 200, threat: 0, missions: ['defense', 'elimination'] },
+                { id: 3, name: 'TRAPPIST-1e', desc: 'Volcanic hellscape', diff: 'hard', aliens: 12, reward: 400, threat: 0, missions: ['elimination', 'survival', 'defense'] },
+                { id: 4, name: 'Gliese-667', desc: 'Toxic atmosphere', diff: 'medium', aliens: 10, reward: 250, threat: 0, missions: ['survival', 'defense'] },
+                { id: 5, name: 'Wolf-1061c', desc: 'Dense jungle', diff: 'hard', aliens: 15, reward: 500, threat: 0, missions: ['elimination', 'defense'] }
             ],
             // Mission system state
             inMission: false,
@@ -1770,9 +1770,9 @@
                         <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
                 `;
                 
-                // Mission type buttons
-                const types = ['elimination', 'survival', 'defense'];
-                types.forEach(type => {
+                // Mission type buttons - only show missions available on this planet
+                const availableMissions = selectedPlanet.missions || ['elimination', 'survival', 'defense'];
+                availableMissions.forEach(type => {
                     const info = MISSION_TYPES[type];
                     const isSelected = game.currentMissionType === type;
                     const btnBg = isSelected ? info.icon.match(/\p{Emoji}/u) ? '#00ff88' : '#ffaa00' : '#1a1f3a';
@@ -1832,11 +1832,13 @@
             }
             
             game.currentMission = planetId;
-            game.currentMissionType = 'elimination'; // Default mission type
             
-            // Get planet difficulty
+            // Get planet and set its difficulty
             const planet = game.planets.find(p => p.id === planetId);
             game.currentMissionDifficulty = planet ? planet.diff : 'easy';
+            
+            // Set mission type to first available mission for this planet
+            game.currentMissionType = (planet && planet.missions && planet.missions.length > 0) ? planet.missions[0] : 'elimination';
             
             game.isReady = false;
             
