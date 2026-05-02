@@ -796,6 +796,24 @@
                     }
                 });
             }
+            // Spacebar to shoot at nearest enemy
+            if (e.key === ' ' && game.inMission && mission.state === 'IN_PROGRESS') {
+                if (mission.enemies.length > 0) {
+                    let closest = mission.enemies[0];
+                    let closestDist = Infinity;
+                    mission.enemies.forEach(enemy => {
+                        const dx = enemy.x - ship.player.x;
+                        const dy = enemy.y - ship.player.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < closestDist) {
+                            closestDist = dist;
+                            closest = enemy;
+                        }
+                    });
+                    shootAt(closest.x + closest.size/2, closest.y + closest.size/2);
+                }
+                e.preventDefault();
+            }
         });
 
         document.addEventListener('keyup', (e) => {
@@ -807,6 +825,13 @@
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
 
+            // If in mission, try to shoot at clicked location
+            if (game.inMission && mission.state === 'IN_PROGRESS') {
+                shootAt(x, y);
+                return;
+            }
+
+            // Otherwise, check for room clicks
             const rooms = [ship.controlRoom, ship.missionTable, ship.armory, ship.engineering, ship.cargo, ship.comm];
             rooms.forEach(room => {
                 if (x > room.x && x < room.x + room.w && y > room.y && y < room.y + room.h) {
@@ -814,6 +839,37 @@
                 }
             });
         });
+
+        function shootAt(clickX, clickY) {
+            // Find closest enemy to click location
+            let closestEnemy = null;
+            let closestDist = 80; // Hit radius
+            
+            mission.enemies.forEach(enemy => {
+                const dx = (enemy.x + enemy.size/2) - clickX;
+                const dy = (enemy.y + enemy.size/2) - clickY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestEnemy = enemy;
+                }
+            });
+            
+            // If hit an enemy, damage it
+            if (closestEnemy) {
+                const damage = 10; // Base damage (will scale with weapons later)
+                closestEnemy.health -= damage;
+                
+                // If enemy dies
+                if (closestEnemy.health <= 0) {
+                    const index = mission.enemies.indexOf(closestEnemy);
+                    if (index > -1) {
+                        mission.enemies.splice(index, 1);
+                        mission.killed++;
+                    }
+                }
+            }
+        }
 
         function roomClicked(room) {
             if (room === ship.missionTable) {
