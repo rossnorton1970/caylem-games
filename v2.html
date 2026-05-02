@@ -665,10 +665,20 @@
         }
 
         function update() {
-            if (ship.keys['ArrowUp'] || ship.keys['w'] || ship.keys['W']) ship.player.y -= ship.player.speed;
-            if (ship.keys['ArrowDown'] || ship.keys['s'] || ship.keys['S']) ship.player.y += ship.player.speed;
-            if (ship.keys['ArrowLeft'] || ship.keys['a'] || ship.keys['A']) ship.player.x -= ship.player.speed;
-            if (ship.keys['ArrowRight'] || ship.keys['d'] || ship.keys['D']) ship.player.x += ship.player.speed;
+            // Only allow movement if no modals are open and we're in the ship or in a mission
+            const anyModalOpen = document.getElementById('missionModal').classList.contains('show') ||
+                                 document.getElementById('engineeringModal').classList.contains('show') ||
+                                 document.getElementById('armoryModal').classList.contains('show') ||
+                                 document.getElementById('controlRoomModal').classList.contains('show') ||
+                                 document.getElementById('countdownScreen').style.display !== 'none' ||
+                                 (document.getElementById('missionResultModal') && document.getElementById('missionResultModal').style.display !== 'none');
+            
+            if (!anyModalOpen) {
+                if (ship.keys['ArrowUp'] || ship.keys['w'] || ship.keys['W']) ship.player.y -= ship.player.speed;
+                if (ship.keys['ArrowDown'] || ship.keys['s'] || ship.keys['S']) ship.player.y += ship.player.speed;
+                if (ship.keys['ArrowLeft'] || ship.keys['a'] || ship.keys['A']) ship.player.x -= ship.player.speed;
+                if (ship.keys['ArrowRight'] || ship.keys['d'] || ship.keys['D']) ship.player.x += ship.player.speed;
+            }
 
             ship.player.x = Math.max(0, Math.min(cw - ship.player.w, ship.player.x));
             ship.player.y = Math.max(0, Math.min(ch - ship.player.h, ship.player.y));
