@@ -294,19 +294,302 @@
             missions: 0,
             cleared: [],
             currentMission: null,
+            currentMissionType: null,
+            currentMissionDifficulty: null,
             isReady: false,
             isLeader: true,
             playersReady: 0,
             maxPlayers: 1,
             loadout: { slot1: 'AR-X', slot2: 'Pistol', slot3: null },
             planets: [
-                { id: 1, name: 'Kepler-452b', desc: 'Desert world', diff: 'easy', aliens: 5, reward: 100 },
-                { id: 2, name: 'Proxima-3', desc: 'Ice planet', diff: 'medium', aliens: 8, reward: 200 },
-                { id: 3, name: 'TRAPPIST-1e', desc: 'Volcanic hellscape', diff: 'hard', aliens: 12, reward: 400 },
-                { id: 4, name: 'Gliese-667', desc: 'Toxic atmosphere', diff: 'medium', aliens: 10, reward: 250 },
-                { id: 5, name: 'Wolf-1061c', desc: 'Dense jungle', diff: 'hard', aliens: 15, reward: 500 }
-            ]
+                { id: 1, name: 'Kepler-452b', desc: 'Desert world', diff: 'easy', aliens: 5, reward: 100, threat: 0 },
+                { id: 2, name: 'Proxima-3', desc: 'Ice planet', diff: 'medium', aliens: 8, reward: 200, threat: 0 },
+                { id: 3, name: 'TRAPPIST-1e', desc: 'Volcanic hellscape', diff: 'hard', aliens: 12, reward: 400, threat: 0 },
+                { id: 4, name: 'Gliese-667', desc: 'Toxic atmosphere', diff: 'medium', aliens: 10, reward: 250, threat: 0 },
+                { id: 5, name: 'Wolf-1061c', desc: 'Dense jungle', diff: 'hard', aliens: 15, reward: 500, threat: 0 }
+            ],
+            // Mission system state
+            inMission: false,
+            missionStartTime: 0,
+            missionEndTime: 0
         };
+
+        // Mission system configuration
+        const MISSION_TYPES = {
+            elimination: {
+                name: 'ELIMINATION',
+                icon: '⚔️',
+                desc: 'Eliminate all enemies',
+                difficulty: { easy: 5, medium: 8, hard: 12 }
+            },
+            survival: {
+                name: 'SURVIVAL',
+                icon: '⏱️',
+                desc: 'Survive for 2 minutes',
+                difficulty: { easy: 3, medium: 5, hard: 8 }
+            },
+            defense: {
+                name: 'DEFENSE',
+                icon: '🛡️',
+                desc: 'Defend the objective',
+                difficulty: { easy: 4, medium: 6, hard: 10 }
+            }
+        };
+
+        // Enemy types configuration
+        const ENEMY_TYPES = {
+            swarm: {
+                name: 'Swarm Drone',
+                icon: '🐝',
+                health: 10,
+                speed: 2.5,
+                damage: 2,
+                size: 6,
+                reward: 25
+            },
+            brute: {
+                name: 'Brute Warrior',
+                icon: '👹',
+                health: 40,
+                speed: 1.5,
+                damage: 8,
+                size: 12,
+                reward: 100
+            },
+            spitter: {
+                name: 'Spitter',
+                icon: '🦂',
+                health: 20,
+                speed: 1.8,
+                damage: 5,
+                size: 9,
+                reward: 50
+            }
+        };
+
+        // Mission state with proper state management
+        const mission = {
+            state: 'IDLE', // IDLE, IN_PROGRESS, WON, LOST
+            type: null,
+            difficulty: null,
+            enemies: [],
+            killed: 0,
+            totalEnemies: 0,
+            objective: null,
+            spawnCounter: 0,
+            reward: 0,
+            missionStartTime: 0,
+            totalTime: 0,
+            targetTime: 120 // 2 minutes for survival
+        };
+
+        // Helper: Create a new enemy
+        function createEnemy(type, x, y, threatLevel = 0) {
+            const config = ENEMY_TYPES[type] || ENEMY_TYPES.swarm;
+            const healthMultiplier = 1 + (threatLevel / 100) * 0.5; // At threat 100, health is 1.5x
+            const scaledHealth = Math.floor(config.health * healthMultiplier);
+            return {
+                type: type,
+                x: x,
+                y: y,
+                vx: 0,
+                vy: 0,
+                health: scaledHealth,
+                maxHealth: scaledHealth,
+                speed: config.speed,
+                damage: config.damage,
+                size: config.size,
+                attacking: false,
+                attackCooldown: 0
+            };
+        }
+
+        // Helper: Spawn enemies based on difficulty
+        function spawnEnemies() {
+            if (mission.state !== 'IN_PROGRESS' || mission.type === 'survival') return; // Survival doesn't spawn enemies, just spawns timer
+            const spawnedCount = mission.enemies.length + mission.killed;
+            if (spawnedCount >= mission.totalEnemies) return;
+            mission.spawnCounter++;
+            const spawnRate = mission.difficulty === 'easy' ? 120 : mission.difficulty === 'medium' ? 80 : 50;
+            if (mission.spawnCounter > spawnRate) {
+                const types = ['swarm', 'brute', 'spitter'];
+                const randomType = types[Math.floor(Math.random() * types.length)];
+                let x, y;
+                const edge = Math.random();
+                if (edge < 0.25) { x = Math.random() * cw; y = -20; }
+                else if (edge < 0.5) { x = Math.random() * cw; y = ch + 20; }
+                else if (edge < 0.75) { x = -20; y = Math.random() * ch; }
+                else { x = cw + 20; y = Math.random() * ch; }
+                const planet = game.planets.find(p => p.id === game.currentMission);
+                mission.enemies.push(createEnemy(randomType, x, y, planet.threat));
+                mission.spawnCounter = 0;
+            }
+        }
+
+        // Helper: Update enemy behavior
+        function updateEnemies() {
+            if (mission.state !== 'IN_PROGRESS') return;
+            for (let i = mission.enemies.length - 1; i >= 0; i--) {
+                const enemy = mission.enemies[i];
+                const dx = ship.player.x - enemy.x;
+                const dy = ship.player.y - enemy.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist > 0) {
+                    enemy.vx = (dx / dist) * enemy.speed;
+                    enemy.vy = (dy / dist) * enemy.speed;
+                }
+                enemy.x += enemy.vx;
+                enemy.y += enemy.vy;
+                const attackRange = 40;
+                if (dist < attackRange) {
+                    enemy.attacking = true;
+                    enemy.attackCooldown--;
+                } else {
+                    enemy.attacking = false;
+                }
+                if ((enemy.x < -50 || enemy.x > cw + 50 || enemy.y < -50 || enemy.y > ch + 50) && dist > 200) {
+                    mission.enemies.splice(i, 1);
+                }
+            }
+        }
+
+        // Helper: Draw enemies
+        function drawEnemies() {
+            mission.enemies.forEach(enemy => {
+                const config = ENEMY_TYPES[enemy.type];
+                ctx.fillStyle = enemy.attacking ? '#ff4444' : '#ff6600';
+                ctx.beginPath();
+                ctx.arc(enemy.x, enemy.y, enemy.size, 0, Math.PI * 2);
+                ctx.fill();
+                if (enemy.health < enemy.maxHealth) {
+                    const healthPercent = enemy.health / enemy.maxHealth;
+                    ctx.fillStyle = '#666';
+                    ctx.fillRect(enemy.x - enemy.size, enemy.y - enemy.size - 8, enemy.size * 2, 3);
+                    ctx.fillStyle = healthPercent > 0.3 ? '#00ff88' : '#ff4444';
+                    ctx.fillRect(enemy.x - enemy.size, enemy.y - enemy.size - 8, enemy.size * 2 * healthPercent, 3);
+                }
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(config.icon, enemy.x, enemy.y);
+            });
+        }
+
+        // Helper: Check mission completion
+        function checkMissionCompletion() {
+            if (mission.state !== 'IN_PROGRESS') return;
+            
+            const missionTime = (Date.now() - mission.missionStartTime) / 1000;
+            
+            if (mission.type === 'elimination') {
+                // Win: kill all enemies
+                if (mission.killed >= mission.totalEnemies && mission.enemies.length === 0) {
+                    mission.state = 'WON';
+                    completeMission();
+                }
+            } else if (mission.type === 'survival') {
+                // Win: survive target time
+                if (missionTime >= mission.targetTime) {
+                    mission.state = 'WON';
+                    completeMission();
+                }
+                // Lose: player dies
+                if (ship.player.health <= 0) {
+                    mission.state = 'LOST';
+                    failMission();
+                }
+            } else if (mission.type === 'defense') {
+                // Win: survive time AND objective alive
+                if (missionTime >= mission.targetTime && mission.objective.health > 0) {
+                    mission.state = 'WON';
+                    completeMission();
+                }
+                // Lose: objective destroyed
+                if (mission.objective.health <= 0) {
+                    mission.state = 'LOST';
+                    failMission();
+                }
+                // Lose: player dies
+                if (ship.player.health <= 0) {
+                    mission.state = 'LOST';
+                    failMission();
+                }
+            }
+        }
+
+        // Helper: Complete mission and award credits
+        function completeMission() {
+            const planet = game.planets.find(p => p.id === game.currentMission);
+            const baseReward = planet.reward;
+            const diffMultiplier = { easy: 1, medium: 1.5, hard: 2.5 }[mission.difficulty] || 1;
+            const threatMultiplier = 1 + (planet.threat / 100) * 0.3;
+            mission.reward = Math.floor(baseReward * diffMultiplier * threatMultiplier);
+            game.credits += mission.reward;
+            
+            // Increase threat after mission completion
+            const threatIncrease = 10 + (mission.difficulty === 'hard' ? 20 : mission.difficulty === 'medium' ? 10 : 0);
+            planet.threat = Math.min(planet.threat + threatIncrease, 100);
+            
+            if (!game.cleared.includes(game.currentMission)) {
+                game.cleared.push(game.currentMission);
+            }
+            
+            showMissionResult(true);
+        }
+        
+        function failMission() {
+            mission.reward = 0;
+            showMissionResult(false);
+        }
+        
+        function showMissionResult(won) {
+            const planet = game.planets.find(p => p.id === game.currentMission);
+            const resultText = won ? '✅ MISSION COMPLETE' : '❌ MISSION FAILED';
+            const color = won ? '#00ff88' : '#ff4444';
+            
+            let resultModal = document.getElementById('missionResultModal');
+            if (!resultModal) {
+                resultModal = document.createElement('div');
+                resultModal.id = 'missionResultModal';
+                resultModal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 200; display: flex; align-items: center; justify-content: center;';
+                document.body.appendChild(resultModal);
+            }
+            
+            resultModal.innerHTML = `
+                <div style="background: #0a0e27; border: 3px solid ${color}; border-radius: 10px; padding: 40px; text-align: center; max-width: 600px;">
+                    <div style="font-size: 48px; color: ${color}; margin-bottom: 20px; font-weight: bold;">${resultText}</div>
+                    <div style="font-size: 24px; color: #00ff88; margin-bottom: 30px;">${MISSION_TYPES[mission.type].name} • ${mission.difficulty.toUpperCase()}</div>
+                    <div style="background: #1a1f3a; padding: 20px; border-radius: 5px; margin-bottom: 20px; color: #aaa;">
+                        <div style="margin: 10px 0;">👽 Enemies Killed: <strong style="color: #ffaa00;">${mission.killed}/${mission.totalEnemies}</strong></div>
+                        <div style="margin: 10px 0;">⏱️ Time: <strong style="color: #ffaa00;">${Math.floor((Date.now() - mission.missionStartTime) / 1000)}s</strong></div>
+                        <div style="margin: 10px 0;">💰 Reward: <strong style="color: ${won ? '#00ff88' : '#666'};">${mission.reward} credits</strong></div>
+                        ${won ? `<div style="margin: 10px 0; color: #ff9900;">⬆️ THREAT: ${planet.threat}/100</div>` : ''}
+                    </div>
+                    <button onclick="exitMission()" style="background: ${color}; color: #0a0e27; padding: 15px 30px; font-size: 18px; font-weight: bold; border: none; cursor: pointer; border-radius: 5px; width: 100%;">CONTINUE</button>
+                </div>
+            `;
+            resultModal.style.display = 'flex';
+        }
+
+        // Helper: Exit mission and return to ship
+        function exitMission() {
+            game.inMission = false;
+            mission.state = 'IDLE';
+            mission.type = null;
+            mission.difficulty = null;
+            mission.enemies = [];
+            mission.killed = 0;
+            mission.totalEnemies = 0;
+            game.isReady = false;
+            
+            const resultModal = document.getElementById('missionResultModal');
+            if (resultModal) resultModal.style.display = 'none';
+            
+            document.getElementById('shipCanvas').style.display = 'block';
+            document.getElementById('header').style.display = 'block';
+            document.getElementById('missionModal').classList.remove('show');
+            document.getElementById('credits').textContent = game.credits;
+        }
 
         // Focus System - One active focus per weapon
         const FOCUS_BONUSES = {
@@ -389,6 +672,13 @@
 
             ship.player.x = Math.max(0, Math.min(cw - ship.player.w, ship.player.x));
             ship.player.y = Math.max(0, Math.min(ch - ship.player.h, ship.player.y));
+
+            // Mission system updates (only when mission is actively running)
+            if (game.inMission && mission.state === 'IN_PROGRESS') {
+                spawnEnemies();
+                updateEnemies();
+                checkMissionCompletion();
+            }
         }
 
         function draw() {
@@ -398,25 +688,50 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, cw, ch);
 
-            drawRoom(ship.controlRoom);
-            drawRoom(ship.missionTable);
-            drawRoom(ship.armory);
-            drawRoom(ship.engineering);
-            drawRoom(ship.cargo);
-            drawRoom(ship.comm);
+            // Draw ship rooms or mission enemies
+            if (game.inMission) {
+                // Mission mode - draw player and enemies
+                ctx.fillStyle = '#00ff88';
+                ctx.beginPath();
+                ctx.arc(ship.player.x + ship.player.w / 2, ship.player.y + ship.player.h / 2, ship.player.w, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#00ff88';
+                ctx.lineWidth = 2;
+                ctx.stroke();
 
-            ctx.fillStyle = '#00ff88';
-            ctx.beginPath();
-            ctx.arc(ship.player.x + ship.player.w / 2, ship.player.y + ship.player.h / 2, ship.player.w, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#00ff88';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+                // Draw enemies
+                drawEnemies();
 
-            ctx.fillStyle = '#00ff88';
-            ctx.font = '14px Arial';
-            ctx.textAlign = 'left';
-            ctx.fillText('WASD or ARROW KEYS to move | E or CLICK to interact', 20, 30);
+                // Draw mission HUD
+                const missionTime = Math.floor((Date.now() - mission.missionStartTime) / 1000);
+                ctx.fillStyle = '#00ff88';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(`${MISSION_TYPES[mission.type].name}`, 20, 30);
+                ctx.font = '12px Arial';
+                ctx.fillText(`Killed: ${mission.killed} | Time: ${missionTime}s | Enemies: ${mission.enemies.length}`, 20, 50);
+            } else {
+                // Ship mode - draw rooms
+                drawRoom(ship.controlRoom);
+                drawRoom(ship.missionTable);
+                drawRoom(ship.armory);
+                drawRoom(ship.engineering);
+                drawRoom(ship.cargo);
+                drawRoom(ship.comm);
+
+                ctx.fillStyle = '#00ff88';
+                ctx.beginPath();
+                ctx.arc(ship.player.x + ship.player.w / 2, ship.player.y + ship.player.h / 2, ship.player.w, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#00ff88';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = '#00ff88';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText('WASD or ARROW KEYS to move | E or CLICK to interact', 20, 30);
+            }
 
             let inRoom = null;
             const rooms = [ship.controlRoom, ship.missionTable, ship.armory, ship.engineering, ship.cargo, ship.comm];
@@ -1196,12 +1511,14 @@
             game.planets.forEach(p => {
                 const cleared = game.cleared.includes(p.id);
                 const isSelected = game.currentMission === p.id;
+                const threatColor = p.threat > 50 ? '#ff4444' : p.threat > 25 ? '#ffaa00' : '#00ff88';
                 list.innerHTML += `
                     <div class="planet-card" onclick="selectMission(${p.id})">
                         <div class="planet-name">🪐 ${p.name}</div>
                         <div class="planet-info">${p.desc}</div>
                         <div class="difficulty ${p.diff}">${p.diff.toUpperCase()}</div>
                         <div class="planet-info">👽 ${p.aliens} aliens | 💰 ${p.reward} credits</div>
+                        <div class="planet-info" style="color: ${threatColor}; font-weight: bold;">⚠️ THREAT LEVEL: ${p.threat}/100</div>
                         <button class="planet-btn ${isSelected ? 'selected' : ''}" ${cleared || isSelected ? 'disabled' : ''}>${cleared ? 'CLEARED' : isSelected ? 'SELECTED' : 'SELECT MISSION'}</button>
                     </div>
                 `;
@@ -1329,8 +1646,8 @@
         }
 
         function startMission() {
-            if (!game.isLeader || !game.isReady) {
-                return;
+            if (!game.isLeader || !game.isReady || mission.state === 'IN_PROGRESS') {
+                return; // Prevent double starts
             }
             
             const planet = game.planets.find(p => p.id === game.currentMission);
@@ -1376,7 +1693,28 @@
 
         function launchMission(planet) {
             document.getElementById('countdownScreen').style.display = 'none';
-            // Combat coming soon!
+            
+            // Set mission state
+            mission.state = 'IN_PROGRESS';
+            mission.type = game.currentMissionType || 'elimination';
+            mission.difficulty = game.currentMissionDifficulty || 'easy';
+            mission.killed = 0;
+            mission.reward = 0;
+            mission.missionStartTime = Date.now();
+            mission.enemies = [];
+            mission.spawnCounter = 0;
+            
+            // Calculate total enemies for this mission
+            const diffConfig = MISSION_TYPES[mission.type].difficulty;
+            const baseTotalEnemies = diffConfig[mission.difficulty] || diffConfig.easy;
+            const threatMultiplier = 1 + (planet.threat / 100) * 0.5;
+            mission.totalEnemies = Math.floor(baseTotalEnemies * threatMultiplier);
+            
+            // Show canvas and hide menus
+            game.inMission = true;
+            document.getElementById('shipCanvas').style.display = 'block';
+            document.getElementById('header').style.display = 'none';
+            document.getElementById('controlRoomModal').classList.remove('show');
         }
 
         function openPartyModal() {
