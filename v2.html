@@ -157,9 +157,10 @@
 
     <div id="missionModal" class="modal">
         <button class="close-modal" onclick="closeMissionModal()">✕</button>
-        <div class="modalBox">
+        <div class="modalBox" style="display: flex; flex-direction: column; max-height: 90vh;">
             <h2>🚀 SELECT MISSION</h2>
-            <div id="planetsList"></div>
+            <div id="missionSelector" style="flex-shrink: 0; margin-bottom: 20px; border-bottom: 2px solid #444; padding-bottom: 20px;"></div>
+            <div id="planetsList" style="flex: 1; overflow-y: auto;"></div>
         </div>
     </div>
 
@@ -1758,16 +1759,20 @@
 
         
         function openMissionModal() {
+            const selector = document.getElementById('missionSelector');
             const list = document.getElementById('planetsList');
+            
+            // Clear both areas
+            selector.innerHTML = '';
             list.innerHTML = '';
             
-            // Add mission type selector if a planet is selected
+            // Add mission type selector if a planet is selected (in the fixed selector area)
             if (game.currentMission) {
                 const selectedPlanet = game.planets.find(p => p.id === game.currentMission);
                 const availableMissions = selectedPlanet.missions || ['elimination', 'survival', 'defense'];
                 
-                list.innerHTML += `
-                    <div style="background: #1a1f3a; border: 2px solid #00ff88; border-radius: 5px; padding: 20px; margin-bottom: 20px;">
+                selector.innerHTML = `
+                    <div style="background: #1a1f3a; border: 2px solid #00ff88; border-radius: 5px; padding: 20px;">
                         <div style="color: #00ff88; font-weight: bold; font-size: 16px; margin-bottom: 15px;">📋 SELECT MISSION TYPE</div>
                         <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
                 `;
@@ -1783,16 +1788,17 @@
                     const btnOpacity = isAvailable ? '1' : '0.5';
                     const cursor = isAvailable ? 'pointer' : 'not-allowed';
                     
-                    list.innerHTML += `
+                    selector.innerHTML += `
                         <button onclick="${isAvailable ? `selectMissionType('${type}')` : 'return false;'}" style="background: ${btnBg}; color: ${btnColor}; border: 2px solid ${isSelected ? btnBg : '#666'}; padding: 12px; border-radius: 5px; cursor: ${cursor}; font-weight: bold; text-align: left; opacity: ${btnOpacity};">
                             ${info.icon} <strong>${info.name}</strong> - ${info.desc}
                         </button>
                     `;
                 });
                 
-                list.innerHTML += `</div>`;
+                selector.innerHTML += `</div>`;
             }
             
+            // Add planets to the scrollable list
             game.planets.forEach(p => {
                 const cleared = game.cleared.includes(p.id);
                 const isSelected = game.currentMission === p.id;
