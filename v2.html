@@ -1851,9 +1851,8 @@
         
         function selectMissionDifficulty(difficulty) {
             game.currentMissionDifficulty = difficulty;
-            // Open control room to start mission
-            document.getElementById('missionModal').classList.remove('show');
-            setTimeout(() => openControlRoom(), 100);
+            // Just update difficulty, don't auto-open control room
+            // Let player decide when to proceed
         }
 
         function openControlRoom() {
