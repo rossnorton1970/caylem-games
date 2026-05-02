@@ -872,6 +872,9 @@
         }
 
         function roomClicked(room) {
+            // Prevent room clicks during missions
+            if (game.inMission) return;
+            
             if (room === ship.missionTable) {
                 openMissionModal();
             } else if (room === ship.controlRoom) {
