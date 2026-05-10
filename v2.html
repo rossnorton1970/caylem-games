@@ -215,8 +215,25 @@
         .difficulty.easy { color: #00ff88; }
         .difficulty.medium { color: #ffaa00; }
         .difficulty.hard { color: #ff4444; }
-        .planet-btn { background: #00ff88; color: #0a0e27; padding: 10px; margin-top: 10px; border: none; cursor: pointer; font-weight: bold; border-radius: 3px; width: 100%; }
-        .planet-btn:hover { background: #00dd77; }
+        .planet-btn { 
+            background: #f97316; 
+            color: #0a0e27; 
+            padding: 10px 16px; 
+            margin-top: 12px; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: bold; 
+            border-radius: 5px; 
+            width: 100%; 
+            transition: all 0.2s ease;
+            font-size: 14px;
+            letter-spacing: 0.1em;
+        }
+        .planet-btn:hover { 
+            background: #fb923c;
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+            transform: translateY(-2px);
+        }
         .planet-btn:disabled { background: #666; color: #aaa; cursor: not-allowed; }
         .planet-btn.selected { background: #666; color: #aaa; cursor: not-allowed; }
         .close-modal { position: absolute; top: 20px; right: 20px; background: #ff4444; color: white; border: none; width: 40px; height: 40px; font-size: 24px; cursor: pointer; border-radius: 5px; }
@@ -354,10 +371,9 @@
 
     <div id="missionModal" class="modal">
         <button class="close-modal" onclick="closeMissionModal()">✕</button>
-        <div class="modalBox" style="display: flex; flex-direction: column; max-height: 90vh;">
-            <h2>🚀 SELECT MISSION</h2>
-            <div id="missionSelector" style="flex-shrink: 0; margin-bottom: 20px; border-bottom: 2px solid #444; padding-bottom: 20px;"></div>
-            <div id="planetsList" style="flex: 1; overflow-y: auto; scrollbar-gutter: stable;"></div>
+        <div class="modalBox" style="display: flex; flex-direction: column; max-height: 90vh; width: 600px;">
+            <h2 style="color: #00ff88; margin-bottom: 25px; font-size: 28px;">🚀 SELECT MISSION</h2>
+            <div id="planetsList" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;"></div>
         </div>
     </div>
 
@@ -483,6 +499,7 @@
             document.getElementById('missionModal').classList.add('show');
             document.getElementById('shipCanvas').style.display = 'block';
             document.getElementById('header').style.display = 'block';
+            loadMissions(); // Load missions when modal opens
         }
 
         function exitGame() {
@@ -539,12 +556,27 @@
             planets.forEach((planet, index) => {
                 const card = document.createElement('div');
                 card.className = 'planet-card';
+                card.style.background = 'rgba(26, 31, 58, 0.8)';
+                card.style.border = '2px solid #444';
+                card.style.padding = '16px';
+                card.style.borderRadius = '8px';
+                card.style.cursor = 'pointer';
+                card.style.transition = 'all 0.3s';
+                card.onmouseover = () => {
+                    card.style.borderColor = '#00ff88';
+                    card.style.background = 'rgba(26, 31, 58, 1)';
+                };
+                card.onmouseout = () => {
+                    card.style.borderColor = '#444';
+                    card.style.background = 'rgba(26, 31, 58, 0.8)';
+                };
                 card.onclick = () => selectMission(index, planet);
                 card.innerHTML = `
-                    <div class="planet-name">${planet.name}</div>
-                    <div class="planet-info">Enemy Count: ${planet.enemies}</div>
-                    <div class="planet-info">Reward: ${planet.reward} Credits</div>
-                    <div class="difficulty ${planet.difficulty}">Difficulty: ${planet.difficulty.toUpperCase()}</div>
+                    <div style="color: #00ff88; font-weight: bold; font-size: 18px; margin-bottom: 10px;">${planet.name}</div>
+                    <div style="color: #aaa; font-size: 12px; margin: 5px 0;">Enemy Count: ${planet.enemies}</div>
+                    <div style="color: #aaa; font-size: 12px; margin: 5px 0;">Reward: ${planet.reward} Credits</div>
+                    <div style="color: ${planet.difficulty === 'easy' ? '#00ff88' : planet.difficulty === 'medium' ? '#ffaa00' : '#ff4444'}; font-weight: bold; margin: 10px 0;">Difficulty: ${planet.difficulty.toUpperCase()}</div>
+                    <div style="color: #aaa; font-size: 11px; margin: 10px 0; line-height: 1.4;">${planet.description}</div>
                     <button class="planet-btn" onclick="deployToMission('${planet.name}', event)">DEPLOY</button>
                 `;
                 planetsList.appendChild(card);
@@ -652,7 +684,6 @@
 
         // ========== INITIALIZATION ==========
         initializeMenu();
-        loadMissions();
     </script>
 </body>
 </html>
