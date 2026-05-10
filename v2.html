@@ -257,6 +257,25 @@
         .launch-btn.show { display: block; }
         
         .launch-msg { color: #ffaa00; text-align: center; margin-top: 10px; font-weight: bold; }
+        
+        /* SHIP HUB STYLES */
+        #shipHub { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0e27; z-index: 100; }
+        #shipHubCanvas { display: block; width: 100%; height: 100%; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); cursor: crosshair; }
+        
+        .hub-ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 102; }
+        .hub-header { position: fixed; top: 20px; left: 20px; color: #00ff88; font-size: 18px; font-weight: bold; pointer-events: auto; }
+        .hub-hint { position: fixed; bottom: 20px; left: 20px; color: #aaa; font-size: 14px; pointer-events: auto; }
+        .hub-hint-highlight { color: #00ff88; font-weight: bold; }
+        .hub-exit-btn { position: fixed; top: 20px; right: 20px; background: #f97316; color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; pointer-events: auto; transition: all 0.2s; z-index: 103; }
+        .hub-exit-btn:hover { background: #fb923c; box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
+        
+        /* Room Modal */
+        .room-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(10, 14, 39, 0.98); border: 2px solid #00ff88; border-radius: 10px; padding: 40px; min-width: 500px; max-height: 80vh; overflow-y: auto; z-index: 105; pointer-events: auto; box-shadow: 0 0 40px rgba(0, 255, 136, 0.2); }
+        .room-modal-header { color: #00ff88; font-size: 28px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #00ff88; padding-bottom: 15px; }
+        .room-modal-content { color: #aaa; font-size: 14px; line-height: 1.6; }
+        .room-close-btn { position: absolute; top: 15px; right: 15px; background: #ff4444; color: white; border: none; width: 40px; height: 40px; cursor: pointer; border-radius: 5px; font-size: 24px; pointer-events: auto; }
+        .room-close-btn:hover { background: #ff6666; }
+        .room-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 104; pointer-events: auto; }
     </style>
 </head>
 <body>
@@ -382,6 +401,102 @@
             <div style="font-size: 48px; color: #ffaa00; margin-bottom: 20px;" id="countdownText">15</div>
             <div style="font-size: 36px; color: #00ff88; margin-bottom: 40px;" id="countdownPlanet">INITIALIZING...</div>
             <div style="font-size: 18px; color: #aaa;">GET READY FOR DESCENT</div>
+        </div>
+    </div>
+    
+    <!-- SHIP HUB SYSTEM -->
+    <div id="shipHub">
+        <canvas id="shipHubCanvas"></canvas>
+        <div class="hub-ui">
+            <div class="hub-header">🚀 HDS VANGUARD - SHIP HUB</div>
+            <div class="hub-hint">MOVEMENT: <span class="hub-hint-highlight">WASD</span> | INTERACT: <span class="hub-hint-highlight">E or CLICK</span></div>
+            <button class="hub-exit-btn" onclick="exitShipHub()">← EXIT TO MENU</button>
+        </div>
+    </div>
+    
+    <!-- ROOM MODALS -->
+    <div class="room-modal-overlay" id="roomModalOverlay" onclick="closeRoomModal()"></div>
+    
+    <div class="room-modal" id="communicationsRoom">
+        <button class="room-close-btn" onclick="closeRoomModal()">✕</button>
+        <div class="room-modal-header">📡 COMMUNICATIONS</div>
+        <div class="room-modal-content">
+            <p>Communication systems fully operational. Status: All channels clear.</p>
+            <p>Current deployment: Planet [NAME TBD]</p>
+            <p>Crew status: Ready for descent.</p>
+            <p style="margin-top: 20px; color: #ffaa00;">• Incoming transmissions: None
+            <br/>• Outgoing channels: Active
+            <br/>• Signal strength: Excellent</p>
+        </div>
+    </div>
+    
+    <div class="room-modal" id="engineeringRoom">
+        <button class="room-close-btn" onclick="closeRoomModal()">✕</button>
+        <div class="room-modal-header">⚙️ ENGINEERING</div>
+        <div class="room-modal-content">
+            <p>Main engineering station. All systems nominal.</p>
+            <p>Ship systems status:</p>
+            <p style="margin-top: 15px; color: #00ff88;">• Power core: 100%
+            <br/>• Propulsion: Operational
+            <br/>• Shields: Active
+            <br/>• Life support: Optimal</p>
+            <p style="margin-top: 15px; color: #ffaa00;">Ready for mission deployment.</p>
+        </div>
+    </div>
+    
+    <div class="room-modal" id="armoryRoom">
+        <button class="room-close-btn" onclick="closeRoomModal()">✕</button>
+        <div class="room-modal-header">⚡ ARMORY</div>
+        <div class="room-modal-content">
+            <p>Weapons arsenal fully stocked. Your loadout:</p>
+            <p style="margin-top: 15px; color: #ffaa00;">• Primary: AR-X Assault Rifle
+            <br/>• Secondary: Combat Pistol
+            <br/>• Throwable: Frag Grenades (4x)
+            <br/>• Special: Smoke Grenades (3x)</p>
+            <p style="margin-top: 15px; color: #aaa;">All weapons: Ammunition - Full</p>
+            <p style="margin-top: 15px; color: #00ff88;">Ready for combat operations.</p>
+        </div>
+    </div>
+    
+    <div class="room-modal" id="controlRoomModal2">
+        <button class="room-close-btn" onclick="closeRoomModal()">✕</button>
+        <div class="room-modal-header">🎮 CONTROL ROOM</div>
+        <div class="room-modal-content">
+            <p>Mission control center. All systems ready for deployment.</p>
+            <p style="margin-top: 15px;">Mission Parameters:</p>
+            <p style="color: #ffaa00;">• Objective: Planetary Extraction
+            <br/>• Duration: 45-60 minutes
+            <br/>• Threat Level: [MISSION DEPENDENT]
+            <br/>• Extraction Point: LZ-Alpha</p>
+            <p style="margin-top: 15px; color: #00ff88;">Awaiting crew ready status.</p>
+        </div>
+    </div>
+    
+    <div class="room-modal" id="hangarRoom">
+        <button class="room-close-btn" onclick="closeRoomModal()">✕</button>
+        <div class="room-modal-header">🛩️ HANGAR</div>
+        <div class="room-modal-content">
+            <p>Flight operations center. Deployment vehicle prepped and ready.</p>
+            <p style="margin-top: 15px; color: #00ff88;">• Landing craft: Vanguard-1
+            <br/>• Status: Ready for descent
+            <br/>• Fuel: 100%
+            <br/>• Cargo: Full supplies</p>
+            <p style="margin-top: 15px; color: #ffaa00;">Awaiting launch sequence authorization.</p>
+        </div>
+    </div>
+    
+    <div class="room-modal" id="cargoBayRoom">
+        <button class="room-close-btn" onclick="closeRoomModal()">✕</button>
+        <div class="room-modal-header">📦 CARGO BAY</div>
+        <div class="room-modal-content">
+            <p>Supply storage and manifest management.</p>
+            <p style="margin-top: 15px; color: #00ff88;">Inventory:</p>
+            <p style="color: #ffaa00;">• Medical Kits: 12x
+            <br/>• Ammunition (General): 500 rounds
+            <br/>• Special Equipment: 3x
+            <br/>• Rations: 20 units
+            <br/>• Repair Tools: Full kit</p>
+            <p style="margin-top: 15px; color: #aaa;">All supplies: Operational</p>
         </div>
     </div>
 
@@ -611,7 +726,7 @@
                 if (count < 0) {
                     clearInterval(interval);
                     countdownScreen.style.display = 'none';
-                    // TODO: Start actual game
+                    initializeShipHub();
                 }
             }, 1000);
         }
@@ -633,9 +748,248 @@
             document.getElementById('mainMenu').style.display = 'flex';
             document.getElementById('shipCanvas').style.display = 'none';
             document.getElementById('header').style.display = 'none';
+            document.getElementById('shipHub').style.display = 'none';
+            shipHubRunning = false;
             closeMissionModal();
+            closeRoomModal();
         }
 
+        // ========== SHIP HUB SYSTEM ==========
+        const shipHubCanvas = document.getElementById('shipHubCanvas');
+        const hubCtx = shipHubCanvas.getContext('2d');
+        
+        let shipHubWidth = window.innerWidth;
+        let shipHubHeight = window.innerHeight;
+        shipHubCanvas.width = shipHubWidth;
+        shipHubCanvas.height = shipHubHeight;
+        
+        const gameState = {
+            location: 'hub',
+            currentRoom: null
+        };
+        
+        const player = {
+            x: shipHubWidth / 2,
+            y: shipHubHeight / 2,
+            radius: 15,
+            speed: 5,
+            velocityX: 0,
+            velocityY: 0,
+            color: '#4444ff',
+            draw() {
+                hubCtx.beginPath();
+                hubCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                hubCtx.fillStyle = this.color;
+                hubCtx.fill();
+                hubCtx.strokeStyle = '#3b82f6';
+                hubCtx.lineWidth = 3;
+                hubCtx.stroke();
+            },
+            update() {
+                this.velocityX *= 0.85;
+                this.velocityY *= 0.85;
+                let newX = this.x + this.velocityX;
+                let newY = this.y + this.velocityY;
+                if (isWalkable(newX, newY, this.radius)) {
+                    this.x = newX;
+                    this.y = newY;
+                }
+            }
+        };
+        
+        const doors = [
+            { id: 'communications', name: '📡 COMMUNICATIONS', x: 200, y: 150, width: 120, height: 80, color: '#00ff88', hovered: false },
+            { id: 'engineering', name: '⚙️ ENGINEERING', x: shipHubWidth - 320, y: 150, width: 120, height: 80, color: '#ffaa00', hovered: false },
+            { id: 'armory', name: '⚡ ARMORY', x: 200, y: shipHubHeight / 2 - 40, width: 120, height: 80, color: '#ff6666', hovered: false },
+            { id: 'controlRoom', name: '🎮 CONTROL ROOM', x: shipHubWidth - 320, y: shipHubHeight / 2 - 40, width: 120, height: 80, color: '#4444ff', hovered: false },
+            { id: 'hangar', name: '🛩️ HANGAR', x: 200, y: shipHubHeight - 230, width: 120, height: 80, color: '#00ddff', hovered: false },
+            { id: 'cargoBay', name: '📦 CARGO BAY', x: shipHubWidth - 320, y: shipHubHeight - 230, width: 120, height: 80, color: '#ffdd00', hovered: false }
+        ];
+        
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            if (e.key.toLowerCase() === 'e') {
+                checkDoorInteraction();
+            }
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+        
+        shipHubCanvas.addEventListener('click', (e) => {
+            const rect = shipHubCanvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            checkClickInteraction(clickX, clickY);
+        });
+        
+        function handleInput() {
+            let moveX = 0, moveY = 0;
+            if (keys['w']) moveY -= player.speed;
+            if (keys['s']) moveY += player.speed;
+            if (keys['a']) moveX -= player.speed;
+            if (keys['d']) moveX += player.speed;
+            player.velocityX += moveX;
+            player.velocityY += moveY;
+            const maxSpeed = 8;
+            const currentSpeed = Math.sqrt(player.velocityX ** 2 + player.velocityY ** 2);
+            if (currentSpeed > maxSpeed) {
+                const scale = maxSpeed / currentSpeed;
+                player.velocityX *= scale;
+                player.velocityY *= scale;
+            }
+        }
+        
+        function isWalkable(x, y, radius) {
+            if (x - radius < 50 || x + radius > shipHubWidth - 50) return false;
+            if (y - radius < 100 || y + radius > shipHubHeight - 100) return false;
+            for (let door of doors) {
+                if (circleRectCollision(x, y, radius, door.x, door.y, door.width, door.height)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        function circleRectCollision(cx, cy, r, rx, ry, rw, rh) {
+            let closestX = Math.max(rx, Math.min(cx, rx + rw));
+            let closestY = Math.max(ry, Math.min(cy, ry + rh));
+            let distance = Math.sqrt((cx - closestX) ** 2 + (cy - closestY) ** 2);
+            return distance < r + 10;
+        }
+        
+        function checkDoorInteraction() {
+            for (let door of doors) {
+                if (circleRectCollision(player.x, player.y, player.radius + 20, door.x, door.y, door.width, door.height)) {
+                    openRoom(door.id);
+                    return;
+                }
+            }
+        }
+        
+        function checkClickInteraction(clickX, clickY) {
+            for (let door of doors) {
+                if (clickX >= door.x && clickX <= door.x + door.width &&
+                    clickY >= door.y && clickY <= door.y + door.height) {
+                    openRoom(door.id);
+                    return;
+                }
+            }
+        }
+        
+        function drawDoors() {
+            for (let door of doors) {
+                const distToDoor = Math.sqrt((player.x - (door.x + door.width/2)) ** 2 + (player.y - (door.y + door.height/2)) ** 2);
+                const isNear = distToDoor < 150;
+                hubCtx.fillStyle = isNear ? door.color + '40' : door.color + '20';
+                hubCtx.fillRect(door.x, door.y, door.width, door.height);
+                hubCtx.strokeStyle = isNear ? door.color : door.color + '80';
+                hubCtx.lineWidth = isNear ? 3 : 2;
+                hubCtx.strokeRect(door.x, door.y, door.width, door.height);
+                hubCtx.fillStyle = door.color;
+                hubCtx.font = 'bold 12px Arial';
+                hubCtx.textAlign = 'center';
+                hubCtx.textBaseline = 'middle';
+                hubCtx.fillText(door.name, door.x + door.width / 2, door.y + door.height / 2);
+                if (isNear) {
+                    hubCtx.fillStyle = '#00ff88';
+                    hubCtx.font = 'bold 11px Arial';
+                    hubCtx.fillText('[E or CLICK]', door.x + door.width / 2, door.y + door.height + 20);
+                }
+            }
+        }
+        
+        function drawShipLayout() {
+            hubCtx.fillStyle = '#0a0e27';
+            hubCtx.fillRect(0, 0, shipHubWidth, shipHubHeight);
+            hubCtx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
+            hubCtx.lineWidth = 1;
+            const gridSize = 50;
+            for (let x = 0; x < shipHubWidth; x += gridSize) {
+                hubCtx.beginPath();
+                hubCtx.moveTo(x, 0);
+                hubCtx.lineTo(x, shipHubHeight);
+                hubCtx.stroke();
+            }
+            for (let y = 0; y < shipHubHeight; y += gridSize) {
+                hubCtx.beginPath();
+                hubCtx.moveTo(0, y);
+                hubCtx.lineTo(shipHubWidth, y);
+                hubCtx.stroke();
+            }
+            hubCtx.strokeStyle = '#00ff88';
+            hubCtx.lineWidth = 4;
+            hubCtx.strokeRect(50, 100, shipHubWidth - 100, shipHubHeight - 200);
+        }
+        
+        function openRoom(roomId) {
+            gameState.location = 'room';
+            gameState.currentRoom = roomId;
+            document.getElementById('roomModalOverlay').style.display = 'block';
+            const roomModal = document.getElementById(roomId + 'Room') || document.getElementById(roomId + 'Modal2');
+            if (roomModal) {
+                roomModal.style.display = 'block';
+            }
+        }
+        
+        function closeRoomModal() {
+            if (gameState.location === 'room') {
+                gameState.location = 'hub';
+                document.getElementById('roomModalOverlay').style.display = 'none';
+                document.getElementById('communicationsRoom').style.display = 'none';
+                document.getElementById('engineeringRoom').style.display = 'none';
+                document.getElementById('armoryRoom').style.display = 'none';
+                document.getElementById('controlRoomModal2').style.display = 'none';
+                document.getElementById('hangarRoom').style.display = 'none';
+                document.getElementById('cargoBayRoom').style.display = 'none';
+            }
+        }
+        
+        function exitShipHub() {
+            if (confirm('Exit to menu? (Mission will be abandoned)')) {
+                document.getElementById('shipHub').style.display = 'none';
+                document.getElementById('shipCanvas').style.display = 'none';
+                document.getElementById('header').style.display = 'none';
+                document.getElementById('mainMenu').style.display = 'flex';
+                closeRoomModal();
+                shipHubRunning = false;
+            }
+        }
+        
+        function updateShipHub() {
+            handleInput();
+            player.update();
+            drawShipLayout();
+            drawDoors();
+            player.draw();
+        }
+        
+        let shipHubRunning = false;
+        function shipHubLoop() {
+            if (!shipHubRunning) return;
+            updateShipHub();
+            requestAnimationFrame(shipHubLoop);
+        }
+        
+        function initializeShipHub() {
+            document.getElementById('shipHub').style.display = 'block';
+            shipHubRunning = true;
+            player.x = shipHubWidth / 2;
+            player.y = shipHubHeight / 2;
+            player.velocityX = 0;
+            player.velocityY = 0;
+            shipHubLoop();
+        }
+        
+        window.addEventListener('resize', () => {
+            shipHubWidth = window.innerWidth;
+            shipHubHeight = window.innerHeight;
+            shipHubCanvas.width = shipHubWidth;
+            shipHubCanvas.height = shipHubHeight;
+        });
+        
         // ========== GAME ENGINE CODE ==========
         const canvas = document.getElementById('shipCanvas');
         const ctx = canvas.getContext('2d');
@@ -644,6 +998,8 @@
         let ch = window.innerHeight;
         canvas.width = cw;
         canvas.height = ch;
+        
+        let gameRunning = false;
 
         function shootBullet(x, y, weaponType) {
             const bullet = {
@@ -676,6 +1032,10 @@
         }
 
         function draw() {
+            if (!gameRunning) {
+                requestAnimationFrame(draw);
+                return;
+            }
             requestAnimationFrame(draw);
             update();
         }
@@ -684,6 +1044,12 @@
 
         // ========== INITIALIZATION ==========
         initializeMenu();
+        
+        document.getElementById('roomModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRoomModal();
+            }
+        });
     </script>
 </body>
 </html>
