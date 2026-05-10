@@ -3,22 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planet Hunters - Mothership</title>
+    <title>Planetfall: Extraction</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; overflow: hidden; }
-        body { font-family: Arial, sans-serif; background: #0a0e27; color: #e0e0e0; }
+        body { font-family: 'Arial', sans-serif; background: #000; color: #e0e0e0; }
         
-        #mainMenu { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); }
-        .menu-title { font-size: 64px; color: #00ff88; margin-bottom: 20px; text-shadow: 0 0 20px #00ff88; }
-        .menu-subtitle { font-size: 20px; color: #ffaa00; margin-bottom: 40px; }
-        .menu-buttons { display: flex; gap: 15px; flex-direction: column; width: 300px; }
-        .menu-btn { background: #00ff88; color: #0a0e27; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; }
-        .menu-btn:hover { background: #00dd77; }
-        .menu-btn.secondary { background: #4444ff; color: white; }
-        .menu-btn.secondary:hover { background: #3333dd; }
-        .menu-btn.settings { background: #ffaa00; color: #0a0e27; }
-        .menu-btn.settings:hover { background: #ff9900; }
+        #mainMenu {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #000;
+            overflow: hidden;
+        }
+
+        /* Background Effects */
+        .menu-bg-glow {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(59, 130, 246, 0.1), transparent 45%),
+                        radial-gradient(circle at bottom, rgba(249, 115, 22, 0.1), transparent 45%);
+            z-index: 1;
+        }
+
+        .menu-bg-planet {
+            position: absolute;
+            bottom: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(249, 115, 22, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 1;
+        }
+
+        .menu-stars {
+            position: absolute;
+            inset: 0;
+            opacity: 0.3;
+            z-index: 2;
+        }
+
+        .menu-star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Content */
+        .menu-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .menu-logo {
+            margin-bottom: 12px;
+        }
+
+        .menu-title {
+            font-size: clamp(48px, 10vw, 96px);
+            font-weight: 900;
+            letter-spacing: 0.25em;
+            color: #fff;
+            margin: 0;
+            text-shadow: 0 0 30px rgba(59, 130, 246, 0.3), 0 0 60px rgba(59, 130, 246, 0.1);
+        }
+
+        .menu-subtitle {
+            font-size: clamp(18px, 3vw, 32px);
+            letter-spacing: 0.5em;
+            color: #3b82f6;
+            font-weight: 300;
+            margin: 8px 0 0 0;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .menu-tagline {
+            font-size: clamp(12px, 1.5vw, 16px);
+            letter-spacing: 0.4em;
+            color: #888;
+            font-weight: 400;
+            margin-top: 16px;
+            text-transform: uppercase;
+        }
+
+        /* Menu Buttons */
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 420px;
+            margin-top: 48px;
+        }
+
+        .menu-btn {
+            position: relative;
+            overflow: hidden;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-align: left;
+            border: 2px solid;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            text-transform: uppercase;
+        }
+
+        /* Primary Button */
+        .menu-btn.primary {
+            border-color: #f97316;
+            color: #fff;
+            background: rgba(249, 115, 22, 0.15);
+        }
+
+        .menu-btn.primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.7s ease;
+        }
+
+        .menu-btn.primary:hover {
+            border-color: #fb923c;
+            background: rgba(249, 115, 22, 0.25);
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.3), inset 0 0 20px rgba(249, 115, 22, 0.1);
+            transform: translateX(4px);
+        }
+
+        .menu-btn.primary:hover::before {
+            transform: translateX(100%);
+        }
+
+        /* Secondary Buttons */
+        .menu-btn.secondary {
+            border-color: #52525b;
+            color: #e4e4e7;
+            background: rgba(82, 82, 89, 0.1);
+        }
+
+        .menu-btn.secondary:hover {
+            border-color: #3b82f6;
+            color: #fff;
+            background: rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+            transform: translateX(4px);
+        }
+
+        /* Bottom Info */
+        .menu-footer {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            color: #666;
+            z-index: 10;
+        }
         
         #shipCanvas { display: none; width: 100%; height: 100%; background: #0a0e27; cursor: crosshair; }
         
@@ -69,12 +244,34 @@
 </head>
 <body>
     <div id="mainMenu">
-        <h1 class="menu-title">⭐ PLANET HUNTERS ⭐</h1>
-        <p class="menu-subtitle">Explore. Fight. Survive.</p>
-        <div class="menu-buttons">
-            <button class="menu-btn" onclick="startGame()">START GAME</button>
-            <button class="menu-btn secondary" onclick="openPartyModal()">👥 PARTY</button>
-            <button class="menu-btn settings" onclick="openSettings()">⚙️ SETTINGS</button>
+        <!-- Background Effects -->
+        <div class="menu-bg-glow"></div>
+        <div class="menu-bg-planet"></div>
+        
+        <!-- Starfield -->
+        <div class="menu-stars" id="starsContainer"></div>
+
+        <!-- Main Content -->
+        <div class="menu-content">
+            <div class="menu-logo">
+                <h1 class="menu-title">PLANETFALL</h1>
+                <h2 class="menu-subtitle">EXTRACTION</h2>
+                <p class="menu-tagline">Land. Fight. Extract.</p>
+            </div>
+
+            <div class="menu-buttons">
+                <button class="menu-btn primary" onclick="startGame()">▶ PLAY</button>
+                <button class="menu-btn secondary" onclick="openPartyModal()">👥 PARTY</button>
+                <button class="menu-btn secondary" onclick="openSettings()">⚙ SETTINGS</button>
+                <button class="menu-btn secondary" onclick="openCommunications()">📡 COMMUNICATIONS</button>
+                <button class="menu-btn secondary" onclick="exitGame()">❌ EXIT</button>
+            </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="menu-footer">
+            <span>Version 0.1 Alpha</span>
+            <span>Helios Directive Network</span>
         </div>
     </div>
 
@@ -185,9 +382,9 @@
             
             <!-- 3-Column Layout -->
             <div style="display: flex; gap: 25px; flex: 1; overflow: hidden;">
-                <!-- LEFT: Categories -->
+                <!-- LEFT: Categories List -->
                 <div style="width: 200px; border-right: 2px solid #444; padding-right: 15px; overflow-y: auto;">
-                    <h3 style="color: #00ff88; margin-bottom: 15px; font-size: 14px;">CATEGORIES</h3>
+                    <h3 style="color: #00ff88; margin-bottom: 15px; font-size: 14px;">WEAPON CATEGORIES</h3>
                     <div id="categoriesList" style="display: flex; flex-direction: column; gap: 10px;"></div>
                 </div>
                 
@@ -196,1867 +393,167 @@
                     <h3 style="color: #4444ff; margin-bottom: 15px; font-size: 14px;">WEAPON PREVIEW</h3>
                     <div id="weaponPreview" style="background: linear-gradient(135deg, #1a1f3a 0%, #0a0e27 100%); border: 2px solid #444; border-radius: 5px; padding: 30px; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px;">
                         <div style="text-align: center;">
-                            <div style="font-size: 80px; margin-bottom: 20px;" id="weaponEmoji">🔫</div>
-                            <div style="color: #00ff88; font-size: 24px; font-weight: bold;" id="previewName">Select a weapon</div>
+                            <div style="font-size: 80px; margin-bottom: 20px;" id="previewName">Select a weapon</div>
                             <div style="color: #aaa; font-size: 12px; margin-top: 10px;" id="previewTier"></div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- RIGHT: Stats & Actions -->
-                <div style="width: 280px; display: flex; flex-direction: column; gap: 15px;">
-                    <!-- Weapon Details -->
-                    <div style="background: #1a1f3a; border: 2px solid #444; border-radius: 5px; padding: 15px;">
-                        <h3 style="color: #ffaa00; margin-bottom: 12px; font-size: 12px;">STATS</h3>
-                        <div id="weaponStats" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- RIGHT: Weapon Stats and Action Button -->
+                <div style="width: 300px; display: flex; flex-direction: column; gap: 15px;">
+                    <div style="background: #1a1f3a; border: 2px solid #444; border-radius: 5px; padding: 15px; flex: 1; overflow-y: auto;">
+                        <h3 style="color: #ffaa00; margin-bottom: 15px; font-size: 12px;">WEAPON STATS</h3>
+                        <div id="weaponStats" style="display: flex; flex-direction: column; gap: 12px;">
                             <div style="color: #aaa; font-size: 11px;">Select a weapon to view stats</div>
                         </div>
                     </div>
-                    
-                    <!-- Purchase/Equip Button -->
-                    <div id="actionButton" style="background: #666; color: #ccc; padding: 12px; border: none; cursor: not-allowed; border-radius: 5px; font-weight: bold; text-align: center; font-size: 12px;">
-                        SELECT A WEAPON
-                    </div>
-                    
-                    <!-- Description -->
-                    <div style="background: #1a1f3a; border: 2px solid #444; border-radius: 5px; padding: 12px; flex: 1; overflow-y: auto;">
-                        <h3 style="color: #4444ff; margin-bottom: 8px; font-size: 12px;">DESCRIPTION</h3>
-                        <div id="weaponDesc" style="color: #aaa; font-size: 11px; line-height: 1.4;">
-                            Select a weapon to view details
-                        </div>
-                    </div>
+                    <button id="actionButton" style="background: #666; color: #ccc; padding: 10px; border: none; cursor: not-allowed; border-radius: 5px; font-weight: bold; width: 100%;">SELECT WEAPON</button>
                 </div>
             </div>
             
-            <!-- BOTTOM: Loadout Slots -->
+            <!-- BOTTOM: Weapon Description -->
             <div style="border-top: 2px solid #444; padding-top: 20px; margin-top: 20px;">
-                <h3 style="color: #00ff88; margin-bottom: 15px; font-size: 14px;">⚙️ LOADOUT</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                    <div style="background: #1a1f3a; border: 2px solid #00ff88; border-radius: 5px; padding: 15px;">
-                        <div style="color: #aaa; font-size: 11px; margin-bottom: 8px;">SLOT 1 (PRIMARY)</div>
-                        <div style="color: #00ff88; font-weight: bold; font-size: 14px; margin-bottom: 10px;" id="slot1Display">AR-X</div>
-                        <div style="color: #666; font-size: 10px;">🔒 LOCKED IN</div>
-                    </div>
-                    <div style="background: #1a1f3a; border: 2px solid #ffaa00; border-radius: 5px; padding: 15px;">
-                        <div style="color: #aaa; font-size: 11px; margin-bottom: 8px;">SLOT 2 (SECONDARY)</div>
-                        <div style="color: #ffaa00; font-weight: bold; font-size: 14px; margin-bottom: 10px;" id="slot2Display">Pistol</div>
-                        <button onclick="equipSelectedWeapon()" style="background: #4444ff; color: white; padding: 8px 12px; border: none; cursor: pointer; border-radius: 3px; font-size: 10px; font-weight: bold; width: 100%;">EQUIP</button>
-                    </div>
-                    <div style="background: #1a1f3a; border: 2px solid #666; border-radius: 5px; padding: 15px;">
-                        <div style="color: #aaa; font-size: 11px; margin-bottom: 8px;">SLOT 3 (UTILITY)</div>
-                        <div style="color: #666; font-weight: bold; font-size: 14px; margin-bottom: 10px;" id="slot3Display">LOCKED</div>
-                        <div style="color: #666; font-size: 10px;">🔒 COMING SOON</div>
-                    </div>
-                </div>
+                <h3 style="color: #00ff88; margin-bottom: 12px; font-size: 12px;">WEAPON DESCRIPTION</h3>
+                <div id="weaponDesc" style="color: #aaa; font-size: 12px;"></div>
             </div>
         </div>
     </div>
 
     <div id="controlRoomModal" class="modal">
         <button class="close-modal" onclick="exitControlRoom()">✕</button>
-        <div class="modalBox" style="min-width: 600px;">
-            <h2>🖥️ CONTROL ROOM - LAUNCH SEQUENCE</h2>
-            
-            <div class="control-section highlight">
-                <h3>📍 MISSION TARGET</h3>
-                <div style="font-size: 24px; color: #ffaa00; font-weight: bold;" id="targetPlanet">No mission selected</div>
-                <div style="font-size: 12px; color: #aaa; margin-top: 5px;" id="targetInfo"></div>
+        <div class="modalBox" style="display: flex; flex-direction: column;">
+            <h2>🚀 CONTROL ROOM</h2>
+            <div style="margin-bottom: 20px;">
+                <div style="color: #ffaa00; font-size: 16px;">TARGET PLANET:</div>
+                <div id="targetPlanet" style="color: #00ff88; font-weight: bold;"></div>
+                <div id="targetInfo" style="color: #aaa; margin-top: 5px;"></div>
             </div>
-
-            <div class="control-section">
-                <h3>👥 CREW STATUS</h3>
-                <div id="crewList"></div>
+            <div id="crewList" style="margin-bottom: 20px;">
+                <!-- Crew members will be dynamically added here -->
             </div>
-
             <div id="playerControls">
-                <button class="ready-btn" id="readyBtn" onclick="togglePlayerReady()">UNREADY ○</button>
-                <div class="launch-msg" id="launchMessage">Mark yourself READY</div>
+                <button id="readyBtn" class="ready-btn" onclick="togglePlayerReady()">UNREADY ○</button>
+                <div id="launchMessage" style="color: #ffaa00; margin-top: 10px;">Mark yourself READY</div>
             </div>
-
-            <div id="leaderControls" style="display: none;">
-                <button class="ready-btn" id="leaderReadyBtn" onclick="togglePlayerReady()">UNREADY ○</button>
-                
-                <div class="control-section">
-                    <h3>🎮 LAUNCH CONTROLS</h3>
-                    <div id="readyStatus" style="color: #ffaa00; margin-bottom: 10px;"></div>
-                </div>
-                <button class="launch-btn" id="launchBtn" onclick="startMission()">🚀 DESCEND - START MISSION</button>
-                <div class="launch-msg" id="launchMessage2">Waiting for crew to be ready...</div>
+            <div id="leaderControls">
+                <button id="leaderReadyBtn" class="ready-btn" onclick="togglePlayerReady()">UNREADY ○</button>
+                <div id="readyStatus" style="color: #aaa; margin-top: 10px;">Crew Ready: <strong>0/1</strong></div>
+                <button id="launchBtn" class="launch-btn" onclick="startMission()" disabled>DESCEND</button>
+                <div id="launchMessage2" style="color: #ffaa00; margin-top: 10px;">Waiting for all crew to be ready...</div>
             </div>
         </div>
     </div>
 
     <script>
-        let countdownTimer = null;
-        let countdownSeconds = 15;
-
-        const game = {
-            credits: 500,
-            missions: 0,
-            cleared: [],
-            currentMission: null,
-            currentMissionType: null,
-            currentMissionDifficulty: null,
-            isReady: false,
-            isLeader: true,
-            playersReady: 0,
-            maxPlayers: 1,
-            loadout: { slot1: 'AR-X', slot2: 'Pistol', slot3: null },
-            planets: [
-                { id: 1, name: 'Kepler-452b', desc: 'Desert world', diff: 'easy', aliens: 5, reward: 100, threat: 0, missions: ['elimination', 'survival'] },
-                { id: 2, name: 'Proxima-3', desc: 'Ice planet', diff: 'medium', aliens: 8, reward: 200, threat: 0, missions: ['defense', 'elimination'] },
-                { id: 3, name: 'TRAPPIST-1e', desc: 'Volcanic hellscape', diff: 'hard', aliens: 12, reward: 400, threat: 0, missions: ['elimination', 'survival', 'defense'] },
-                { id: 4, name: 'Gliese-667', desc: 'Toxic atmosphere', diff: 'medium', aliens: 10, reward: 250, threat: 0, missions: ['survival', 'defense'] },
-                { id: 5, name: 'Wolf-1061c', desc: 'Dense jungle', diff: 'hard', aliens: 15, reward: 500, threat: 0, missions: ['elimination', 'defense'] }
-            ],
-            // Mission system state
-            inMission: false,
-            missionStartTime: 0,
-            missionEndTime: 0
-        };
-
-        // Mission system configuration
-        const MISSION_TYPES = {
-            elimination: {
-                name: 'ELIMINATION',
-                icon: '⚔️',
-                desc: 'Eliminate all enemies',
-                difficulty: { easy: 5, medium: 8, hard: 12 },
-                duration: 0 // No timer limit
-            },
-            survival: {
-                name: 'SURVIVAL',
-                icon: '⏱️',
-                desc: 'Survive for 2 minutes',
-                difficulty: { easy: 3, medium: 5, hard: 8 },
-                duration: 120 // 120 seconds
-            },
-            defense: {
-                name: 'DEFENSE',
-                icon: '🛡️',
-                desc: 'Defend the objective',
-                difficulty: { easy: 4, medium: 6, hard: 10 },
-                duration: 120 // 120 seconds
-            }
-        };
-
-        // Enemy types configuration
-        const ENEMY_TYPES = {
-            swarm: {
-                name: 'Swarm Drone',
-                icon: '🐝',
-                health: 10,
-                speed: 2.5,
-                damage: 2,
-                size: 6,
-                reward: 25
-            },
-            brute: {
-                name: 'Brute Warrior',
-                icon: '👹',
-                health: 40,
-                speed: 1.5,
-                damage: 8,
-                size: 12,
-                reward: 100
-            },
-            spitter: {
-                name: 'Spitter',
-                icon: '🦂',
-                health: 20,
-                speed: 1.8,
-                damage: 5,
-                size: 9,
-                reward: 50
-            }
-        };
-
-        // Mission state with proper state management
-        const mission = {
-            state: 'IDLE', // IDLE, IN_PROGRESS, WON, LOST
-            type: null,
-            difficulty: null,
-            enemies: [],
-            killed: 0,
-            totalEnemies: 0,
-            objective: null,
-            spawnCounter: 0,
-            reward: 0,
-            missionStartTime: 0,
-            totalTime: 0,
-            targetTime: 120, // 2 minutes for survival/defense
-            missionDuration: 120 // Duration for this mission type
-        };
-
-        // Helper: Create a new enemy
-        function createEnemy(type, x, y, threatLevel = 0) {
-            const config = ENEMY_TYPES[type] || ENEMY_TYPES.swarm;
-            const healthMultiplier = 1 + (threatLevel / 100) * 0.5; // At threat 100, health is 1.5x
-            const scaledHealth = Math.floor(config.health * healthMultiplier);
-            return {
-                type: type,
-                x: x,
-                y: y,
-                vx: 0,
-                vy: 0,
-                health: scaledHealth,
-                maxHealth: scaledHealth,
-                speed: config.speed,
-                damage: config.damage,
-                size: config.size,
-                attacking: false,
-                attackCooldown: 0
-            };
+        // ========== MAIN MENU INITIALIZATION ==========
+        function initializeMenu() {
+            generateStarfield();
         }
 
-        // Helper: Spawn enemies based on mission type and difficulty
-        function spawnEnemies() {
-            if (mission.state !== 'IN_PROGRESS') return;
-            
-            const planet = game.planets.find(p => p.id === game.currentMission);
-            
-            // ELIMINATION: spawn until total enemies reached
-            if (mission.type === 'elimination') {
-                const spawnedCount = mission.enemies.length + mission.killed;
-                if (spawnedCount >= mission.totalEnemies) return;
-                mission.spawnCounter++;
-                const spawnRate = mission.difficulty === 'easy' ? 120 : mission.difficulty === 'medium' ? 80 : 50;
-                if (mission.spawnCounter > spawnRate) {
-                    const types = ['swarm', 'brute', 'spitter'];
-                    const randomType = types[Math.floor(Math.random() * types.length)];
-                    let x, y;
-                    const edge = Math.random();
-                    if (edge < 0.25) { x = Math.random() * cw; y = -20; }
-                    else if (edge < 0.5) { x = Math.random() * cw; y = ch + 20; }
-                    else if (edge < 0.75) { x = -20; y = Math.random() * ch; }
-                    else { x = cw + 20; y = Math.random() * ch; }
-                    mission.enemies.push(createEnemy(randomType, x, y, planet.threat));
-                    mission.spawnCounter = 0;
-                }
-            }
-            // SURVIVAL: spawn continuously with high spawn rate (no cap)
-            else if (mission.type === 'survival') {
-                mission.spawnCounter++;
-                // Much faster spawn rate for survival - creates constant pressure
-                const spawnRate = mission.difficulty === 'easy' ? 60 : mission.difficulty === 'medium' ? 40 : 25;
-                if (mission.spawnCounter > spawnRate) {
-                    const types = ['swarm', 'brute', 'spitter'];
-                    const randomType = types[Math.floor(Math.random() * types.length)];
-                    let x, y;
-                    const edge = Math.random();
-                    if (edge < 0.25) { x = Math.random() * cw; y = -20; }
-                    else if (edge < 0.5) { x = Math.random() * cw; y = ch + 20; }
-                    else if (edge < 0.75) { x = -20; y = Math.random() * ch; }
-                    else { x = cw + 20; y = Math.random() * ch; }
-                    mission.enemies.push(createEnemy(randomType, x, y, planet.threat));
-                    mission.spawnCounter = 0;
-                }
-            }
-            // DEFENSE: spawn continuously to attack objective
-            else if (mission.type === 'defense') {
-                mission.spawnCounter++;
-                const spawnRate = mission.difficulty === 'easy' ? 80 : mission.difficulty === 'medium' ? 60 : 40;
-                if (mission.spawnCounter > spawnRate) {
-                    const types = ['swarm', 'brute', 'spitter'];
-                    const randomType = types[Math.floor(Math.random() * types.length)];
-                    let x, y;
-                    const edge = Math.random();
-                    if (edge < 0.25) { x = Math.random() * cw; y = -20; }
-                    else if (edge < 0.5) { x = Math.random() * cw; y = ch + 20; }
-                    else if (edge < 0.75) { x = -20; y = Math.random() * ch; }
-                    else { x = cw + 20; y = Math.random() * ch; }
-                    mission.enemies.push(createEnemy(randomType, x, y, planet.threat));
-                    mission.spawnCounter = 0;
-                }
-            }
-        }
+        // Generate random starfield
+        function generateStarfield() {
+            const container = document.getElementById('starsContainer');
+            const stars = [
+                { top: '16%', left: '20%', size: 1 },
+                { top: '40%', left: '33%', size: 2 },
+                { top: '32%', left: '60%', size: 1 },
+                { top: '68%', left: '25%', size: 1 },
+                { top: '80%', left: '67%', size: 2 },
+                { top: '10%', left: '80%', size: 1 },
+                { top: '55%', left: '10%', size: 1 },
+                { top: '85%', left: '85%', size: 1.5 },
+            ];
 
-        // Helper: Update enemy behavior (including defense objective targeting)
-        function updateEnemies() {
-            if (mission.state !== 'IN_PROGRESS') return;
-            for (let i = mission.enemies.length - 1; i >= 0; i--) {
-                const enemy = mission.enemies[i];
-                
-                // In DEFENSE mode, enemies prefer to target objective, otherwise target player
-                let targetX = ship.player.x;
-                let targetY = ship.player.y;
-                
-                if (mission.type === 'defense' && mission.objective) {
-                    // Check distance to objective vs distance to player
-                    const distToObjective = Math.sqrt(
-                        Math.pow(mission.objective.x - enemy.x, 2) + 
-                        Math.pow(mission.objective.y - enemy.y, 2)
-                    );
-                    const distToPlayer = Math.sqrt(
-                        Math.pow(ship.player.x - enemy.x, 2) + 
-                        Math.pow(ship.player.y - enemy.y, 2)
-                    );
-                    
-                    // Enemies target objective if closer or if player is far away
-                    if (distToObjective < distToPlayer || distToPlayer > 400) {
-                        targetX = mission.objective.x;
-                        targetY = mission.objective.y;
-                    }
-                }
-                
-                const dx = targetX - enemy.x;
-                const dy = targetY - enemy.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist > 0) {
-                    enemy.vx = (dx / dist) * enemy.speed;
-                    enemy.vy = (dy / dist) * enemy.speed;
-                }
-                enemy.x += enemy.vx;
-                enemy.y += enemy.vy;
-                
-                // Check for attacks
-                const attackRange = 40;
-                if (dist < attackRange) {
-                    enemy.attacking = true;
-                    enemy.attackCooldown--;
-                    
-                    // In defense, damage objective if in attack range
-                    if (mission.type === 'defense' && mission.objective) {
-                        const distToObjective = Math.sqrt(
-                            Math.pow(mission.objective.x - enemy.x, 2) + 
-                            Math.pow(mission.objective.y - enemy.y, 2)
-                        );
-                        if (distToObjective < attackRange && (!enemy.objectiveCooldown || enemy.objectiveCooldown <= 0)) {
-                            mission.objective.health -= 1;
-                            enemy.objectiveCooldown = 30; // Cooldown between objective hits
-                        }
-                    }
-                } else {
-                    enemy.attacking = false;
-                }
-                
-                // Decrement cooldowns
-                if (enemy.objectiveCooldown) enemy.objectiveCooldown--;
-                
-                if ((enemy.x < -50 || enemy.x > cw + 50 || enemy.y < -50 || enemy.y > ch + 50) && dist > 200) {
-                    mission.enemies.splice(i, 1);
-                }
-            }
-        }
-
-        // Helper: Draw enemies
-        function drawEnemies() {
-            mission.enemies.forEach(enemy => {
-                const config = ENEMY_TYPES[enemy.type];
-                ctx.fillStyle = enemy.attacking ? '#ff4444' : '#ff6600';
-                ctx.beginPath();
-                ctx.arc(enemy.x, enemy.y, enemy.size, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Always draw health bar
-                const healthPercent = enemy.health / enemy.maxHealth;
-                ctx.fillStyle = '#333';
-                ctx.fillRect(enemy.x - enemy.size, enemy.y - enemy.size - 8, enemy.size * 2, 3);
-                ctx.fillStyle = healthPercent > 0.3 ? '#00ff88' : '#ff4444';
-                ctx.fillRect(enemy.x - enemy.size, enemy.y - enemy.size - 8, enemy.size * 2 * healthPercent, 3);
-                
-                ctx.font = '14px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(config.icon, enemy.x, enemy.y);
+            stars.forEach(star => {
+                const starEl = document.createElement('div');
+                starEl.className = 'menu-star';
+                starEl.style.width = star.size + 'px';
+                starEl.style.height = star.size + 'px';
+                starEl.style.top = star.top;
+                starEl.style.left = star.left;
+                starEl.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(starEl);
             });
         }
-        
-        // Helper: Draw objective (for defense missions)
-        function drawObjective() {
-            if (!mission.objective) return;
-            
-            const obj = mission.objective;
-            const size = 30;
-            
-            // Draw objective core - glowing circle
-            ctx.fillStyle = '#00ffff';
-            ctx.globalAlpha = 0.3;
-            ctx.beginPath();
-            ctx.arc(obj.x, obj.y, size + 5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1.0;
-            
-            // Draw main circle with border
-            ctx.fillStyle = '#00ffff';
-            ctx.beginPath();
-            ctx.arc(obj.x, obj.y, size, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.strokeStyle = '#00ffff';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-            
-            // Draw icon
-            ctx.font = 'bold 28px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#0a0e27';
-            ctx.fillText('⚛️', obj.x, obj.y);
-            
-            // Draw health bar above objective
-            const healthPercent = obj.health / obj.maxHealth;
-            const barWidth = 60;
-            const barHeight = 6;
-            ctx.fillStyle = '#333';
-            ctx.fillRect(obj.x - barWidth/2, obj.y - size - 20, barWidth, barHeight);
-            ctx.fillStyle = healthPercent > 0.3 ? '#00ff88' : '#ff4444';
-            ctx.fillRect(obj.x - barWidth/2, obj.y - size - 20, barWidth * healthPercent, barHeight);
-            
-            // Draw health text
-            ctx.font = 'bold 11px Arial';
-            ctx.fillStyle = '#00ffff';
-            ctx.textAlign = 'center';
-            ctx.fillText(`${Math.max(0, obj.health)}/${obj.maxHealth}`, obj.x, obj.y - size - 28);
-        }
 
-        // Helper: Check mission completion
-        function checkMissionCompletion() {
-            if (mission.state !== 'IN_PROGRESS') return;
-            
-            const missionTime = (Date.now() - mission.missionStartTime) / 1000;
-            
-            if (mission.type === 'elimination') {
-                // Win: kill all enemies
-                if (mission.killed >= mission.totalEnemies && mission.enemies.length === 0) {
-                    mission.state = 'WON';
-                    completeMission();
-                }
-                // Lose: player dies
-                if (ship.player.health <= 0) {
-                    mission.state = 'LOST';
-                    failMission();
-                }
-            } else if (mission.type === 'survival') {
-                // Win: survive target time (120 seconds)
-                if (missionTime >= mission.targetTime) {
-                    mission.state = 'WON';
-                    completeMission();
-                }
-                // Lose: player dies
-                if (ship.player.health <= 0) {
-                    mission.state = 'LOST';
-                    failMission();
-                }
-            } else if (mission.type === 'defense') {
-                // Win: survive time AND objective alive
-                if (missionTime >= mission.targetTime && mission.objective && mission.objective.health > 0) {
-                    mission.state = 'WON';
-                    completeMission();
-                }
-                // Lose: objective destroyed
-                if (mission.objective && mission.objective.health <= 0) {
-                    mission.state = 'LOST';
-                    failMission();
-                }
-                // Lose: player dies
-                if (ship.player.health <= 0) {
-                    mission.state = 'LOST';
-                    failMission();
-                }
-            }
-        }
-
-        // Helper: Complete mission and award credits
-        function completeMission() {
-            const planet = game.planets.find(p => p.id === game.currentMission);
-            const baseReward = planet.reward;
-            const diffMultiplier = { easy: 1, medium: 1.5, hard: 2.5 }[mission.difficulty] || 1;
-            const threatMultiplier = 1 + (planet.threat / 100) * 0.3;
-            mission.reward = Math.floor(baseReward * diffMultiplier * threatMultiplier);
-            game.credits += mission.reward;
-            
-            // Increase threat after mission completion
-            const threatIncrease = 10 + (mission.difficulty === 'hard' ? 20 : mission.difficulty === 'medium' ? 10 : 0);
-            planet.threat = Math.min(planet.threat + threatIncrease, 100);
-            
-            if (!game.cleared.includes(game.currentMission)) {
-                game.cleared.push(game.currentMission);
-            }
-            
-            // Record mission time for display
-            mission.totalTime = (Date.now() - mission.missionStartTime) / 1000;
-            
-            showMissionResult(true);
-        }
-        
-        function failMission() {
-            mission.reward = 0;
-            showMissionResult(false);
-        }
-        
-        function showMissionResult(won) {
-            const planet = game.planets.find(p => p.id === game.currentMission);
-            const resultText = won ? '✅ MISSION COMPLETE' : '❌ MISSION FAILED';
-            const color = won ? '#00ff88' : '#ff4444';
-            
-            let resultModal = document.getElementById('missionResultModal');
-            if (!resultModal) {
-                resultModal = document.createElement('div');
-                resultModal.id = 'missionResultModal';
-                resultModal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 200; display: flex; align-items: center; justify-content: center;';
-                document.body.appendChild(resultModal);
-            }
-            
-            const missionTime = Math.floor(mission.totalTime);
-            
-            // Build mission-specific stats
-            let statsHTML = `
-                <div style="margin: 10px 0;">👽 Enemies Killed: <strong style="color: #ffaa00;">${mission.killed}</strong></div>
-                <div style="margin: 10px 0;">⏱️ Time: <strong style="color: #ffaa00;">${missionTime}s</strong></div>
-            `;
-            
-            if (mission.type === 'elimination') {
-                statsHTML += `<div style="margin: 10px 0;">📊 Total Enemies: <strong style="color: #ffaa00;">${mission.totalEnemies}</strong></div>`;
-            } else if (mission.type === 'survival') {
-                statsHTML += `<div style="margin: 10px 0;">⏰ Target Time: <strong style="color: #ffaa00;">${mission.targetTime}s</strong></div>`;
-            } else if (mission.type === 'defense') {
-                const objectiveStatus = mission.objective && mission.objective.health > 0 ? '✓ PROTECTED' : '✗ DESTROYED';
-                const objectiveColor = mission.objective && mission.objective.health > 0 ? '#00ff88' : '#ff4444';
-                statsHTML += `<div style="margin: 10px 0;">🛡️ Objective: <strong style="color: ${objectiveColor};">${objectiveStatus}</strong></div>`;
-                statsHTML += `<div style="margin: 10px 0;">⏰ Survival Time: <strong style="color: #ffaa00;">${missionTime}/${mission.targetTime}s</strong></div>`;
-            }
-            
-            resultModal.innerHTML = `
-                <div style="background: #0a0e27; border: 3px solid ${color}; border-radius: 10px; padding: 40px; text-align: center; max-width: 600px;">
-                    <div style="font-size: 48px; color: ${color}; margin-bottom: 20px; font-weight: bold;">${resultText}</div>
-                    <div style="font-size: 24px; color: #00ff88; margin-bottom: 30px;">${MISSION_TYPES[mission.type].name} • ${mission.difficulty.toUpperCase()}</div>
-                    <div style="background: #1a1f3a; padding: 20px; border-radius: 5px; margin-bottom: 20px; color: #aaa;">
-                        ${statsHTML}
-                        <div style="margin: 10px 0;">💰 Reward: <strong style="color: ${won ? '#00ff88' : '#666'};">${won ? '+' : ''}${mission.reward} credits</strong></div>
-                        ${won ? `<div style="margin: 10px 0; color: #ff9900;">⬆️ THREAT: ${planet.threat}/100</div>` : ''}
-                    </div>
-                    <button onclick="exitMission()" style="background: ${color}; color: #0a0e27; padding: 15px 30px; font-size: 18px; font-weight: bold; border: none; cursor: pointer; border-radius: 5px; width: 100%;">CONTINUE</button>
-                </div>
-            `;
-            resultModal.style.display = 'flex';
-        }
-
-        // Helper: Exit mission and return to ship
-        function exitMission() {
-            game.inMission = false;
-            mission.state = 'IDLE';
-            mission.type = null;
-            mission.difficulty = null;
-            mission.enemies = [];
-            mission.killed = 0;
-            mission.totalEnemies = 0;
-            game.isReady = false;
-            
-            const resultModal = document.getElementById('missionResultModal');
-            if (resultModal) resultModal.style.display = 'none';
-            
-            document.getElementById('shipCanvas').style.display = 'block';
-            document.getElementById('header').style.display = 'block';
-            document.getElementById('missionModal').classList.remove('show');
-            document.getElementById('credits').textContent = game.credits;
-        }
-
-        // Focus System - One active focus per weapon
-        const FOCUS_BONUSES = {
-            damage: {
-                name: 'Damage Focus',
-                icon: '💥',
-                bonus: '+10% damage + crit chance',
-                description: 'Gain increased damage and occasional critical hits (1.5x damage)'
-            },
-            fireRate: {
-                name: 'Fire Rate Focus',
-                icon: '⚡',
-                bonus: '+10% fire rate + stability',
-                description: 'Fire faster and with improved accuracy'
-            },
-            magSize: {
-                name: 'Magazine Focus',
-                icon: '📦',
-                bonus: '+20% mag + reload speed',
-                description: 'Larger magazine and faster reloads'
-            },
-            reloadSpeed: {
-                name: 'Reload Focus',
-                icon: '🔄',
-                bonus: 'Reload buff for 3s',
-                description: 'After reloading, gain +10% damage for 3 seconds'
-            }
-        };
-
-        const canvas = document.getElementById('shipCanvas');
-        const ctx = canvas.getContext('2d');
-        let cw = 0, ch = 0;
-
-        // Ship state
-        const ship = {
-            player: { x: 400, y: 400, w: 15, h: 15, speed: 4 },
-            keys: {},
-            controlRoom: { x: 200, y: 50, w: 400, h: 120, name: 'CONTROL ROOM', icon: '🖥️', color: '#4444ff' },
-            missionTable: { x: 150, y: 220, w: 500, h: 150, name: 'MISSION TABLE', icon: '🗺️', color: '#00ff88' },
-            armory: { x: 50, y: 420, w: 150, h: 100, name: 'ARMORY', icon: '⚔️', color: '#ff6600' },
-            engineering: { x: 250, y: 420, w: 150, h: 100, name: 'ENGINEERING', icon: '⚡', color: '#ff4444' },
-            cargo: { x: 450, y: 420, w: 150, h: 100, name: 'CARGO BAY', icon: '📦', color: '#ffaa00' },
-            comm: { x: 650, y: 420, w: 150, h: 100, name: 'COMMUNICATIONS', icon: '📡', color: '#00aaff' }
-        };
-
+        // Menu Button Functions
         function startGame() {
-            document.getElementById('mainMenu').style.display = 'none';
-            document.getElementById('header').style.display = 'block';
-            document.getElementById('shipCanvas').style.display = 'block';
-            cw = canvas.clientWidth;
-            ch = canvas.clientHeight;
-            canvas.width = cw;
-            canvas.height = ch;
-            
-            ship.player.x = cw / 2 - ship.player.w / 2;
-            ship.player.y = ch / 2;
-            
-            gameLoop();
-        }
-
-        function exitToMenu() {
-            document.getElementById('mainMenu').style.display = 'flex';
-            document.getElementById('header').style.display = 'none';
-            document.getElementById('shipCanvas').style.display = 'none';
-        }
-
-        function gameLoop() {
-            update();
-            draw();
-            if (document.getElementById('shipCanvas').style.display !== 'none') {
-                requestAnimationFrame(gameLoop);
-            }
-        }
-
-        function update() {
-            // Only allow movement if no modals are open and we're in the ship or in a mission
-            const anyModalOpen = document.getElementById('missionModal').classList.contains('show') ||
-                                 document.getElementById('engineeringModal').classList.contains('show') ||
-                                 document.getElementById('armoryModal').classList.contains('show') ||
-                                 document.getElementById('controlRoomModal').classList.contains('show') ||
-                                 document.getElementById('countdownScreen').style.display !== 'none' ||
-                                 (document.getElementById('missionResultModal') && document.getElementById('missionResultModal').style.display !== 'none');
-            
-            if (!anyModalOpen) {
-                if (ship.keys['ArrowUp'] || ship.keys['w'] || ship.keys['W']) ship.player.y -= ship.player.speed;
-                if (ship.keys['ArrowDown'] || ship.keys['s'] || ship.keys['S']) ship.player.y += ship.player.speed;
-                if (ship.keys['ArrowLeft'] || ship.keys['a'] || ship.keys['A']) ship.player.x -= ship.player.speed;
-                if (ship.keys['ArrowRight'] || ship.keys['d'] || ship.keys['D']) ship.player.x += ship.player.speed;
-            }
-
-            ship.player.x = Math.max(0, Math.min(cw - ship.player.w, ship.player.x));
-            ship.player.y = Math.max(0, Math.min(ch - ship.player.h, ship.player.y));
-
-            // Mission system updates (only when mission is actively running)
-            if (game.inMission && mission.state === 'IN_PROGRESS') {
-                spawnEnemies();
-                updateEnemies();
-                checkMissionCompletion();
-            }
-        }
-
-        function draw() {
-            const gradient = ctx.createLinearGradient(0, 0, 0, ch);
-            gradient.addColorStop(0, '#0a0e27');
-            gradient.addColorStop(1, '#1a1f3a');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, cw, ch);
-
-            // Draw ship rooms or mission enemies
-            if (game.inMission) {
-                // Mission mode - draw player and enemies
-                ctx.fillStyle = '#00ff88';
-                ctx.beginPath();
-                ctx.arc(ship.player.x + ship.player.w / 2, ship.player.y + ship.player.h / 2, ship.player.w, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#00ff88';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                // Draw enemies
-                drawEnemies();
-                
-                // Draw objective if defense mission
-                if (mission.type === 'defense') {
-                    drawObjective();
-                }
-
-                // Draw mission HUD
-                const missionTime = Math.floor((Date.now() - mission.missionStartTime) / 1000);
-                ctx.fillStyle = '#00ff88';
-                ctx.font = 'bold 16px Arial';
-                ctx.textAlign = 'left';
-                ctx.fillText(`${MISSION_TYPES[mission.type].name}`, 20, 30);
-                ctx.font = '12px Arial';
-                
-                // Mission-specific HUD displays
-                if (mission.type === 'elimination') {
-                    ctx.fillText(`Killed: ${mission.killed}/${mission.totalEnemies} | Time: ${missionTime}s | Enemies: ${mission.enemies.length}`, 20, 50);
-                } else if (mission.type === 'survival') {
-                    ctx.fillText(`Survive: ${missionTime}/${mission.targetTime}s | Enemies: ${mission.enemies.length} | Killed: ${mission.killed}`, 20, 50);
-                } else if (mission.type === 'defense') {
-                    const objHealth = mission.objective ? mission.objective.health : 0;
-                    const objMaxHealth = mission.objective ? mission.objective.maxHealth : 100;
-                    ctx.fillText(`Objective: ${objHealth}/${objMaxHealth} HP | Survive: ${missionTime}/${mission.targetTime}s | Enemies: ${mission.enemies.length}`, 20, 50);
-                }
-            } else {
-                // Ship mode - draw rooms
-                drawRoom(ship.controlRoom);
-                drawRoom(ship.missionTable);
-                drawRoom(ship.armory);
-                drawRoom(ship.engineering);
-                drawRoom(ship.cargo);
-                drawRoom(ship.comm);
-
-                ctx.fillStyle = '#00ff88';
-                ctx.beginPath();
-                ctx.arc(ship.player.x + ship.player.w / 2, ship.player.y + ship.player.h / 2, ship.player.w, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#00ff88';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                ctx.fillStyle = '#00ff88';
-                ctx.font = '14px Arial';
-                ctx.textAlign = 'left';
-                ctx.fillText('WASD or ARROW KEYS to move | E or CLICK to interact', 20, 30);
-            }
-
-            let inRoom = null;
-            const rooms = [ship.controlRoom, ship.missionTable, ship.armory, ship.engineering, ship.cargo, ship.comm];
-            const playerCenterX = ship.player.x + ship.player.w / 2;
-            const playerCenterY = ship.player.y + ship.player.h / 2;
-            
-            // Check if player center is inside a room (not just touching edge)
-            rooms.forEach(room => {
-                if (playerCenterX > room.x + 20 &&
-                    playerCenterX < room.x + room.w - 20 &&
-                    playerCenterY > room.y + 20 &&
-                    playerCenterY < room.y + room.h - 20) {
-                    inRoom = room;
-                }
-            });
-
-            if (inRoom && inRoom.name) {
-                ctx.fillStyle = '#ffaa00';
-                ctx.font = 'bold 16px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(`Press E or Click to enter ${inRoom.name}`, cw / 2, ch - 40);
-            }
-        }
-
-        function drawRoom(room) {
-            ctx.fillStyle = room.color;
-            ctx.globalAlpha = 0.15;
-            ctx.fillRect(room.x, room.y, room.w, room.h);
-            ctx.globalAlpha = 1.0;
-
-            ctx.strokeStyle = room.color;
-            ctx.lineWidth = 3;
-            ctx.strokeRect(room.x, room.y, room.w, room.h);
-
-            ctx.fillStyle = room.color;
-            ctx.font = 'bold 32px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(room.icon, room.x + room.w / 2, room.y + room.h / 2 - 5);
-
-            ctx.fillStyle = room.color;
-            ctx.font = 'bold 14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(room.name, room.x + room.w / 2, room.y + room.h / 2 + 25);
-        }
-
-        document.addEventListener('keydown', (e) => {
-            ship.keys[e.key] = true;
-            if (e.key === 'e' || e.key === 'E') {
-                const rooms = [ship.controlRoom, ship.missionTable, ship.armory, ship.engineering, ship.cargo, ship.comm];
-                rooms.forEach(room => {
-                    if (ship.player.x + ship.player.w > room.x &&
-                        ship.player.x < room.x + room.w &&
-                        ship.player.y + ship.player.h > room.y &&
-                        ship.player.y < room.y + room.h) {
-                        roomClicked(room);
-                    }
-                });
-            }
-            // Spacebar to shoot at nearest enemy
-            if (e.key === ' ' && game.inMission && mission.state === 'IN_PROGRESS') {
-                if (mission.enemies.length > 0) {
-                    let closest = mission.enemies[0];
-                    let closestDist = Infinity;
-                    mission.enemies.forEach(enemy => {
-                        const dx = enemy.x - ship.player.x;
-                        const dy = enemy.y - ship.player.y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < closestDist) {
-                            closestDist = dist;
-                            closest = enemy;
-                        }
-                    });
-                    shootAt(closest.x + closest.size/2, closest.y + closest.size/2);
-                }
-                e.preventDefault();
-            }
-        });
-
-        document.addEventListener('keyup', (e) => {
-            ship.keys[e.key] = false;
-        });
-
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            // If in mission, try to shoot at clicked location
-            if (game.inMission && mission.state === 'IN_PROGRESS') {
-                shootAt(x, y);
-                return;
-            }
-
-            // Otherwise, check for room clicks
-            const rooms = [ship.controlRoom, ship.missionTable, ship.armory, ship.engineering, ship.cargo, ship.comm];
-            rooms.forEach(room => {
-                if (x > room.x && x < room.x + room.w && y > room.y && y < room.y + room.h) {
-                    roomClicked(room);
-                }
-            });
-        });
-
-        function shootAt(clickX, clickY) {
-            // Find closest enemy to click location
-            let closestEnemy = null;
-            let closestDist = 120; // Hit radius (increased for easier targeting)
-            
-            mission.enemies.forEach(enemy => {
-                const dx = (enemy.x + enemy.size/2) - clickX;
-                const dy = (enemy.y + enemy.size/2) - clickY;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < closestDist) {
-                    closestDist = dist;
-                    closestEnemy = enemy;
-                }
-            });
-            
-            // If hit an enemy, damage it
-            if (closestEnemy) {
-                const damage = 15; // Base damage
-                closestEnemy.health -= damage;
-                console.log(`Shot! Damage: ${damage}, Enemy health: ${closestEnemy.health}`);
-                
-                // If enemy dies
-                if (closestEnemy.health <= 0) {
-                    const index = mission.enemies.indexOf(closestEnemy);
-                    if (index > -1) {
-                        mission.enemies.splice(index, 1);
-                        mission.killed++;
-                        console.log(`Enemy killed! Total kills: ${mission.killed}`);
-                    }
-                }
-            } else {
-                console.log(`Miss! No enemies in range. Enemies on map: ${mission.enemies.length}`);
-            }
-        }
-
-        function roomClicked(room) {
-            // Prevent room clicks during missions
-            if (game.inMission) return;
-            
-            if (room === ship.missionTable) {
-                openMissionModal();
-            } else if (room === ship.controlRoom) {
-                openControlRoom();
-            } else if (room === ship.armory) {
-                openArmory();
-            } else if (room === ship.engineering) {
-                openEngineering();
-            }
-            // Other rooms coming soon
-        }
-
-        function openArmory() {
-            updateArmoryDisplay();
-            document.getElementById('armoryModal').classList.add('show');
-        }
-
-        function exitArmory() {
-            document.getElementById('armoryModal').classList.remove('show');
-        }
-
-        function openEngineering() {
-            updateUpgradeDisplay();
-            document.getElementById('engineeringModal').classList.add('show');
-        }
-
-        function exitEngineering() {
-            document.getElementById('engineeringModal').classList.remove('show');
-        }
-
-        function updateUpgradeDisplay() {
-            // Initialize upgrade tracking if needed
-            if (!game.weaponUpgrades) {
-                game.weaponUpgrades = {};
-            }
-            
-            // Initialize focus system
-            if (!game.weaponFocus) {
-                game.weaponFocus = {};
-            }
-            
-            document.getElementById('engineeringCreditsDisplay').textContent = game.credits;
-            const slot1Name = game.loadout.slot1 || 'AR-X';
-            const slot2Name = game.loadout.slot2 || 'Pistol';
-            document.getElementById('engineeringSlot1Display').textContent = slot1Name;
-            document.getElementById('engineeringSlot2Display').textContent = slot2Name;
-            
-            // Show focus status in loadout
-            const slot1Weapon = getWeaponByName(slot1Name);
-            const slot2Weapon = getWeaponByName(slot2Name);
-            
-            if (slot1Weapon && game.weaponFocus[slot1Weapon.id] && game.weaponFocus[slot1Weapon.id].activeFocus) {
-                const focusType = game.weaponFocus[slot1Weapon.id].activeFocus;
-                const focusInfo = FOCUS_BONUSES[focusType];
-                document.getElementById('engineeringSlot1Focus').textContent = `${focusInfo.icon} ${focusInfo.name}`;
-            }
-            
-            if (slot2Weapon && game.weaponFocus[slot2Weapon.id] && game.weaponFocus[slot2Weapon.id].activeFocus) {
-                const focusType = game.weaponFocus[slot2Weapon.id].activeFocus;
-                const focusInfo = FOCUS_BONUSES[focusType];
-                document.getElementById('engineeringSlot2Focus').textContent = `${focusInfo.icon} ${focusInfo.name}`;
-            }
-            
-            // Show active focus in loadout
-            let activeFocusText = 'None selected';
-            if (slot2Weapon && game.weaponFocus[slot2Weapon.id] && game.weaponFocus[slot2Weapon.id].activeFocus) {
-                const focusType = game.weaponFocus[slot2Weapon.id].activeFocus;
-                const focusInfo = FOCUS_BONUSES[focusType];
-                activeFocusText = `${focusInfo.icon} ${focusInfo.name}`;
-            }
-            document.getElementById('activeFocusDisplay').textContent = activeFocusText;
-            
-            // Get all weapon data
-            const allWeapons = [];
-            const weaponCategories = [
-                {
-                    weapons: [
-                        { id: 'ar-x', name: 'AR-X', tier: 1, owned: true, price: 0, dmg: 20, mag: 30, ammo: 360, fireRate: 600 },
-                        { id: 'burst', name: 'Burst Rifle', tier: 2, owned: false, price: 500, dmg: 20, mag: 24, ammo: 300, fireRate: 400 },
-                        { id: 'carbine', name: 'Combat Carbine', tier: 3, owned: false, price: 9000, dmg: 32, mag: 28, ammo: 336, fireRate: 550 },
-                        { id: 'lmg', name: 'Heavy Pulse LMG', tier: 3.5, owned: false, price: 12000, dmg: 22, mag: 60, ammo: 600, fireRate: 700 },
-                        { id: 'auto', name: 'Auto Cannon', tier: 4, owned: false, price: 1600, dmg: 20, mag: 50, ammo: 600, fireRate: 750 }
-                    ]
-                },
-                {
-                    weapons: [
-                        { id: 'pistol', name: 'Energy Pistol', tier: 1, owned: true, price: 0, dmg: 15, mag: 12, ammo: 240, fireRate: 400 },
-                        { id: 'smg', name: 'Pulse SMG', tier: 1, owned: true, price: 0, dmg: 10, mag: 30, ammo: 420, fireRate: 650 },
-                        { id: 'stabilizer', name: 'Energy Stabilizer', tier: 3, owned: false, price: 7500, dmg: 15, mag: 20, ammo: 240, fireRate: 350 },
-                        { id: 'suppression-smg', name: 'Suppression SMG', tier: 3, owned: false, price: 8500, dmg: 18, mag: 35, ammo: 420, fireRate: 680 }
-                    ]
-                },
-                {
-                    weapons: [
-                        { id: 'sniper', name: 'Laser Sniper', tier: 2, owned: false, price: 700, dmg: 90, mag: 5, ammo: 40, fireRate: 200 },
-                        { id: 'gauss', name: 'Gauss Rifle', tier: 3, owned: false, price: 1200, dmg: 60, mag: 10, ammo: 120, fireRate: 300 },
-                        { id: 'laser-rifle', name: 'Marksman Laser Rifle', tier: 3, owned: false, price: 11500, dmg: 85, mag: 12, ammo: 120, fireRate: 250 },
-                        { id: 'railgun', name: 'Railgun', tier: 3, owned: false, price: 1500, dmg: 130, mag: 3, ammo: 24, fireRate: 150 }
-                    ]
-                },
-                {
-                    weapons: [
-                        { id: 'shotgun', name: 'Plasma Shotgun', tier: 2, owned: false, price: 600, dmg: 60, mag: 6, ammo: 72, fireRate: 250 },
-                        { id: 'pulse', name: 'Pulse Rifle', tier: 3, owned: false, price: 1000, dmg: 20, mag: 27, ammo: 360, fireRate: 500 },
-                        { id: 'rocket', name: 'Rocket Launcher', tier: 4, owned: false, price: 2000, dmg: 120, mag: 1, ammo: 12, fireRate: 100 },
-                        { id: 'plasma', name: 'Plasma Launcher', tier: 4, owned: false, price: 1800, dmg: 100, mag: 4, ammo: 40, fireRate: 120 },
-                        { id: 'grenade', name: 'Grenade Launcher', tier: 4, owned: false, price: 1700, dmg: 90, mag: 6, ammo: 60, fireRate: 140 },
-                        { id: 'cluster', name: 'Cluster Launcher', tier: 4, owned: false, price: 15500, dmg: 110, mag: 5, ammo: 50, fireRate: 110 }
-                    ]
-                }
-            ];
-            
-            // Collect all weapons and filter owned
-            weaponCategories.forEach(cat => {
-                cat.weapons.forEach(w => {
-                    if (w.owned || (game.inventory && game.inventory[w.id])) {
-                        allWeapons.push(w);
-                    }
-                });
-            });
-            
-            // Build weapon list
-            const weaponsList = document.getElementById('upgradeWeaponsList');
-            weaponsList.innerHTML = '';
-            
-            if (allWeapons.length === 0) {
-                weaponsList.innerHTML = '<div style="color: #aaa; font-size: 11px;">No owned weapons yet</div>';
-                return;
-            }
-            
-            allWeapons.forEach(w => {
-                const btn = document.createElement('button');
-                btn.style.cssText = `background: #1a1f3a; border: 2px solid #666; color: #00ff88; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 11px; transition: all 0.2s; text-align: left;`;
-                btn.textContent = w.name;
-                btn.onclick = () => selectUpgradeWeapon(w);
-                weaponsList.appendChild(btn);
-            });
-            
-            // Select first weapon by default
-            if (allWeapons.length > 0) {
-                selectUpgradeWeapon(allWeapons[0]);
-            }
-        }
-        
-        let selectedUpgradeWeapon = null;
-        
-        function selectUpgradeWeapon(weapon) {
-            selectedUpgradeWeapon = weapon;
-            
-            // Update preview
-            document.getElementById('upgradePreviewName').textContent = weapon.name;
-            document.getElementById('upgradePreviewTier').textContent = ['', 'TIER 1', 'TIER 2', 'TIER 3', 'TIER 4'][Math.floor(weapon.tier)] || '';
-            
-            // Initialize upgrade levels for this weapon
-            if (!game.weaponUpgrades[weapon.id]) {
-                game.weaponUpgrades[weapon.id] = {
-                    damage: 0,
-                    fireRate: 0,
-                    magSize: 0,
-                    reloadSpeed: 0
-                };
-            }
-            
-            const upgrades = game.weaponUpgrades[weapon.id];
-            
-            // Calculate and display total weapon level
-            const totalLevel = (upgrades.damage || 0) + (upgrades.fireRate || 0) + (upgrades.magSize || 0) + (upgrades.reloadSpeed || 0);
-            document.getElementById('totalWeaponLevel').textContent = `Total Level: ${totalLevel}/20`;
-            
-            // Build upgrade stats panel
-            const statsPanel = document.getElementById('upgradeStatsPanel');
-            statsPanel.innerHTML = `
-                <div style="background: #0a0e27; border: 1px solid #444; border-radius: 3px; padding: 10px; margin-bottom: 5px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <div>
-                            <div style="color: #aaa; font-size: 10px;">DAMAGE</div>
-                            <div style="color: #ff4444; font-weight: bold; font-size: 14px;">${weapon.dmg} → ${weapon.dmg + (upgrades.damage * 3)}</div>
-                        </div>
-                        <div style="color: #666; font-size: 10px;">Lv ${upgrades.damage}/5 ${upgrades.damage === 5 ? '🌟' : ''}</div>
-                    </div>
-                    <div style="background: #1a1f3a; border: 1px solid #444; border-radius: 2px; padding: 3px; margin-bottom: 8px;">
-                        <div style="background: #ff4444; height: 6px; border-radius: 1px; width: ${upgrades.damage * 20}%;"></div>
-                    </div>
-                    ${upgrades.damage >= 5 ? '<button style="background: #333; color: #666; padding: 6px 8px; border: none; cursor: not-allowed; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">✓ MAX LEVEL</button>' : '<button onclick="upgradeWeaponStat(\'${weapon.id}\', \'damage\')" style="background: #ff4444; color: white; padding: 6px 8px; border: none; cursor: pointer; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">UPGRADE - $${getUpgradeCost(\'damage\', upgrades.damage)}</button>'}
-                </div>
-                
-                <div style="background: #0a0e27; border: 1px solid #444; border-radius: 3px; padding: 10px; margin-bottom: 5px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <div>
-                            <div style="color: #aaa; font-size: 10px;">FIRE RATE</div>
-                            <div style="color: #ffaa00; font-weight: bold; font-size: 14px;">${weapon.fireRate} → ${weapon.fireRate + (upgrades.fireRate * 15)}</div>
-                        </div>
-                        <div style="color: #666; font-size: 10px;">Lv ${upgrades.fireRate}/5 ${upgrades.fireRate === 5 ? '🌟' : ''}</div>
-                    </div>
-                    <div style="background: #1a1f3a; border: 1px solid #444; border-radius: 2px; padding: 3px; margin-bottom: 8px;">
-                        <div style="background: #ffaa00; height: 6px; border-radius: 1px; width: ${upgrades.fireRate * 20}%;"></div>
-                    </div>
-                    ${upgrades.fireRate >= 5 ? '<button style="background: #333; color: #666; padding: 6px 8px; border: none; cursor: not-allowed; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">✓ MAX LEVEL</button>' : '<button onclick="upgradeWeaponStat(\'${weapon.id}\', \'fireRate\')" style="background: #ffaa00; color: #0a0e27; padding: 6px 8px; border: none; cursor: pointer; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">UPGRADE - $${getUpgradeCost(\'fireRate\', upgrades.fireRate)}</button>'}
-                </div>
-                
-                <div style="background: #0a0e27; border: 1px solid #444; border-radius: 3px; padding: 10px; margin-bottom: 5px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <div>
-                            <div style="color: #aaa; font-size: 10px;">MAGAZINE SIZE</div>
-                            <div style="color: #4444ff; font-weight: bold; font-size: 14px;">${weapon.mag} → ${weapon.mag + (upgrades.magSize * 2)}</div>
-                        </div>
-                        <div style="color: #666; font-size: 10px;">Lv ${upgrades.magSize}/5 ${upgrades.magSize === 5 ? '🌟' : ''}</div>
-                    </div>
-                    <div style="background: #1a1f3a; border: 1px solid #444; border-radius: 2px; padding: 3px; margin-bottom: 8px;">
-                        <div style="background: #4444ff; height: 6px; border-radius: 1px; width: ${upgrades.magSize * 20}%;"></div>
-                    </div>
-                    ${upgrades.magSize >= 5 ? '<button style="background: #333; color: #666; padding: 6px 8px; border: none; cursor: not-allowed; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">✓ MAX LEVEL</button>' : '<button onclick="upgradeWeaponStat(\'${weapon.id}\', \'magSize\')" style="background: #4444ff; color: white; padding: 6px 8px; border: none; cursor: pointer; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">UPGRADE - $${getUpgradeCost(\'magSize\', upgrades.magSize)}</button>'}
-                </div>
-                
-                <div style="background: #0a0e27; border: 1px solid #444; border-radius: 3px; padding: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <div>
-                            <div style="color: #aaa; font-size: 10px;">RELOAD SPEED</div>
-                            <div style="color: #00ff88; font-weight: bold; font-size: 14px;">+${(upgrades.reloadSpeed - 1) * 5}% → +${upgrades.reloadSpeed * 5}%</div>
-                        </div>
-                        <div style="color: #666; font-size: 10px;">Lv ${upgrades.reloadSpeed}/5 ${upgrades.reloadSpeed === 5 ? '🌟' : ''}</div>
-                    </div>
-                    <div style="background: #1a1f3a; border: 1px solid #444; border-radius: 2px; padding: 3px; margin-bottom: 8px;">
-                        <div style="background: #00ff88; height: 6px; border-radius: 1px; width: ${upgrades.reloadSpeed * 20}%;"></div>
-                    </div>
-                    ${upgrades.reloadSpeed >= 5 ? '<button style="background: #333; color: #666; padding: 6px 8px; border: none; cursor: not-allowed; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">✓ MAX LEVEL</button>' : '<button onclick="upgradeWeaponStat(\'${weapon.id}\', \'reloadSpeed\')" style="background: #00ff88; color: #0a0e27; padding: 6px 8px; border: none; cursor: pointer; border-radius: 2px; font-size: 10px; width: 100%; font-weight: bold;">UPGRADE - $${getUpgradeCost(\'reloadSpeed\', upgrades.reloadSpeed)}</button>'}
-                </div>
-                
-                <!-- FOCUS SELECTION PANEL -->
-                <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #ffaa00;">
-                    <h4 style="color: #ffaa00; font-size: 11px; margin-bottom: 10px;">🎯 FOCUS SYSTEM</h4>
-                    ${(() => {
-                        const unlocked = getUnlockedFocuses(weapon.id);
-                        const focus = initializeWeaponFocus(weapon.id);
-                        
-                        if (unlocked.length === 0) {
-                            return '<div style="color: #666; font-size: 10px;">Upgrade any stat to Level 5 to unlock Focus</div>';
-                        }
-                        
-                        let focusHTML = '';
-                        unlocked.forEach(focusType => {
-                            const focusInfo = FOCUS_BONUSES[focusType];
-                            const isActive = focus.activeFocus === focusType;
-                            const btnBg = isActive ? '#ffaa00' : '#1a1f3a';
-                            const btnColor = isActive ? '#0a0e27' : '#ffaa00';
-                            const btnText = isActive ? '✓ ACTIVE' : 'ACTIVATE';
-                            
-                            focusHTML += `
-                                <div style="background: #0a0e27; border: 1px solid #ffaa00; border-radius: 3px; padding: 8px; margin-bottom: 8px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                                        <div style="color: #ffaa00; font-weight: bold; font-size: 11px;">${focusInfo.icon} ${focusInfo.name}</div>
-                                        <button onclick="activateFocus('${weapon.id}', '${focusType}')" style="background: ${btnBg}; color: ${btnColor}; padding: 3px 6px; border: 1px solid #ffaa00; cursor: pointer; border-radius: 2px; font-size: 9px; font-weight: bold;">${btnText}</button>
-                                    </div>
-                                    <div style="color: #aaa; font-size: 9px; line-height: 1.3;">${focusInfo.bonus}</div>
-                                </div>
-                            `;
-                        });
-                        
-                        return focusHTML;
-                    })()}
-                </div>
-            `;
-        }
-        
-
-
-
-
-        function getWeaponByName(name) {
-            const weaponCategories = [
-                {
-                    weapons: [
-                        { id: 'ar-x', name: 'AR-X', tier: 1, owned: true, price: 0, dmg: 20, mag: 30, ammo: 360, fireRate: 600 },
-                        { id: 'burst', name: 'Burst Rifle', tier: 2, owned: false, price: 500, dmg: 20, mag: 24, ammo: 300, fireRate: 400 },
-                        { id: 'carbine', name: 'Combat Carbine', tier: 3, owned: false, price: 9000, dmg: 32, mag: 28, ammo: 336, fireRate: 550 },
-                        { id: 'lmg', name: 'Heavy Pulse LMG', tier: 3.5, owned: false, price: 12000, dmg: 22, mag: 60, ammo: 600, fireRate: 700 },
-                        { id: 'auto', name: 'Auto Cannon', tier: 4, owned: false, price: 1600, dmg: 20, mag: 50, ammo: 600, fireRate: 750 }
-                    ]
-                },
-                {
-                    weapons: [
-                        { id: 'pistol', name: 'Energy Pistol', tier: 1, owned: true, price: 0, dmg: 15, mag: 12, ammo: 240, fireRate: 400 },
-                        { id: 'smg', name: 'Pulse SMG', tier: 1, owned: true, price: 0, dmg: 10, mag: 30, ammo: 420, fireRate: 650 },
-                        { id: 'stabilizer', name: 'Energy Stabilizer', tier: 3, owned: false, price: 7500, dmg: 15, mag: 20, ammo: 240, fireRate: 350 },
-                        { id: 'suppression-smg', name: 'Suppression SMG', tier: 3, owned: false, price: 8500, dmg: 18, mag: 35, ammo: 420, fireRate: 680 }
-                    ]
-                },
-                {
-                    weapons: [
-                        { id: 'sniper', name: 'Laser Sniper', tier: 2, owned: false, price: 700, dmg: 90, mag: 5, ammo: 40, fireRate: 200 },
-                        { id: 'gauss', name: 'Gauss Rifle', tier: 3, owned: false, price: 1200, dmg: 60, mag: 10, ammo: 120, fireRate: 300 },
-                        { id: 'laser-rifle', name: 'Marksman Laser Rifle', tier: 3, owned: false, price: 11500, dmg: 85, mag: 12, ammo: 120, fireRate: 250 },
-                        { id: 'railgun', name: 'Railgun', tier: 3, owned: false, price: 1500, dmg: 130, mag: 3, ammo: 24, fireRate: 150 }
-                    ]
-                },
-                {
-                    weapons: [
-                        { id: 'shotgun', name: 'Plasma Shotgun', tier: 2, owned: false, price: 600, dmg: 60, mag: 6, ammo: 72, fireRate: 250 },
-                        { id: 'pulse', name: 'Pulse Rifle', tier: 3, owned: false, price: 1000, dmg: 20, mag: 27, ammo: 360, fireRate: 500 },
-                        { id: 'rocket', name: 'Rocket Launcher', tier: 4, owned: false, price: 2000, dmg: 120, mag: 1, ammo: 12, fireRate: 100 },
-                        { id: 'plasma', name: 'Plasma Launcher', tier: 4, owned: false, price: 1800, dmg: 100, mag: 4, ammo: 40, fireRate: 120 },
-                        { id: 'grenade', name: 'Grenade Launcher', tier: 4, owned: false, price: 1700, dmg: 90, mag: 6, ammo: 60, fireRate: 140 },
-                        { id: 'cluster', name: 'Cluster Launcher', tier: 4, owned: false, price: 15500, dmg: 110, mag: 5, ammo: 50, fireRate: 110 }
-                    ]
-                }
-            ];
-            
-            for (let cat of weaponCategories) {
-                for (let w of cat.weapons) {
-                    if (w.name === name) return w;
-                }
-            }
-            return null;
-        }
-        
-        function initializeWeaponFocus(weaponId) {
-            if (!game.weaponFocus) {
-                game.weaponFocus = {};
-            }
-            if (!game.weaponFocus[weaponId]) {
-                game.weaponFocus[weaponId] = {
-                    unlockedFocuses: [],
-                    activeFocus: null
-                };
-            }
-            return game.weaponFocus[weaponId];
-        }
-        
-        function getUnlockedFocuses(weaponId) {
-            const upgrades = game.weaponUpgrades[weaponId];
-            const unlocked = [];
-            
-            if (upgrades.damage >= 5) unlocked.push('damage');
-            if (upgrades.fireRate >= 5) unlocked.push('fireRate');
-            if (upgrades.magSize >= 5) unlocked.push('magSize');
-            if (upgrades.reloadSpeed >= 5) unlocked.push('reloadSpeed');
-            
-            return unlocked;
-        }
-
-
-        // Weapon type and stat scaling configuration
-        const WEAPON_CONFIGS = {
-            // SMGs - fast, mag focused
-            'smg': { type: 'SMG', damageScale: 0.8, fireRateCap: 60, fireRateScale: 1.2, magScale: 1.3, reloadScale: 0.9 },
-            'suppression-smg': { type: 'SMG', damageScale: 0.8, fireRateCap: 60, fireRateScale: 1.2, magScale: 1.3, reloadScale: 0.9 },
-            
-            // Rifles - balanced
-            'ar-x': { type: 'Rifle', damageScale: 1.0, fireRateCap: 75, fireRateScale: 1.0, magScale: 1.0, reloadScale: 1.0 },
-            'burst': { type: 'Rifle', damageScale: 1.0, fireRateCap: 75, fireRateScale: 1.0, magScale: 1.0, reloadScale: 1.0 },
-            'carbine': { type: 'Rifle', damageScale: 1.0, fireRateCap: 75, fireRateScale: 1.0, magScale: 1.0, reloadScale: 1.0 },
-            'pulse': { type: 'Rifle', damageScale: 1.0, fireRateCap: 75, fireRateScale: 1.0, magScale: 1.0, reloadScale: 1.0 },
-            
-            // Heavy - slow, dmg focused
-            'lmg': { type: 'Heavy', damageScale: 1.2, fireRateCap: 50, fireRateScale: 0.8, magScale: 1.4, reloadScale: 0.8 },
-            'auto': { type: 'Heavy', damageScale: 1.2, fireRateCap: 50, fireRateScale: 0.8, magScale: 1.3, reloadScale: 0.8 },
-            
-            // Snipers - one-shot, damage + precision
-            'sniper': { type: 'Sniper', damageScale: 1.5, fireRateCap: 40, fireRateScale: 0.6, magScale: 0.5, reloadScale: 1.2 },
-            'laser-rifle': { type: 'Sniper', damageScale: 1.5, fireRateCap: 40, fireRateScale: 0.6, magScale: 0.7, reloadScale: 1.1 },
-            'railgun': { type: 'Sniper', damageScale: 1.5, fireRateCap: 40, fireRateScale: 0.5, magScale: 0.3, reloadScale: 1.0 },
-            
-            // Shotguns - medium, burst damage
-            'shotgun': { type: 'Shotgun', damageScale: 1.3, fireRateCap: 50, fireRateScale: 0.8, magScale: 0.8, reloadScale: 1.1 },
-            
-            // Pistols - utility
-            'pistol': { type: 'Pistol', damageScale: 0.9, fireRateCap: 70, fireRateScale: 1.1, magScale: 1.0, reloadScale: 1.0 },
-            'stabilizer': { type: 'Pistol', damageScale: 0.9, fireRateCap: 70, fireRateScale: 1.0, magScale: 1.0, reloadScale: 1.1 },
-            
-            // Ordnance - area, dmg
-            'rocket': { type: 'Ordnance', damageScale: 1.6, fireRateCap: 30, fireRateScale: 0.5, magScale: 0.2, reloadScale: 0.9 },
-            'plasma': { type: 'Ordnance', damageScale: 1.5, fireRateCap: 35, fireRateScale: 0.6, magScale: 0.3, reloadScale: 0.9 },
-            'grenade': { type: 'Ordnance', damageScale: 1.5, fireRateCap: 35, fireRateScale: 0.6, magScale: 0.4, reloadScale: 0.9 },
-            'cluster': { type: 'Ordnance', damageScale: 1.6, fireRateCap: 30, fireRateScale: 0.5, magScale: 0.3, reloadScale: 0.8 }
-        };
-        
-        // Diminishing returns multiplier for levels 4-5
-        function getDiminishingReturnMultiplier(level) {
-            if (level <= 3) return 1.0;
-            if (level === 4) return 0.85;
-            if (level === 5) return 0.75;
-            return 1.0;
-        }
-        
-        // Get actual stat increase with weapon type and diminishing returns
-        function getActualStatIncrease(weaponId, stat, level) {
-            const config = WEAPON_CONFIGS[weaponId] || { damageScale: 1.0, fireRateScale: 1.0, magScale: 1.0, reloadScale: 1.0 };
-            const diminish = getDiminishingReturnMultiplier(level);
-            
-            const baseIncreases = {
-                damage: 3,
-                fireRate: 15,
-                magSize: 2,
-                reloadSpeed: 1
-            };
-            
-            const scales = {
-                damage: config.damageScale,
-                fireRate: config.fireRateScale,
-                magSize: config.magScale,
-                reloadSpeed: config.reloadScale
-            };
-            
-            return Math.floor(baseIncreases[stat] * scales[stat] * diminish);
-        }
-        
-        // Calculate fire rate cap per weapon
-        function getFireRateCap(weaponId) {
-            const config = WEAPON_CONFIGS[weaponId] || { fireRateCap: 75 };
-            return config.fireRateCap;
-        }
-
-        function getUpgradeCost(stat, currentLevel) {
-            if (currentLevel >= 5) return 0;
-            const baseCosts = { damage: 500, fireRate: 400, magSize: 300, reloadSpeed: 250 };
-            return baseCosts[stat] * (currentLevel + 1);
-        }
-        
-
-        
-        
-
-
-        function activateFocus(weaponId, focusType) {
-            const focus = initializeWeaponFocus(weaponId);
-            const weapon = selectedUpgradeWeapon;
-            
-            if (!weapon || weapon.id !== weaponId) return;
-            
-            // Toggle if already active
-            if (focus.activeFocus === focusType) {
-                focus.activeFocus = null;
-                alert(`✓ ${focusType.toUpperCase()} Focus deactivated`);
-            } else {
-                // Activate new focus
-                focus.activeFocus = focusType;
-                const focusInfo = FOCUS_BONUSES[focusType];
-                alert(`🎯 ${focusInfo.name} ACTIVATED!\n\n${focusInfo.bonus}\n\nBuild your playstyle! ⚡`);
-            }
-            
-            // Re-render to update UI
-            selectUpgradeWeapon(weapon);
-        }
-
-        function upgradeWeaponStat(weaponId, stat) {
-            const weapon = selectedUpgradeWeapon;
-            if (!weapon || weapon.id !== weaponId) return;
-            
-            const upgrades = game.weaponUpgrades[weaponId];
-            if (upgrades[stat] >= 5) {
-                alert('Already at max level 5!');
-                return;
-            }
-            
-            // Special check for fire rate cap
-            if (stat === 'fireRate') {
-                const cap = getFireRateCap(weaponId);
-                const fireRateIncrease = getActualStatIncrease(weaponId, 'fireRate', upgrades.fireRate);
-                const currentFireRateIncrease = getActualStatIncrease(weaponId, 'fireRate', upgrades.fireRate - 1) || 0;
-                const maxFireRateIncrease = Math.floor((weapon.fireRate / 100) * cap);
-                
-                if (currentFireRateIncrease >= maxFireRateIncrease) {
-                    alert(`⚠️ Fire Rate has reached its cap for this weapon type!\n\nCap: +${cap}% (${weapon.fireRate + maxFireRateIncrease})`);
-                    return;
-                }
-            }
-            
-            const cost = getUpgradeCost(stat, upgrades[stat]);
-            const newLevel = upgrades[stat] + 1;
-            
-            if (game.credits < cost) {
-                alert(`Need $${cost - game.credits} more credits!`);
-                return;
-            }
-            
-            // Show confirm popup for expensive upgrades
-            if (cost > 1000) {
-                const confirmed = confirm(`Upgrade ${stat.toUpperCase()} to Level ${newLevel}?\n\nCost: $${cost}\nCredits left: $${game.credits - cost}`);
-                if (!confirmed) return;
-            }
-            
-            // Upgrade!
-            game.credits -= cost;
-            upgrades[stat]++;
-            
-            // Check if stat reached max level 5
-            let maxMessage = '';
-            if (upgrades[stat] === 5) {
-                maxMessage = `\n🌟 STAT MAXED! Unlock Focus bonus!`;
-            }
-            
-            // Visual feedback
-            document.getElementById('engineeringCreditsDisplay').textContent = game.credits;
-            
-            // Flash effect
-            const statsPanel = document.getElementById('upgradeStatsPanel');
-            statsPanel.style.opacity = '0.5';
-            setTimeout(() => statsPanel.style.opacity = '1', 100);
-            
-            // Re-render
-            selectUpgradeWeapon(weapon);
-            
-            alert(`✅ ${stat.toUpperCase()} upgraded to level ${upgrades[stat]}!${maxMessage}`);
-        }
-
-        function updateArmoryDisplay() {
-            document.getElementById('creditsDisplay').textContent = game.credits;
-            
-            const TIER_COLORS = ['#999999', '#00ff88', '#4444ff', '#ffaa00', '#ff4444'];
-            const TIER_NAMES = ['', 'TIER 1', 'TIER 2', 'TIER 3', 'TIER 4'];
-            
-            const weaponCategories = [
-                {
-                    name: 'ASSAULT OPERATORS',
-                    icon: '⚔️',
-                    color: '#ff6600',
-                    weapons: [
-                        { id: 'ar-x', name: 'AR-X', tier: 1, owned: true, price: 0, dmg: 20, mag: 30, ammo: 360 },
-                        { id: 'burst', name: 'Burst Rifle', tier: 2, owned: false, price: 500, dmg: 20, mag: 24, ammo: 300 },
-                        { id: 'carbine', name: 'Combat Carbine', tier: 3, owned: false, price: 9000, dmg: 32, mag: 28, ammo: 336 },
-                        { id: 'lmg', name: 'Heavy Pulse LMG', tier: 3.5, owned: false, price: 12000, dmg: 22, mag: 60, ammo: 600 },
-                        { id: 'auto', name: 'Auto Cannon', tier: 4, owned: false, price: 1600, dmg: 20, mag: 50, ammo: 600 }
-                    ]
-                },
-                {
-                    name: 'SUPPORT UNITS',
-                    icon: '🛡️',
-                    color: '#4444ff',
-                    weapons: [
-                        { id: 'pistol', name: 'Energy Pistol', tier: 1, owned: true, price: 0, dmg: 15, mag: 12, ammo: 240 },
-                        { id: 'smg', name: 'Pulse SMG', tier: 1, owned: true, price: 0, dmg: 10, mag: 30, ammo: 420 },
-                        { id: 'stabilizer', name: 'Energy Stabilizer', tier: 3, owned: false, price: 7500, dmg: 15, mag: 20, ammo: 240 },
-                        { id: 'suppression-smg', name: 'Suppression SMG', tier: 3, owned: false, price: 8500, dmg: 18, mag: 35, ammo: 420 }
-                    ]
-                },
-                {
-                    name: 'PRECISION STRIKE',
-                    icon: '🎯',
-                    color: '#00ff88',
-                    weapons: [
-                        { id: 'sniper', name: 'Laser Sniper', tier: 2, owned: false, price: 700, dmg: 90, mag: 5, ammo: 40 },
-                        { id: 'gauss', name: 'Gauss Rifle', tier: 3, owned: false, price: 1200, dmg: 60, mag: 10, ammo: 120 },
-                        { id: 'laser-rifle', name: 'Marksman Laser Rifle', tier: 3, owned: false, price: 11500, dmg: 85, mag: 12, ammo: 120 },
-                        { id: 'railgun', name: 'Railgun', tier: 3, owned: false, price: 1500, dmg: 130, mag: 3, ammo: 24 }
-                    ]
-                },
-                {
-                    name: 'ORDNANCE',
-                    icon: '💥',
-                    color: '#ff4444',
-                    weapons: [
-                        { id: 'shotgun', name: 'Plasma Shotgun', tier: 2, owned: false, price: 600, dmg: 60, mag: 6, ammo: 72 },
-                        { id: 'pulse', name: 'Pulse Rifle', tier: 3, owned: false, price: 1000, dmg: 20, mag: 27, ammo: 360 },
-                        { id: 'rocket', name: 'Rocket Launcher', tier: 4, owned: false, price: 2000, dmg: 120, mag: 1, ammo: 12 },
-                        { id: 'plasma', name: 'Plasma Launcher', tier: 4, owned: false, price: 1800, dmg: 100, mag: 4, ammo: 40 },
-                        { id: 'grenade', name: 'Grenade Launcher', tier: 4, owned: false, price: 1700, dmg: 90, mag: 6, ammo: 60 },
-                        { id: 'cluster', name: 'Cluster Launcher', tier: 4, owned: false, price: 15500, dmg: 110, mag: 5, ammo: 50 }
-                    ]
-                }
-            ];
-            
-            let selectedWeapon = null;
-            
-            const categoriesList = document.getElementById('categoriesList');
-            categoriesList.innerHTML = '';
-            
-            weaponCategories.forEach((cat, idx) => {
-                const btn = document.createElement('button');
-                btn.style.cssText = `background: #1a1f3a; border: 2px solid ${cat.color}; color: ${cat.color}; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px; transition: all 0.2s;`;
-                btn.innerHTML = `${cat.icon} ${cat.name}`;
-                btn.onmouseover = () => btn.style.background = cat.color.slice(0, -1) + '33';
-                btn.onmouseout = () => btn.style.background = '#1a1f3a';
-                btn.onclick = () => selectCategory(idx);
-                categoriesList.appendChild(btn);
-            });
-            
-            function selectCategory(catIdx) {
-                const cat = weaponCategories[catIdx];
-                const weaponPreview = document.getElementById('weaponPreview');
-                weaponPreview.innerHTML = '';
-                
-                const weaponGrid = document.createElement('div');
-                weaponGrid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; height: 100%;';
-                
-                cat.weapons.forEach(w => {
-                    const card = document.createElement('div');
-                    const tierColor = TIER_COLORS[Math.floor(w.tier)];
-                    const owned = w.owned ? '✓ OWNED' : (game.credits >= w.price ? '💰 BUY' : '🔒 LOCKED');
-                    const btnBg = w.owned ? '#00ff88' : (game.credits >= w.price ? '#4444ff' : '#666');
-                    
-                    card.style.cssText = `background: linear-gradient(135deg, #1a1f3a 0%, #0a0e27 100%); border: 2px solid ${tierColor}; border-radius: 5px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column;`;
-                    card.innerHTML = `
-                        <div style="color: ${tierColor}; font-weight: bold; font-size: 13px;">${w.name}</div>
-                        <div style="color: #aaa; font-size: 10px; margin-top: 4px;">${TIER_NAMES[Math.floor(w.tier)]}</div>
-                        <div style="color: #ffaa00; font-size: 11px; margin-top: 6px; font-weight: bold;">${w.owned ? 'FREE' : `$${w.price}`}</div>
-                        <button style="background: ${btnBg}; color: #0a0e27; padding: 6px; border: none; cursor: pointer; border-radius: 3px; font-weight: bold; font-size: 10px; margin-top: auto;">${owned}</button>
-                    `;
-                    card.onmouseover = () => card.style.borderColor = '#fff';
-                    card.onmouseout = () => card.style.borderColor = tierColor;
-                    card.onclick = () => selectWeapon(w);
-                    weaponGrid.appendChild(card);
-                });
-                
-                weaponPreview.appendChild(weaponGrid);
-            }
-            
-            window.selectWeapon = function(weapon) {
-                selectedWeapon = weapon;
-                
-                document.getElementById('previewName').textContent = weapon.name;
-                document.getElementById('previewTier').textContent = TIER_NAMES[Math.floor(weapon.tier)];
-                
-                const tierColor = TIER_COLORS[Math.floor(weapon.tier)];
-                const statsDiv = document.getElementById('weaponStats');
-                statsDiv.innerHTML = `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                        <div>
-                            <div style="color: #aaa; font-size: 10px;">DAMAGE</div>
-                            <div style="color: #ff4444; font-weight: bold; font-size: 16px;">${weapon.dmg}</div>
-                        </div>
-                        <div>
-                            <div style="color: #aaa; font-size: 10px;">MAGAZINE</div>
-                            <div style="color: #ffaa00; font-weight: bold; font-size: 16px;">${weapon.mag}</div>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <div style="color: #aaa; font-size: 10px;">TOTAL AMMO</div>
-                            <div style="color: #4444ff; font-weight: bold; font-size: 16px;">${weapon.ammo}</div>
-                        </div>
-                    </div>
-                `;
-                
-                const actionBtn = document.getElementById('actionButton');
-                if (weapon.owned) {
-                    actionBtn.style.background = '#00ff88';
-                    actionBtn.style.color = '#0a0e27';
-                    actionBtn.style.cursor = 'pointer';
-                    actionBtn.textContent = '✓ OWNED';
-                } else if (game.credits >= weapon.price) {
-                    actionBtn.style.background = '#4444ff';
-                    actionBtn.style.color = 'white';
-                    actionBtn.style.cursor = 'pointer';
-                    actionBtn.textContent = `💰 PURCHASE - $${weapon.price}`;
-                    actionBtn.onclick = () => purchaseWeapon(weapon);
-                } else {
-                    actionBtn.style.background = '#666';
-                    actionBtn.style.color = '#ccc';
-                    actionBtn.style.cursor = 'not-allowed';
-                    actionBtn.textContent = `🔒 $${weapon.price} (Need $${weapon.price - game.credits} more)`;
-                }
-                
-                const weaponDescriptions = {
-                    'ar-x': 'A standard-issue Astra Rifle deployed across human frontier colonies and deep-space expedition forces.',
-                    'pistol': 'A compact emergency sidearm issued to explorers, engineers, and colonial personnel operating beyond core systems.',
-                    'smg': 'A close-quarters suppression weapon widely used by assault squads engaging hostile alien lifeforms.',
-                    'burst': 'A tactical mid-range rifle engineered for disciplined fire control.',
-                    'shotgun': 'A devastating short-range weapon designed for boarding operations and hive-clearing missions.',
-                    'sniper': 'A long-range precision weapon calibrated for extreme-distance engagements across planetary terrain.',
-                    'pulse': 'An advanced military rifle upgraded from early frontier designs.',
-                    'gauss': 'A magnetically accelerated precision weapon used by elite orbital and planetary strike units.',
-                    'railgun': 'A heavily classified experimental weapon that channels immense electromagnetic force.',
-                    'rocket': 'A heavy ordnance system used by demolition specialists and frontline breaching units.',
-                    'plasma': 'An experimental explosive weapon that launches unstable plasma spheres toward targets.',
-                    'auto': 'A rapid-fire suppression system adapted for infantry deployment.',
-                    'grenade': 'A tactical area-denial weapon used to control battlefield movement.',
-                    'carbine': 'A lightweight, high-mobility rifle designed for fast engagements.',
-                    'lmg': 'A large-capacity energy weapon that fires sustained pulse rounds.',
-                    'stabilizer': 'A modified sidearm that slowly regenerates shield on hit.',
-                    'suppression-smg': 'A utility-focused SMG that slightly slows enemies on hit.',
-                    'laser-rifle': 'A semi-auto precision weapon with high accuracy and moderate damage.',
-                    'cluster': 'Fires a projectile that splits into multiple smaller explosives mid-air.'
-                };
-                
-                document.getElementById('weaponDesc').textContent = weaponDescriptions[weapon.id] || 'Weapon info not available.';
-            };
-            
-            window.purchaseWeapon = function(weapon) {
-                if (game.credits >= weapon.price) {
-                    game.credits -= weapon.price;
-                    weapon.owned = true;
-                    document.getElementById('creditsDisplay').textContent = game.credits;
-                    selectWeapon(weapon);
-                    alert(`Purchased ${weapon.name}!`);
-                }
-            };
-            
-            window.equipSelectedWeapon = function() {
-                if (selectedWeapon && selectedWeapon.owned) {
-                    game.loadout.slot2 = selectedWeapon.name;
-                    document.getElementById('slot2Display').textContent = selectedWeapon.name;
-                    alert(`Equipped ${selectedWeapon.name} to Slot 2!`);
-                } else {
-                    alert('Must own and select a weapon first!');
-                }
-            };
-            
-            selectCategory(0);
-        }
-
-        
-        function openMissionModal() {
-            const selector = document.getElementById('missionSelector');
-            const list = document.getElementById('planetsList');
-            
-            // Clear both areas
-            selector.innerHTML = '';
-            list.innerHTML = '';
-            
-            // Add mission type selector if a planet is selected (in the fixed selector area)
-            if (game.currentMission) {
-                const selectedPlanet = game.planets.find(p => p.id === game.currentMission);
-                const availableMissions = selectedPlanet.missions || ['elimination', 'survival', 'defense'];
-                
-                selector.innerHTML = `
-                    <div style="background: #1a1f3a; border: 2px solid #00ff88; border-radius: 5px; padding: 20px;">
-                        <div style="color: #00ff88; font-weight: bold; font-size: 16px; margin-bottom: 15px;">📋 SELECT MISSION TYPE</div>
-                        <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
-                `;
-                
-                // Always show all 3 mission types, but disable unavailable ones
-                const allTypes = ['elimination', 'survival', 'defense'];
-                allTypes.forEach(type => {
-                    const info = MISSION_TYPES[type];
-                    const isAvailable = availableMissions.includes(type);
-                    const isSelected = game.currentMissionType === type;
-                    const btnBg = isSelected ? info.icon.match(/\p{Emoji}/u) ? '#00ff88' : '#ffaa00' : isAvailable ? '#1a1f3a' : '#0a0a15';
-                    const btnColor = isSelected ? '#0a0e27' : isAvailable ? '#aaa' : '#444';
-                    const btnOpacity = isAvailable ? '1' : '0.5';
-                    const cursor = isAvailable ? 'pointer' : 'not-allowed';
-                    
-                    selector.innerHTML += `
-                        <button onclick="${isAvailable ? `selectMissionType('${type}')` : 'return false;'}" style="background: ${btnBg}; color: ${btnColor}; border: 2px solid ${isSelected ? btnBg : '#666'}; padding: 12px; border-radius: 5px; cursor: ${cursor}; font-weight: bold; text-align: left; opacity: ${btnOpacity};">
-                            ${info.icon} <strong>${info.name}</strong> - ${info.desc}
-                        </button>
-                    `;
-                });
-                
-                selector.innerHTML += `</div>`;
-            }
-            
-            // Add planets to the scrollable list
-            game.planets.forEach(p => {
-                const cleared = game.cleared.includes(p.id);
-                const isSelected = game.currentMission === p.id;
-                const threatColor = p.threat > 50 ? '#ff4444' : p.threat > 25 ? '#ffaa00' : '#00ff88';
-                list.innerHTML += `
-                    <div class="planet-card" onclick="selectMission(${p.id})">
-                        <div class="planet-name">🪐 ${p.name}</div>
-                        <div class="planet-info">${p.desc}</div>
-                        <div class="difficulty ${p.diff}">${p.diff.toUpperCase()}</div>
-                        <div class="planet-info">👽 ${p.aliens} aliens | 💰 ${p.reward} credits</div>
-                        <div class="planet-info" style="color: ${threatColor}; font-weight: bold;">⚠️ THREAT LEVEL: ${p.threat}/100</div>
-                        <button class="planet-btn ${isSelected ? 'selected' : ''}" ${cleared || isSelected ? 'disabled' : ''}>${cleared ? 'CLEARED' : isSelected ? 'SELECTED' : 'SELECT MISSION'}</button>
-                    </div>
-                `;
-            });
+            const mainMenu = document.getElementById('mainMenu');
+            mainMenu.style.display = 'none';
             document.getElementById('missionModal').classList.add('show');
-        }
-        
-        function selectMissionType(type) {
-            game.currentMissionType = type;
-            // Difficulty is determined by the planet, not user choice
-            const planet = game.planets.find(p => p.id === game.currentMission);
-            if (planet) {
-                game.currentMissionDifficulty = planet.diff;
-            }
-        }
-
-        function closeMissionModal() {
-            document.getElementById('missionModal').classList.remove('show');
-            // Refresh mission modal when it closes so button states update
-            setTimeout(() => {
-                if (document.getElementById('missionModal').classList.contains('show')) {
-                    openMissionModal();
-                }
-            }, 100);
-        }
-
-        function selectMission(planetId) {
-            // If already selected, don't change it
-            if (game.currentMission === planetId) {
-                return;
-            }
-            
-            game.currentMission = planetId;
-            
-            // Get planet and set its difficulty
-            const planet = game.planets.find(p => p.id === planetId);
-            game.currentMissionDifficulty = planet ? planet.diff : 'easy';
-            
-            // Set mission type to first available mission for this planet
-            game.currentMissionType = (planet && planet.missions && planet.missions.length > 0) ? planet.missions[0] : 'elimination';
-            
-            game.isReady = false;
-            
-            // Refresh the modal to show updated button states
-            openMissionModal();
-        }
-        
-        function selectMissionDifficulty(difficulty) {
-            game.currentMissionDifficulty = difficulty;
-            // Refresh mission modal to show updated selection
-            openMissionModal();
-        }
-
-        function openControlRoom() {
-            if (!game.currentMission) {
-                return;
-            }
-            updateControlRoomDisplay();
-            document.getElementById('controlRoomModal').classList.add('show');
-        }
-
-        function exitControlRoom() {
-            document.getElementById('controlRoomModal').classList.remove('show');
-            // Stop countdown if running
-            if (countdownTimer) {
-                clearInterval(countdownTimer);
-                document.getElementById('countdownScreen').style.display = 'none';
-            }
-        }
-
-        function updateControlRoomDisplay() {
-            const planet = game.planets.find(p => p.id === game.currentMission);
-            document.getElementById('targetPlanet').textContent = `🪐 ${planet.name}`;
-            document.getElementById('targetInfo').textContent = `${planet.desc} • ${planet.diff.toUpperCase()} • ${planet.aliens} aliens`;
-            
-            // Update crew list
-            const crewList = document.getElementById('crewList');
-            crewList.innerHTML = `
-                <div class="crew-member ${game.isReady ? 'ready' : 'notready'}">
-                    <div class="crew-name">👤 You (Player 1) ${game.isLeader ? '👑 LEADER' : ''}</div>
-                    <div class="crew-status">${game.isReady ? '✓ READY' : '○ NOT READY'}</div>
-                </div>
-            `;
-            
-            if (game.isLeader) {
-                // LEADER VIEW
-                document.getElementById('playerControls').style.display = 'none';
-                document.getElementById('leaderControls').style.display = 'block';
-                
-                // Update leader ready button
-                const leaderReadyBtn = document.getElementById('leaderReadyBtn');
-                if (game.isReady) {
-                    leaderReadyBtn.textContent = 'READY ✓';
-                    leaderReadyBtn.classList.add('is-ready');
-                } else {
-                    leaderReadyBtn.textContent = 'UNREADY ○';
-                    leaderReadyBtn.classList.remove('is-ready');
-                }
-                
-                const readyCount = game.isReady ? 1 : 0;
-                const totalPlayers = 1;
-                const allReady = readyCount === totalPlayers && totalPlayers > 0;
-                
-                document.getElementById('readyStatus').innerHTML = `
-                    Crew Ready: <strong>${readyCount}/${totalPlayers}</strong>
-                `;
-                
-                const launchBtn = document.getElementById('launchBtn');
-                const launchMsg = document.getElementById('launchMessage2');
-                
-                if (allReady) {
-                    launchBtn.style.display = 'block';
-                    launchBtn.style.background = '#00ff88';
-                    launchBtn.style.color = '#0a0e27';
-                    launchMsg.textContent = 'All crew ready! Press DESCEND to start!';
-                    launchMsg.style.color = '#00ff88';
-                } else {
-                    launchBtn.style.display = 'block';
-                    launchBtn.style.background = '#666';
-                    launchBtn.style.color = '#ccc';
-                    launchBtn.style.cursor = 'not-allowed';
-                    launchMsg.textContent = 'Waiting for all crew to be ready...';
-                    launchMsg.style.color = '#ffaa00';
-                }
-            } else {
-                // PLAYER VIEW
-                document.getElementById('playerControls').style.display = 'block';
-                document.getElementById('leaderControls').style.display = 'none';
-                
-                const readyBtn = document.getElementById('readyBtn');
-                const launchMsg = document.getElementById('launchMessage');
-                
-                if (game.isReady) {
-                    readyBtn.textContent = 'READY ✓';
-                    readyBtn.classList.add('is-ready');
-                    launchMsg.textContent = 'Ready! Waiting for leader to start...';
-                } else {
-                    readyBtn.textContent = 'UNREADY ○';
-                    readyBtn.classList.remove('is-ready');
-                    launchMsg.textContent = 'Mark yourself READY';
-                }
-            }
-        }
-
-        function togglePlayerReady() {
-            game.isReady = !game.isReady;
-            updateControlRoomDisplay();
-        }
-
-        function startMission() {
-            if (!game.isLeader || !game.isReady || mission.state === 'IN_PROGRESS') {
-                return; // Prevent double starts
-            }
-            
-            const planet = game.planets.find(p => p.id === game.currentMission);
-            startCountdown(planet);
-        }
-
-        function startCountdown(planet) {
-            // Hide control room and show countdown
-            document.getElementById('controlRoomModal').classList.remove('show');
-            document.getElementById('countdownScreen').style.display = 'flex';
-            document.getElementById('countdownPlanet').textContent = `🪐 ${planet.name}`;
-            
-            countdownSeconds = 15;
-            updateCountdownDisplay();
-            
-            countdownTimer = setInterval(() => {
-                countdownSeconds--;
-                updateCountdownDisplay();
-                
-                if (countdownSeconds <= 0) {
-                    clearInterval(countdownTimer);
-                    launchMission(planet);
-                }
-            }, 1000);
-        }
-
-        function updateCountdownDisplay() {
-            document.getElementById('countdownText').textContent = countdownSeconds;
-            
-            // Change color based on time
-            const countdownText = document.getElementById('countdownText');
-            if (countdownSeconds <= 5) {
-                countdownText.style.color = '#ff4444';
-                countdownText.style.fontSize = '56px';
-            } else if (countdownSeconds <= 10) {
-                countdownText.style.color = '#ffaa00';
-                countdownText.style.fontSize = '52px';
-            } else {
-                countdownText.style.color = '#00ff88';
-                countdownText.style.fontSize = '48px';
-            }
-        }
-
-        function launchMission(planet) {
-            document.getElementById('countdownScreen').style.display = 'none';
-            
-            // Set mission state
-            mission.state = 'IN_PROGRESS';
-            mission.type = game.currentMissionType || 'elimination';
-            mission.difficulty = game.currentMissionDifficulty || 'easy';
-            mission.killed = 0;
-            mission.reward = 0;
-            mission.missionStartTime = Date.now();
-            mission.enemies = [];
-            mission.spawnCounter = 0;
-            mission.objective = null;
-            
-            // Set mission duration based on type
-            if (mission.type === 'survival' || mission.type === 'defense') {
-                mission.targetTime = 120; // 2 minutes
-            } else {
-                mission.targetTime = 0; // No time limit for elimination
-            }
-            
-            // Calculate total enemies for elimination missions
-            const diffConfig = MISSION_TYPES[mission.type].difficulty;
-            const baseTotalEnemies = diffConfig[mission.difficulty] || diffConfig.easy;
-            const threatMultiplier = 1 + (planet.threat / 100) * 0.5;
-            mission.totalEnemies = Math.floor(baseTotalEnemies * threatMultiplier);
-            
-            // Initialize objective for defense missions
-            if (mission.type === 'defense') {
-                mission.objective = {
-                    x: cw / 2,
-                    y: ch / 2,
-                    health: 100,
-                    maxHealth: 100,
-                    size: 30
-                };
-            }
-            
-            // Show canvas and hide menus
-            game.inMission = true;
             document.getElementById('shipCanvas').style.display = 'block';
-            document.getElementById('header').style.display = 'none';
-            document.getElementById('controlRoomModal').classList.remove('show');
+            document.getElementById('header').style.display = 'block';
         }
 
         function openPartyModal() {
-            // Party system coming soon
+            console.log('Party modal - coming soon');
+            // TODO: Implement party system
         }
 
         function openSettings() {
-            // Settings coming soon
+            console.log('Settings modal - coming soon');
+            // TODO: Implement settings
         }
+
+        function openCommunications() {
+            console.log('Communications modal - coming soon');
+            // TODO: Implement communications
+        }
+
+        function exitGame() {
+            if (confirm('Exit Planetfall: Extraction?')) {
+                window.close();
+            }
+        }
+
+        // ========== GAME ENGINE CODE ==========
+        const canvas = document.getElementById('shipCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let cw = window.innerWidth;
+        let ch = window.innerHeight;
+        canvas.width = cw;
+        canvas.height = ch;
+
+        function shootBullet(x, y, weaponType) {
+            const bullet = {
+                x: x,
+                y: y,
+                speed: 10,
+                size: 5,
+                color: '#ff4444',
+                damage: 10
+            };
+            bullets.push(bullet);
+        }
+
+        let bullets = [];
+
+        function update() {
+            ctx.clearRect(0, 0, cw, ch);
+
+            bullets.forEach((bullet, index) => {
+                bullet.x += bullet.speed;
+                if (bullet.x > cw) {
+                    bullets.splice(index, 1);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(bullet.x, bullet.y, bullet.size, 0, Math.PI * 2);
+                    ctx.fillStyle = bullet.color;
+                    ctx.fill();
+                }
+            });
+        }
+
+        function draw() {
+            requestAnimationFrame(draw);
+            update();
+        }
+
+        draw();
+
+        // ========== INITIALIZATION ==========
+        initializeMenu();
     </script>
 </body>
 </html>
