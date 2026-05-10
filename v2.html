@@ -485,25 +485,123 @@
             document.getElementById('header').style.display = 'block';
         }
 
-        function openPartyModal() {
-            console.log('Party modal - coming soon');
-            // TODO: Implement party system
-        }
-
-        function openSettings() {
-            console.log('Settings modal - coming soon');
-            // TODO: Implement settings
-        }
-
-        function openCommunications() {
-            console.log('Communications modal - coming soon');
-            // TODO: Implement communications
-        }
-
         function exitGame() {
             if (confirm('Exit Planetfall: Extraction?')) {
                 window.close();
             }
+        }
+
+        // ========== MISSION DATA ==========
+        const planets = [
+            {
+                name: 'Kepler Prime',
+                difficulty: 'easy',
+                enemies: 8,
+                reward: 150,
+                description: 'Light reconnaissance mission. Perfect for new operatives.'
+            },
+            {
+                name: 'Vulcan Ridge',
+                difficulty: 'medium',
+                enemies: 15,
+                reward: 300,
+                description: 'Moderate resistance. Standard extraction protocol.'
+            },
+            {
+                name: 'Nexus-7',
+                difficulty: 'hard',
+                enemies: 25,
+                reward: 500,
+                description: 'High-intensity combat. Elite forces only.'
+            },
+            {
+                name: 'Frozen Outpost',
+                difficulty: 'medium',
+                enemies: 12,
+                reward: 250,
+                description: 'Environmental hazards present. Thermal gear required.'
+            },
+            {
+                name: 'Crimson Wastes',
+                difficulty: 'hard',
+                enemies: 30,
+                reward: 600,
+                description: 'Extreme danger. Veteran operators recommended.'
+            }
+        ];
+
+        let selectedMission = null;
+
+        function loadMissions() {
+            const planetsList = document.getElementById('planetsList');
+            planetsList.innerHTML = '';
+
+            planets.forEach((planet, index) => {
+                const card = document.createElement('div');
+                card.className = 'planet-card';
+                card.onclick = () => selectMission(index, planet);
+                card.innerHTML = `
+                    <div class="planet-name">${planet.name}</div>
+                    <div class="planet-info">Enemy Count: ${planet.enemies}</div>
+                    <div class="planet-info">Reward: ${planet.reward} Credits</div>
+                    <div class="difficulty ${planet.difficulty}">Difficulty: ${planet.difficulty.toUpperCase()}</div>
+                    <button class="planet-btn" onclick="deployToMission('${planet.name}', event)">DEPLOY</button>
+                `;
+                planetsList.appendChild(card);
+            });
+        }
+
+        function selectMission(index, planet) {
+            selectedMission = planet;
+            console.log('Selected mission:', planet.name);
+        }
+
+        function deployToMission(planetName, event) {
+            event.stopPropagation();
+            console.log('Deploying to', planetName);
+            closeMissionModal();
+            startCountdown(planetName);
+        }
+
+        function closeMissionModal() {
+            document.getElementById('missionModal').classList.remove('show');
+        }
+
+        function startCountdown(planetName) {
+            const countdownScreen = document.getElementById('countdownScreen');
+            countdownScreen.style.display = 'flex';
+            document.getElementById('countdownPlanet').textContent = planetName;
+
+            let count = 15;
+            const interval = setInterval(() => {
+                document.getElementById('countdownText').textContent = count;
+                count--;
+                if (count < 0) {
+                    clearInterval(interval);
+                    countdownScreen.style.display = 'none';
+                    // TODO: Start actual game
+                }
+            }, 1000);
+        }
+
+        // ========== MODAL FUNCTIONS ==========
+        function openPartyModal() {
+            console.log('Party modal - coming soon');
+        }
+
+        function openSettings() {
+            console.log('Settings modal - coming soon');
+        }
+
+        function openCommunications() {
+            console.log('Communications modal - coming soon');
+        }
+
+        function exitToMenu() {
+            document.getElementById('mainMenu').style.display = 'flex';
+            document.getElementById('shipCanvas').style.display = 'none';
+            document.getElementById('header').style.display = 'none';
+            closeMissionModal();
         }
 
         // ========== GAME ENGINE CODE ==========
@@ -554,6 +652,7 @@
 
         // ========== INITIALIZATION ==========
         initializeMenu();
+        loadMissions();
     </script>
 </body>
 </html>
