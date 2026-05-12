@@ -533,11 +533,48 @@
             }
         };
 
-        // Planets
+        // Planets with preset mission types
         const planets = [
-            { name: 'Kepler-442b', difficulty: 'easy', type: 'Desert', enemies: 8 },
-            { name: 'TRAPPIST-1d', difficulty: 'medium', type: 'Ice World', enemies: 12 },
-            { name: 'Proxima-b', difficulty: 'hard', type: 'Volcanic', enemies: 20 }
+            {
+                name: 'Kepler-442b',
+                missionType: 'ELIMINATION',
+                threatLevel: 35,
+                terrainType: 'Desert Wasteland',
+                enemyType: 'Scavenger Drones',
+                enemyCount: 12,
+                rewardMin: 400,
+                rewardMax: 650
+            },
+            {
+                name: 'TRAPPIST-1d',
+                missionType: 'SURVIVAL',
+                threatLevel: 52,
+                terrainType: 'Ice World',
+                enemyType: 'Frost Stalkers',
+                enemyCount: 8,
+                rewardMin: 500,
+                rewardMax: 800
+            },
+            {
+                name: 'Proxima-b',
+                missionType: 'DEFENSE',
+                threatLevel: 68,
+                terrainType: 'Volcanic Expanse',
+                enemyType: 'Lava Elementals',
+                enemyCount: 15,
+                rewardMin: 700,
+                rewardMax: 1100
+            },
+            {
+                name: 'LHS 475 b',
+                missionType: 'SURVIVAL',
+                threatLevel: 45,
+                terrainType: 'Urban Ruins',
+                enemyType: 'Synthetic Remnants',
+                enemyCount: 10,
+                rewardMin: 450,
+                rewardMax: 750
+            }
         ];
 
         // Key tracking
@@ -773,17 +810,20 @@
                     break;
                 case 'controlRoom':
                     modalContent.innerHTML = `
-                        <div class="interaction-modal-header">🖥 CONTROL ROOM</div>
+                        <div class="interaction-modal-header">🖥 CONTROL ROOM — AVAILABLE OPERATIONS</div>
                         <div class="interaction-modal-content">
-                            <p style="margin-bottom: 15px;">Select your mission:</p>
+                            <p style="margin-bottom: 20px; color: #888;">Select an operation to deploy:</p>
                             <div class="planet-grid">
                                 ${planets.map((planet, idx) => `
                                     <div class="planet-card">
                                         <div class="planet-name">${planet.name}</div>
-                                        <div class="planet-info">Type: ${planet.type}</div>
-                                        <div class="planet-info">Enemies: ${planet.enemies}</div>
-                                        <div class="difficulty ${planet.difficulty.toLowerCase()}">${planet.difficulty.toUpperCase()}</div>
-                                        <button class="planet-btn" onclick="selectPlanet(${idx})">SELECT</button>
+                                        <div class="planet-mission-type" style="color: ${getMissionTypeColor(planet.missionType)}; font-weight: bold; margin: 8px 0;">${planet.missionType}</div>
+                                        <div class="planet-info" style="margin-top: 10px;">Terrain: ${planet.terrainType}</div>
+                                        <div class="planet-info">Enemies: ${planet.enemyType}</div>
+                                        <div class="planet-info">Count: ${planet.enemyCount}</div>
+                                        <div class="planet-threat" style="margin-top: 10px; color: ${getThreatColor(planet.threatLevel)}; font-weight: bold;">THREAT: ${planet.threatLevel}%</div>
+                                        <div class="planet-reward" style="color: #ffcc00; margin-top: 5px;">Reward: ${planet.rewardMin}–${planet.rewardMax} ⚡</div>
+                                        <button class="planet-btn" onclick="showPreMissionScreen(${idx})">VIEW OPERATION</button>
                                     </div>
                                 `).join('')}
                             </div>
@@ -836,10 +876,75 @@
             document.getElementById('interactionModal').classList.remove('show');
         }
 
-        function selectPlanet(idx) {
+        // Get mission type color
+        function getMissionTypeColor(missionType) {
+            switch(missionType) {
+                case 'ELIMINATION': return '#ff4444';
+                case 'SURVIVAL': return '#44ff44';
+                case 'DEFENSE': return '#4444ff';
+                default: return '#ffaa00';
+            }
+        }
+
+        // Get threat level color
+        function getThreatColor(level) {
+            if (level < 40) return '#44ff44';
+            if (level < 60) return '#ffaa00';
+            return '#ff4444';
+        }
+
+        // Show pre-mission screen
+        function showPreMissionScreen(idx) {
             const planet = planets[idx];
-            alert(`Mission ready: ${planet.name}\n\nDeployment coming soon!`);
+            const modalContent = document.getElementById('modalContent');
+            
+            const missionObjective = getMissionObjective(planet.missionType);
+            
+            modalContent.innerHTML = `
+                <div class="interaction-modal-header">⚠ OPERATION BRIEFING</div>
+                <div class="interaction-modal-content">
+                    <div style="background: rgba(0, 212, 255, 0.1); border-left: 4px solid ${getMissionTypeColor(planet.missionType)}; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                        <div style="color: #00d4ff; font-weight: bold; margin-bottom: 10px;">📍 ${planet.name}</div>
+                        <div style="color: #aaa; font-size: 13px; line-height: 1.5;">
+                            <div><strong style="color: #fff;">MISSION TYPE:</strong> ${planet.missionType}</div>
+                            <div><strong style="color: #fff;">OBJECTIVE:</strong> ${missionObjective}</div>
+                            <div style="margin-top: 10px;"><strong style="color: ${getThreatColor(planet.threatLevel)};">THREAT LEVEL: ${planet.threatLevel}%</strong></div>
+                            <div><strong style="color: #fff;">TERRAIN:</strong> ${planet.terrainType}</div>
+                            <div><strong style="color: #fff;">HOSTILES:</strong> ${planet.enemyType} (${planet.enemyCount})</div>
+                            <div style="margin-top: 10px;"><strong style="color: #ffcc00;">ESTIMATED REWARD: ${planet.rewardMin}–${planet.rewardMax} Credits</strong></div>
+                        </div>
+                    </div>
+                    <button class="planet-btn" style="background: #f97316; margin-top: 10px;" onclick="deployToMission(${idx})">DESCEND TO OPERATION</button>
+                    <button class="planet-btn" style="background: #444; color: #aaa; margin-top: 10px;" onclick="closePreMissionScreen()">CANCEL</button>
+                </div>
+            `;
+        }
+
+        // Get mission objective description
+        function getMissionObjective(missionType) {
+            switch(missionType) {
+                case 'ELIMINATION':
+                    return 'Clear all hostile lifeforms in the AO.';
+                case 'SURVIVAL':
+                    return 'Survive until extraction arrives. Defend your position.';
+                case 'DEFENSE':
+                    return 'Protect critical equipment until secure pickup.';
+                default:
+                    return 'Unknown mission type.';
+            }
+        }
+
+        // Close pre-mission screen
+        function closePreMissionScreen() {
+            showRoomUI('controlRoom', rooms.controlRoom);
+        }
+
+        // Deploy to mission
+        function deployToMission(idx) {
+            const planet = planets[idx];
             closeInteractionModal();
+            // TODO: Load actual mission
+            alert(`DESCENDING TO: ${planet.name}\n\nMission loading...`);
         }
 
         function exitToMenu() {
