@@ -9,6 +9,7 @@
         html, body { width: 100%; height: 100%; overflow: hidden; }
         body { font-family: 'Arial', sans-serif; background: #000; color: #e0e0e0; }
         
+        /* MAIN MENU */
         #mainMenu {
             position: relative;
             display: flex;
@@ -20,7 +21,6 @@
             overflow: hidden;
         }
 
-        /* Background Effects */
         .menu-bg-glow {
             position: absolute;
             inset: 0;
@@ -61,7 +61,6 @@
             50% { opacity: 1; }
         }
 
-        /* Content */
         .menu-content {
             position: relative;
             z-index: 10;
@@ -111,7 +110,6 @@
             text-transform: uppercase;
         }
 
-        /* Menu Buttons */
         .menu-buttons {
             display: flex;
             flex-direction: column;
@@ -137,34 +135,19 @@
             text-transform: uppercase;
         }
 
-        /* Primary Button */
         .menu-btn.primary {
             border-color: #f97316;
             color: #fff;
             background: rgba(249, 115, 22, 0.15);
         }
 
-        .menu-btn.primary::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.7s ease;
-        }
-
         .menu-btn.primary:hover {
             border-color: #fb923c;
             background: rgba(249, 115, 22, 0.25);
-            box-shadow: 0 0 20px rgba(249, 115, 22, 0.3), inset 0 0 20px rgba(249, 115, 22, 0.1);
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
             transform: translateX(4px);
         }
 
-        .menu-btn.primary:hover::before {
-            transform: translateX(100%);
-        }
-
-        /* Secondary Buttons */
         .menu-btn.secondary {
             border-color: #52525b;
             color: #e4e4e7;
@@ -179,7 +162,6 @@
             transform: translateX(4px);
         }
 
-        /* Bottom Info */
         .menu-footer {
             position: absolute;
             bottom: 20px;
@@ -194,138 +176,232 @@
             color: #666;
             z-index: 10;
         }
-        
-        /* SHIP HUB STYLES */
-        #shipHub {
+
+        /* SHIP HUB */
+        #shipHubContainer {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
-            position: relative;
-            overflow: hidden;
+            z-index: 100;
         }
 
         #shipHubCanvas {
             display: block;
             width: 100%;
             height: 100%;
-            background: inherit;
+            cursor: crosshair;
         }
 
-        .ship-ui {
-            position: absolute;
+        /* SHIP HUB UI */
+        .ship-ui-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 101;
+        }
+
+        .ship-header {
+            position: fixed;
+            top: 20px;
+            left: 20px;
             color: #00ff88;
+            font-size: 18px;
+            font-weight: bold;
+            pointer-events: auto;
+            z-index: 102;
+        }
+
+        .ship-hint {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #aaa;
+            font-size: 14px;
+            text-align: center;
+            pointer-events: auto;
+            z-index: 102;
+        }
+
+        .ship-hint-highlight {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .ship-exit-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f97316;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            pointer-events: auto;
+            z-index: 103;
+            transition: all 0.2s;
+        }
+
+        .ship-exit-btn:hover {
+            background: #fb923c;
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+        }
+
+        /* INTERACTION MODAL */
+        .interaction-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 14, 39, 0.98);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 40px;
+            min-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 105;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.2);
+            pointer-events: auto;
+        }
+
+        .interaction-modal.show {
+            display: block;
+        }
+
+        .interaction-modal-header {
+            color: #00ff88;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #00ff88;
+            padding-bottom: 15px;
+        }
+
+        .interaction-modal-content {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .close-modal-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 24px;
+            pointer-events: auto;
+        }
+
+        .close-modal-btn:hover {
+            background: #ff6666;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 104;
+            pointer-events: auto;
+        }
+
+        .modal-overlay.show {
+            display: block;
+        }
+
+        /* PLANET SELECTION */
+        .planet-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .planet-card {
+            background: #1a1f3a;
+            border: 2px solid #444;
+            padding: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .planet-card:hover {
+            border-color: #00ff88;
+            background: #2a2f4a;
+        }
+
+        .planet-name {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .planet-info {
             font-size: 12px;
-            font-family: Arial, sans-serif;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
-            pointer-events: none;
+            color: #aaa;
+            margin: 5px 0;
         }
 
-        .interaction-hint {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #00ff88;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 11px;
-            color: #00ff88;
-            pointer-events: none;
-            z-index: 10;
+        .difficulty {
+            font-weight: bold;
+            margin: 10px 0;
         }
 
-        #shipCanvas { display: none; width: 100%; height: 100%; background: #0a0e27; cursor: crosshair; }
-        
-        #header { background: #1a1f3a; padding: 15px 30px; border-bottom: 2px solid #00ff88; display: none; }
-        .header-content { display: flex; justify-content: space-between; align-items: center; }
-        .header-stat { margin: 0 20px; }
-        .stat-label { font-size: 12px; color: #888; }
-        .stat-value { font-size: 24px; color: #00ff88; font-weight: bold; }
-        
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 101; align-items: center; justify-content: center; }
-        .modal.show { display: flex; }
-        .modalBox { background: rgba(10, 14, 39, 0.98); padding: 40px; border: 2px solid #00ff88; border-radius: 10px; min-width: 400px; max-height: 80vh; overflow-y: auto; position: relative; }
-        .modalBox h2 { color: #00ff88; margin-bottom: 20px; font-size: 28px; }
-        .planet-card { background: #1a1f3a; border: 2px solid #444; padding: 20px; margin: 15px 0; border-radius: 5px; cursor: pointer; transition: all 0.3s; }
-        .planet-card:hover { border-color: #00ff88; background: #2a2f4a; }
-        .planet-name { color: #00ff88; font-weight: bold; font-size: 18px; margin-bottom: 10px; }
-        .planet-info { font-size: 12px; color: #aaa; margin: 5px 0; }
-        .difficulty { font-weight: bold; margin: 10px 0; }
         .difficulty.easy { color: #00ff88; }
         .difficulty.medium { color: #ffaa00; }
         .difficulty.hard { color: #ff4444; }
-        .planet-btn { 
-            background: #f97316; 
-            color: #0a0e27; 
-            padding: 10px 16px; 
-            margin-top: 12px; 
-            border: none; 
-            cursor: pointer; 
-            font-weight: bold; 
-            border-radius: 5px; 
-            width: 100%; 
+
+        .planet-btn {
+            background: #f97316;
+            color: #0a0e27;
+            padding: 10px 16px;
+            margin-top: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+            width: 100%;
             transition: all 0.2s ease;
             font-size: 14px;
             letter-spacing: 0.1em;
         }
-        .planet-btn:hover { 
+
+        .planet-btn:hover {
             background: #fb923c;
             box-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
             transform: translateY(-2px);
         }
-        .planet-btn:disabled { background: #666; color: #aaa; cursor: not-allowed; }
-        .planet-btn.selected { background: #666; color: #aaa; cursor: not-allowed; }
-        .close-modal { position: absolute; top: 20px; right: 20px; background: #ff4444; color: white; border: none; width: 40px; height: 40px; font-size: 24px; cursor: pointer; border-radius: 5px; }
-        
-        .control-section { background: #1a1f3a; padding: 20px; border-radius: 5px; margin: 20px 0; border: 2px solid #444; }
-        .control-section.highlight { border-color: #00ff88; }
-        .control-section h3 { color: #00ff88; margin-bottom: 15px; font-size: 16px; }
-        .crew-member { padding: 10px; background: #0a0e27; border-radius: 3px; margin-bottom: 5px; }
-        .crew-member.ready { border-left: 4px solid #00ff88; }
-        .crew-member.notready { border-left: 4px solid #ff4444; }
-        .crew-name { color: #00ff88; font-weight: bold; }
-        .crew-status { font-size: 12px; color: #aaa; margin-top: 5px; }
-        
-        .ready-btn { background: #4444ff; color: white; padding: 15px; font-size: 16px; font-weight: bold; border: none; cursor: pointer; border-radius: 5px; width: 100%; margin: 20px 0; }
-        .ready-btn:hover { background: #3333dd; }
-        .ready-btn.is-ready { background: #00ff88; color: #0a0e27; }
-        .ready-btn.is-ready:hover { background: #00dd77; }
-        
-        .launch-btn { background: #00ff88; color: #0a0e27; padding: 15px; font-size: 16px; font-weight: bold; border: none; cursor: pointer; border-radius: 5px; width: 100%; display: none; }
-        .launch-btn:hover { background: #00dd77; }
-        .launch-btn.show { display: block; }
-        
-        .launch-msg { color: #ffaa00; text-align: center; margin-top: 10px; font-weight: bold; }
-        
-        /* SHIP HUB STYLES */
-        #shipHub { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0e27; z-index: 100; }
-        #shipHubCanvas { display: block; width: 100%; height: 100%; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); cursor: crosshair; }
-        
-        .hub-ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 102; }
-        .hub-header { position: fixed; top: 20px; left: 20px; color: #00ff88; font-size: 18px; font-weight: bold; pointer-events: auto; }
-        .hub-hint { position: fixed; bottom: 20px; left: 20px; color: #aaa; font-size: 14px; pointer-events: auto; }
-        .hub-hint-highlight { color: #00ff88; font-weight: bold; }
-        .hub-exit-btn { position: fixed; top: 20px; right: 20px; background: #f97316; color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; pointer-events: auto; transition: all 0.2s; z-index: 103; }
-        .hub-exit-btn:hover { background: #fb923c; box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
-        
-        /* Room Modal */
-        .room-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(10, 14, 39, 0.98); border: 2px solid #00ff88; border-radius: 10px; padding: 40px; min-width: 500px; max-height: 80vh; overflow-y: auto; z-index: 105; pointer-events: auto; box-shadow: 0 0 40px rgba(0, 255, 136, 0.2); }
-        .room-modal-header { color: #00ff88; font-size: 28px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #00ff88; padding-bottom: 15px; }
-        .room-modal-content { color: #aaa; font-size: 14px; line-height: 1.6; }
-        .room-close-btn { position: absolute; top: 15px; right: 15px; background: #ff4444; color: white; border: none; width: 40px; height: 40px; cursor: pointer; border-radius: 5px; font-size: 24px; pointer-events: auto; }
-        .room-close-btn:hover { background: #ff6666; }
-        .room-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 104; pointer-events: auto; }
     </style>
 </head>
 <body>
+    <!-- MAIN MENU -->
     <div id="mainMenu">
-        <!-- Background Effects -->
         <div class="menu-bg-glow"></div>
         <div class="menu-bg-planet"></div>
-        
-        <!-- Starfield -->
         <div class="menu-stars" id="starsContainer"></div>
 
-        <!-- Main Content -->
         <div class="menu-content">
             <div class="menu-logo">
                 <h1 class="menu-title">PLANETFALL</h1>
@@ -335,770 +411,313 @@
 
             <div class="menu-buttons">
                 <button class="menu-btn primary" onclick="startGame()">▶ PLAY</button>
-                <button class="menu-btn secondary" onclick="openPartyModal()">👥 PARTY</button>
-                <button class="menu-btn secondary" onclick="openSettings()">⚙ SETTINGS</button>
-                <button class="menu-btn secondary" onclick="openCommunications()">📡 COMMUNICATIONS</button>
+                <button class="menu-btn secondary" onclick="alert('Settings coming soon!')">⚙ SETTINGS</button>
                 <button class="menu-btn secondary" onclick="exitGame()">❌ EXIT</button>
             </div>
         </div>
 
-        <!-- Footer Info -->
         <div class="menu-footer">
-            <span>Version 0.1 Alpha</span>
+            <span>Version 0.2 Alpha</span>
             <span>Helios Directive Network</span>
         </div>
     </div>
 
-    <div id="header">
-        <div class="header-content">
-            <div class="header-stat"><div class="stat-label">CREDITS</div><div class="stat-value" id="credits">500</div></div>
-            <button onclick="exitToMenu()" style="background: #ff4444; color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold;">← MENU</button>
-        </div>
-    </div>
-
     <!-- SHIP HUB -->
-    <div id="shipHub">
+    <div id="shipHubContainer">
         <canvas id="shipHubCanvas"></canvas>
-        <div id="shipUIOverlay"></div>
-    </div>
-
-    <canvas id="shipCanvas"></canvas>
-
-
-    <div id="engineeringModal" class="modal">
-        <button class="close-modal" onclick="exitEngineering()">✕</button>
-        <div class="modalBox" style="min-width: 1200px; max-height: 90vh; display: flex; flex-direction: column;">
-            <h2 style="margin-bottom: 25px;">🔧 ENGINEERING - WEAPON UPGRADES</h2>
-            
-            <!-- Credits Bar -->
-            <div style="background: #0a0e27; padding: 12px 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #ffaa00;">
-                <span style="color: #ffaa00; font-weight: bold;">💰 CREDITS: </span>
-                <span style="color: #00ff88; font-weight: bold; font-size: 18px;" id="engineeringCreditsDisplay">500</span>
-            </div>
-            
-            <!-- 3-Column Layout -->
-            <div style="display: flex; gap: 25px; flex: 1; overflow: hidden;">
-                <!-- LEFT: Owned Weapons List -->
-                <div style="width: 200px; border-right: 2px solid #444; padding-right: 15px; overflow-y: auto;">
-                    <h3 style="color: #00ff88; margin-bottom: 15px; font-size: 14px;">OWNED WEAPONS</h3>
-                    <div id="upgradeWeaponsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                </div>
-                
-                <!-- CENTER: Weapon Preview -->
-                <div style="flex: 1; display: flex; flex-direction: column;">
-                    <h3 style="color: #4444ff; margin-bottom: 15px; font-size: 14px;">WEAPON PREVIEW</h3>
-                    <div id="upgradeWeaponPreview" style="background: linear-gradient(135deg, #1a1f3a 0%, #0a0e27 100%); border: 2px solid #444; border-radius: 5px; padding: 30px; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px;">
-                        <div style="text-align: center;">
-                            <div style="font-size: 80px; margin-bottom: 20px;" id="upgradeWeaponEmoji">🔫</div>
-                            <div style="color: #00ff88; font-size: 24px; font-weight: bold;" id="upgradePreviewName">Select a weapon</div>
-                            <div style="color: #aaa; font-size: 12px; margin-top: 10px;" id="upgradePreviewTier"></div>
-                            <div style="color: #ffaa00; font-size: 11px; margin-top: 5px; font-weight: bold;" id="totalWeaponLevel">Total Level: 0/20</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- RIGHT: Upgrade Stats Panel -->
-                <div style="width: 300px; display: flex; flex-direction: column; gap: 15px;">
-                    <div style="background: #1a1f3a; border: 2px solid #444; border-radius: 5px; padding: 15px; flex: 1; overflow-y: auto;">
-                        <h3 style="color: #ffaa00; margin-bottom: 15px; font-size: 12px;">UPGRADE STATS</h3>
-                        <div id="upgradeStatsPanel" style="display: flex; flex-direction: column; gap: 12px;">
-                            <div style="color: #aaa; font-size: 11px;">Select a weapon to upgrade</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- BOTTOM: Mini Loadout -->
-            <div style="border-top: 2px solid #444; padding-top: 20px; margin-top: 20px;">
-                <h3 style="color: #00ff88; margin-bottom: 12px; font-size: 12px;">⚙️ CURRENT LOADOUT</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 12px;">
-                    <div style="background: #1a1f3a; border: 2px solid #00ff88; border-radius: 5px; padding: 12px;">
-                        <div style="color: #aaa; font-size: 10px; margin-bottom: 5px;">PRIMARY</div>
-                        <div style="color: #00ff88; font-weight: bold; font-size: 12px;" id="engineeringSlot1Display">AR-X</div>
-                        <div style="color: #666; font-size: 9px; margin-top: 4px;" id="engineeringSlot1Focus"></div>
-                    </div>
-                    <div style="background: #1a1f3a; border: 2px solid #ffaa00; border-radius: 5px; padding: 12px;">
-                        <div style="color: #aaa; font-size: 10px; margin-bottom: 5px;">SECONDARY</div>
-                        <div style="color: #ffaa00; font-weight: bold; font-size: 12px;" id="engineeringSlot2Display">Pistol</div>
-                        <div style="color: #666; font-size: 9px; margin-top: 4px;" id="engineeringSlot2Focus"></div>
-                    </div>
-                </div>
-                <div style="background: #1a1f3a; border: 1px solid #ffaa00; border-radius: 3px; padding: 8px; text-align: center;">
-                    <div style="color: #aaa; font-size: 9px; margin-bottom: 3px;">ACTIVE FOCUS</div>
-                    <div style="color: #ffaa00; font-weight: bold; font-size: 11px;" id="activeFocusDisplay">None selected</div>
-                </div>
-            </div>
+        <div class="ship-ui-layer">
+            <div class="ship-header">🚀 MOTHERSHIP HUB</div>
+            <div class="ship-hint">Move with <span class="ship-hint-highlight">WASD</span> | Interact with <span class="ship-hint-highlight">E</span></div>
+            <button class="ship-exit-btn" onclick="exitToMenu()">← MENU</button>
         </div>
     </div>
 
-
-    <div id="missionModal" class="modal">
-        <button class="close-modal" onclick="closeMissionModal()">✕</button>
-        <div class="modalBox" style="display: flex; flex-direction: column; max-height: 90vh; width: 600px;">
-            <h2 style="color: #00ff88; margin-bottom: 25px; font-size: 28px;">🚀 SELECT MISSION</h2>
-            <div id="planetsList" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;"></div>
-        </div>
-    </div>
-
-    <div id="countdownScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 200; align-items: center; justify-content: center; flex-direction: column;">
-        <div style="text-align: center;">
-            <div style="font-size: 48px; color: #ffaa00; margin-bottom: 20px;" id="countdownText">15</div>
-            <div style="font-size: 36px; color: #00ff88; margin-bottom: 40px;" id="countdownPlanet">INITIALIZING...</div>
-            <div style="font-size: 18px; color: #aaa;">GET READY FOR DESCENT</div>
-        </div>
-    </div>
-    
-    <!-- SHIP HUB SYSTEM -->
-    <div id="shipHub">
-        <canvas id="shipHubCanvas"></canvas>
-        <div class="hub-ui">
-            <div class="hub-header">🚀 HDS VANGUARD - SHIP HUB</div>
-            <div class="hub-hint">MOVEMENT: <span class="hub-hint-highlight">WASD</span> | INTERACT: <span class="hub-hint-highlight">E or CLICK</span></div>
-            <button class="hub-exit-btn" onclick="exitShipHub()">← EXIT TO MENU</button>
-        </div>
-    </div>
-    
-    <!-- ROOM MODALS -->
-    <div class="room-modal-overlay" id="roomModalOverlay" onclick="closeRoomModal()"></div>
-    
-    <div class="room-modal" id="communicationsRoom">
-        <button class="room-close-btn" onclick="closeRoomModal()">✕</button>
-        <div class="room-modal-header">📡 COMMUNICATIONS</div>
-        <div class="room-modal-content">
-            <p>Communication systems fully operational. Status: All channels clear.</p>
-            <p>Current deployment: Planet [NAME TBD]</p>
-            <p>Crew status: Ready for descent.</p>
-            <p style="margin-top: 20px; color: #ffaa00;">• Incoming transmissions: None
-            <br/>• Outgoing channels: Active
-            <br/>• Signal strength: Excellent</p>
-        </div>
-    </div>
-    
-    <div class="room-modal" id="engineeringRoom">
-        <button class="room-close-btn" onclick="closeRoomModal()">✕</button>
-        <div class="room-modal-header">⚙️ ENGINEERING</div>
-        <div class="room-modal-content">
-            <p>Main engineering station. All systems nominal.</p>
-            <p>Ship systems status:</p>
-            <p style="margin-top: 15px; color: #00ff88;">• Power core: 100%
-            <br/>• Propulsion: Operational
-            <br/>• Shields: Active
-            <br/>• Life support: Optimal</p>
-            <p style="margin-top: 15px; color: #ffaa00;">Ready for mission deployment.</p>
-        </div>
-    </div>
-    
-    <div class="room-modal" id="armoryRoom">
-        <button class="room-close-btn" onclick="closeRoomModal()">✕</button>
-        <div class="room-modal-header">⚡ ARMORY</div>
-        <div class="room-modal-content">
-            <p>Weapons arsenal fully stocked. Your loadout:</p>
-            <p style="margin-top: 15px; color: #ffaa00;">• Primary: AR-X Assault Rifle
-            <br/>• Secondary: Combat Pistol
-            <br/>• Throwable: Frag Grenades (4x)
-            <br/>• Special: Smoke Grenades (3x)</p>
-            <p style="margin-top: 15px; color: #aaa;">All weapons: Ammunition - Full</p>
-            <p style="margin-top: 15px; color: #00ff88;">Ready for combat operations.</p>
-        </div>
-    </div>
-    
-    <div class="room-modal" id="controlRoomModal2">
-        <button class="room-close-btn" onclick="closeRoomModal()">✕</button>
-        <div class="room-modal-header">🎮 CONTROL ROOM</div>
-        <div class="room-modal-content">
-            <p>Mission control center. All systems ready for deployment.</p>
-            <p style="margin-top: 15px;">Mission Parameters:</p>
-            <p style="color: #ffaa00;">• Objective: Planetary Extraction
-            <br/>• Duration: 45-60 minutes
-            <br/>• Threat Level: [MISSION DEPENDENT]
-            <br/>• Extraction Point: LZ-Alpha</p>
-            <p style="margin-top: 15px; color: #00ff88;">Awaiting crew ready status.</p>
-        </div>
-    </div>
-    
-    <div class="room-modal" id="hangarRoom">
-        <button class="room-close-btn" onclick="closeRoomModal()">✕</button>
-        <div class="room-modal-header">🛩️ HANGAR</div>
-        <div class="room-modal-content">
-            <p>Flight operations center. Deployment vehicle prepped and ready.</p>
-            <p style="margin-top: 15px; color: #00ff88;">• Landing craft: Vanguard-1
-            <br/>• Status: Ready for descent
-            <br/>• Fuel: 100%
-            <br/>• Cargo: Full supplies</p>
-            <p style="margin-top: 15px; color: #ffaa00;">Awaiting launch sequence authorization.</p>
-        </div>
-    </div>
-    
-    <div class="room-modal" id="cargoBayRoom">
-        <button class="room-close-btn" onclick="closeRoomModal()">✕</button>
-        <div class="room-modal-header">📦 CARGO BAY</div>
-        <div class="room-modal-content">
-            <p>Supply storage and manifest management.</p>
-            <p style="margin-top: 15px; color: #00ff88;">Inventory:</p>
-            <p style="color: #ffaa00;">• Medical Kits: 12x
-            <br/>• Ammunition (General): 500 rounds
-            <br/>• Special Equipment: 3x
-            <br/>• Rations: 20 units
-            <br/>• Repair Tools: Full kit</p>
-            <p style="margin-top: 15px; color: #aaa;">All supplies: Operational</p>
-        </div>
-    </div>
-
-    <div id="armoryModal" class="modal">
-        <button class="close-modal" onclick="exitArmory()">✕</button>
-        <div class="modalBox" style="min-width: 1200px; max-height: 90vh; display: flex; flex-direction: column;">
-            <h2 style="margin-bottom: 25px;">⚡ ARMORY - WEAPONS & LOADOUTS</h2>
-            
-            <!-- Credits Bar -->
-            <div style="background: #0a0e27; padding: 12px 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #ffaa00;">
-                <span style="color: #ffaa00; font-weight: bold;">💰 CREDITS: </span>
-                <span style="color: #00ff88; font-weight: bold; font-size: 18px;" id="creditsDisplay">500</span>
-            </div>
-            
-            <!-- 3-Column Layout -->
-            <div style="display: flex; gap: 25px; flex: 1; overflow: hidden;">
-                <!-- LEFT: Categories List -->
-                <div style="width: 200px; border-right: 2px solid #444; padding-right: 15px; overflow-y: auto;">
-                    <h3 style="color: #00ff88; margin-bottom: 15px; font-size: 14px;">WEAPON CATEGORIES</h3>
-                    <div id="categoriesList" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                </div>
-                
-                <!-- CENTER: Weapon Preview -->
-                <div style="flex: 1; display: flex; flex-direction: column;">
-                    <h3 style="color: #4444ff; margin-bottom: 15px; font-size: 14px;">WEAPON PREVIEW</h3>
-                    <div id="weaponPreview" style="background: linear-gradient(135deg, #1a1f3a 0%, #0a0e27 100%); border: 2px solid #444; border-radius: 5px; padding: 30px; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px;">
-                        <div style="text-align: center;">
-                            <div style="font-size: 80px; margin-bottom: 20px;" id="previewName">Select a weapon</div>
-                            <div style="color: #aaa; font-size: 12px; margin-top: 10px;" id="previewTier"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- RIGHT: Weapon Stats and Action Button -->
-                <div style="width: 300px; display: flex; flex-direction: column; gap: 15px;">
-                    <div style="background: #1a1f3a; border: 2px solid #444; border-radius: 5px; padding: 15px; flex: 1; overflow-y: auto;">
-                        <h3 style="color: #ffaa00; margin-bottom: 15px; font-size: 12px;">WEAPON STATS</h3>
-                        <div id="weaponStats" style="display: flex; flex-direction: column; gap: 12px;">
-                            <div style="color: #aaa; font-size: 11px;">Select a weapon to view stats</div>
-                        </div>
-                    </div>
-                    <button id="actionButton" style="background: #666; color: #ccc; padding: 10px; border: none; cursor: not-allowed; border-radius: 5px; font-weight: bold; width: 100%;">SELECT WEAPON</button>
-                </div>
-            </div>
-            
-            <!-- BOTTOM: Weapon Description -->
-            <div style="border-top: 2px solid #444; padding-top: 20px; margin-top: 20px;">
-                <h3 style="color: #00ff88; margin-bottom: 12px; font-size: 12px;">WEAPON DESCRIPTION</h3>
-                <div id="weaponDesc" style="color: #aaa; font-size: 12px;"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="controlRoomModal" class="modal">
-        <button class="close-modal" onclick="exitControlRoom()">✕</button>
-        <div class="modalBox" style="display: flex; flex-direction: column;">
-            <h2>🚀 CONTROL ROOM</h2>
-            <div style="margin-bottom: 20px;">
-                <div style="color: #ffaa00; font-size: 16px;">TARGET PLANET:</div>
-                <div id="targetPlanet" style="color: #00ff88; font-weight: bold;"></div>
-                <div id="targetInfo" style="color: #aaa; margin-top: 5px;"></div>
-            </div>
-            <div id="crewList" style="margin-bottom: 20px;">
-                <!-- Crew members will be dynamically added here -->
-            </div>
-            <div id="playerControls">
-                <button id="readyBtn" class="ready-btn" onclick="togglePlayerReady()">UNREADY ○</button>
-                <div id="launchMessage" style="color: #ffaa00; margin-top: 10px;">Mark yourself READY</div>
-            </div>
-            <div id="leaderControls">
-                <button id="leaderReadyBtn" class="ready-btn" onclick="togglePlayerReady()">UNREADY ○</button>
-                <div id="readyStatus" style="color: #aaa; margin-top: 10px;">Crew Ready: <strong>0/1</strong></div>
-                <button id="launchBtn" class="launch-btn" onclick="startMission()" disabled>DESCEND</button>
-                <div id="launchMessage2" style="color: #ffaa00; margin-top: 10px;">Waiting for all crew to be ready...</div>
-            </div>
-        </div>
+    <!-- INTERACTION MODAL -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="interaction-modal" id="interactionModal">
+        <button class="close-modal-btn" onclick="closeInteractionModal()">✕</button>
+        <div id="modalContent"></div>
     </div>
 
     <script>
-        // ========== MAIN MENU INITIALIZATION ==========
-        function initializeMenu() {
-            generateStarfield();
-        }
-
-        // Generate random starfield
-        function generateStarfield() {
-            const container = document.getElementById('starsContainer');
-            const stars = [
-                { top: '16%', left: '20%', size: 1 },
-                { top: '40%', left: '33%', size: 2 },
-                { top: '32%', left: '60%', size: 1 },
-                { top: '68%', left: '25%', size: 1 },
-                { top: '80%', left: '67%', size: 2 },
-                { top: '10%', left: '80%', size: 1 },
-                { top: '55%', left: '10%', size: 1 },
-                { top: '85%', left: '85%', size: 1.5 },
-            ];
-
-            stars.forEach(star => {
-                const starEl = document.createElement('div');
-                starEl.className = 'menu-star';
-                starEl.style.width = star.size + 'px';
-                starEl.style.height = star.size + 'px';
-                starEl.style.top = star.top;
-                starEl.style.left = star.left;
-                starEl.style.animationDelay = Math.random() * 2 + 's';
-                container.appendChild(starEl);
-            });
-        }
-
-        // ========== GAME STATE ==========
+        // Game state
         const gameState = {
-            location: 'menu', // menu, hub, mission
-            canMove: true,
-            inModal: false
+            currentLocation: 'menu',
+            credits: 500,
+            playerX: 0,
+            playerY: 0,
+            playerSpeed: 5
         };
 
-        // Menu Button Functions
-        function startGame() {
-            const mainMenu = document.getElementById('mainMenu');
-            mainMenu.style.display = 'none';
-            document.getElementById('header').style.display = 'block';
-            gameState.location = 'mission';
-            loadMissions();
-            document.getElementById('missionModal').classList.add('show');
-        }
-
-        function exitGame() {
-            if (confirm('Exit Planetfall: Extraction?')) {
-                window.close();
+        // Rooms definition
+        const rooms = {
+            centralHub: {
+                name: 'Central Hub',
+                x: 400,
+                y: 300,
+                width: 200,
+                height: 200,
+                color: '#1a4d6d',
+                icon: '●'
+            },
+            armory: {
+                name: 'Armory',
+                x: 100,
+                y: 150,
+                width: 150,
+                height: 150,
+                color: '#4d1a1a',
+                icon: '⚔'
+            },
+            engineering: {
+                name: 'Engineering',
+                x: 700,
+                y: 150,
+                width: 150,
+                height: 150,
+                color: '#4d4d1a',
+                icon: '⚙'
+            },
+            controlRoom: {
+                name: 'Control Room',
+                x: 400,
+                y: 550,
+                width: 150,
+                height: 150,
+                color: '#1a4d1a',
+                icon: '📡'
             }
-        }
+        };
 
-        // ========== MISSION DATA ==========
+        // Planets
         const planets = [
-            {
-                name: 'Kepler Prime',
-                difficulty: 'easy',
-                enemies: 8,
-                reward: 150,
-                description: 'Light reconnaissance mission. Perfect for new operatives.'
-            },
-            {
-                name: 'Vulcan Ridge',
-                difficulty: 'medium',
-                enemies: 15,
-                reward: 300,
-                description: 'Moderate resistance. Standard extraction protocol.'
-            },
-            {
-                name: 'Nexus-7',
-                difficulty: 'hard',
-                enemies: 25,
-                reward: 500,
-                description: 'High-intensity combat. Elite forces only.'
-            },
-            {
-                name: 'Frozen Outpost',
-                difficulty: 'medium',
-                enemies: 12,
-                reward: 250,
-                description: 'Environmental hazards present. Thermal gear required.'
-            },
-            {
-                name: 'Crimson Wastes',
-                difficulty: 'hard',
-                enemies: 30,
-                reward: 600,
-                description: 'Extreme danger. Veteran operators recommended.'
-            }
+            { name: 'Kepler-442b', difficulty: 'easy', type: 'Desert', enemies: 8 },
+            { name: 'TRAPPIST-1d', difficulty: 'medium', type: 'Ice World', enemies: 12 },
+            { name: 'Proxima-b', difficulty: 'hard', type: 'Volcanic', enemies: 20 }
         ];
 
-        let selectedMission = null;
-
-        function loadMissions() {
-            const planetsList = document.getElementById('planetsList');
-            planetsList.innerHTML = '';
-
-            planets.forEach((planet, index) => {
-                const card = document.createElement('div');
-                card.className = 'planet-card';
-                card.style.background = 'rgba(26, 31, 58, 0.8)';
-                card.style.border = '2px solid #444';
-                card.style.padding = '16px';
-                card.style.borderRadius = '8px';
-                card.style.cursor = 'pointer';
-                card.style.transition = 'all 0.3s';
-                card.onmouseover = () => {
-                    card.style.borderColor = '#00ff88';
-                    card.style.background = 'rgba(26, 31, 58, 1)';
-                };
-                card.onmouseout = () => {
-                    card.style.borderColor = '#444';
-                    card.style.background = 'rgba(26, 31, 58, 0.8)';
-                };
-                card.onclick = () => selectMission(index, planet);
-                card.innerHTML = `
-                    <div style="color: #00ff88; font-weight: bold; font-size: 18px; margin-bottom: 10px;">${planet.name}</div>
-                    <div style="color: #aaa; font-size: 12px; margin: 5px 0;">Enemy Count: ${planet.enemies}</div>
-                    <div style="color: #aaa; font-size: 12px; margin: 5px 0;">Reward: ${planet.reward} Credits</div>
-                    <div style="color: ${planet.difficulty === 'easy' ? '#00ff88' : planet.difficulty === 'medium' ? '#ffaa00' : '#ff4444'}; font-weight: bold; margin: 10px 0;">Difficulty: ${planet.difficulty.toUpperCase()}</div>
-                    <div style="color: #aaa; font-size: 11px; margin: 10px 0; line-height: 1.4;">${planet.description}</div>
-                    <button class="planet-btn" onclick="deployToMission('${planet.name}', event)">DEPLOY</button>
-                `;
-                planetsList.appendChild(card);
-            });
-        }
-
-        function selectMission(index, planet) {
-            selectedMission = planet;
-            console.log('Selected mission:', planet.name);
-        }
-
-        function deployToMission(planetName, event) {
-            event.stopPropagation();
-            console.log('Deploying to', planetName);
-            closeMissionModal();
-            startCountdown(planetName);
-        }
-
-        function closeMissionModal() {
-            document.getElementById('missionModal').classList.remove('show');
-        }
-
-        function startCountdown(planetName) {
-            const countdownScreen = document.getElementById('countdownScreen');
-            countdownScreen.style.display = 'flex';
-            document.getElementById('countdownPlanet').textContent = planetName;
-
-            let count = 15;
-            const interval = setInterval(() => {
-                document.getElementById('countdownText').textContent = count;
-                count--;
-                if (count < 0) {
-                    clearInterval(interval);
-                    countdownScreen.style.display = 'none';
-                    initializeShipHub();
-                }
-            }, 1000);
-        }
-
-        // ========== MODAL FUNCTIONS ==========
-        function openPartyModal() {
-            console.log('Party modal - coming soon');
-        }
-
-        function openSettings() {
-            console.log('Settings modal - coming soon');
-        }
-
-        function openCommunications() {
-            console.log('Communications modal - coming soon');
-        }
-
-        function exitToMenu() {
-            document.getElementById('mainMenu').style.display = 'flex';
-            document.getElementById('shipCanvas').style.display = 'none';
-            document.getElementById('header').style.display = 'none';
-            document.getElementById('shipHub').style.display = 'none';
-            shipHubRunning = false;
-            closeMissionModal();
-            closeRoomModal();
-        }
-
-        // ========== SHIP HUB SYSTEM ==========
-        const shipHubCanvas = document.getElementById('shipHubCanvas');
-        const hubCtx = shipHubCanvas.getContext('2d');
-        
-        let shipHubWidth = window.innerWidth;
-        let shipHubHeight = window.innerHeight;
-        shipHubCanvas.width = shipHubWidth;
-        shipHubCanvas.height = shipHubHeight;
-        
-        const gameState = {
-            location: 'hub',
-            currentRoom: null
-        };
-        
-        const player = {
-            x: shipHubWidth / 2,
-            y: shipHubHeight / 2,
-            radius: 15,
-            speed: 5,
-            velocityX: 0,
-            velocityY: 0,
-            color: '#4444ff',
-            draw() {
-                hubCtx.beginPath();
-                hubCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                hubCtx.fillStyle = this.color;
-                hubCtx.fill();
-                hubCtx.strokeStyle = '#3b82f6';
-                hubCtx.lineWidth = 3;
-                hubCtx.stroke();
-            },
-            update() {
-                this.velocityX *= 0.85;
-                this.velocityY *= 0.85;
-                let newX = this.x + this.velocityX;
-                let newY = this.y + this.velocityY;
-                if (isWalkable(newX, newY, this.radius)) {
-                    this.x = newX;
-                    this.y = newY;
-                }
-            }
-        };
-        
-        const doors = [
-            { id: 'communications', name: '📡 COMMUNICATIONS', x: 200, y: 150, width: 120, height: 80, color: '#00ff88', hovered: false },
-            { id: 'engineering', name: '⚙️ ENGINEERING', x: shipHubWidth - 320, y: 150, width: 120, height: 80, color: '#ffaa00', hovered: false },
-            { id: 'armory', name: '⚡ ARMORY', x: 200, y: shipHubHeight / 2 - 40, width: 120, height: 80, color: '#ff6666', hovered: false },
-            { id: 'controlRoom', name: '🎮 CONTROL ROOM', x: shipHubWidth - 320, y: shipHubHeight / 2 - 40, width: 120, height: 80, color: '#4444ff', hovered: false },
-            { id: 'hangar', name: '🛩️ HANGAR', x: 200, y: shipHubHeight - 230, width: 120, height: 80, color: '#00ddff', hovered: false },
-            { id: 'cargoBay', name: '📦 CARGO BAY', x: shipHubWidth - 320, y: shipHubHeight - 230, width: 120, height: 80, color: '#ffdd00', hovered: false }
-        ];
-        
+        // Key tracking
         const keys = {};
         window.addEventListener('keydown', (e) => {
             keys[e.key.toLowerCase()] = true;
-            if (e.key.toLowerCase() === 'e') {
-                checkDoorInteraction();
-            }
+            if (e.key.toLowerCase() === 'e') handleInteraction();
         });
-        
         window.addEventListener('keyup', (e) => {
             keys[e.key.toLowerCase()] = false;
         });
-        
-        shipHubCanvas.addEventListener('click', (e) => {
-            const rect = shipHubCanvas.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const clickY = e.clientY - rect.top;
-            checkClickInteraction(clickX, clickY);
-        });
-        
-        function handleInput() {
-            let moveX = 0, moveY = 0;
-            if (keys['w']) moveY -= player.speed;
-            if (keys['s']) moveY += player.speed;
-            if (keys['a']) moveX -= player.speed;
-            if (keys['d']) moveX += player.speed;
-            player.velocityX += moveX;
-            player.velocityY += moveY;
-            const maxSpeed = 8;
-            const currentSpeed = Math.sqrt(player.velocityX ** 2 + player.velocityY ** 2);
-            if (currentSpeed > maxSpeed) {
-                const scale = maxSpeed / currentSpeed;
-                player.velocityX *= scale;
-                player.velocityY *= scale;
-            }
-        }
-        
-        function isWalkable(x, y, radius) {
-            if (x - radius < 50 || x + radius > shipHubWidth - 50) return false;
-            if (y - radius < 100 || y + radius > shipHubHeight - 100) return false;
-            for (let door of doors) {
-                if (circleRectCollision(x, y, radius, door.x, door.y, door.width, door.height)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        
-        function circleRectCollision(cx, cy, r, rx, ry, rw, rh) {
-            let closestX = Math.max(rx, Math.min(cx, rx + rw));
-            let closestY = Math.max(ry, Math.min(cy, ry + rh));
-            let distance = Math.sqrt((cx - closestX) ** 2 + (cy - closestY) ** 2);
-            return distance < r + 10;
-        }
-        
-        function checkDoorInteraction() {
-            for (let door of doors) {
-                if (circleRectCollision(player.x, player.y, player.radius + 20, door.x, door.y, door.width, door.height)) {
-                    openRoom(door.id);
-                    return;
-                }
-            }
-        }
-        
-        function checkClickInteraction(clickX, clickY) {
-            for (let door of doors) {
-                if (clickX >= door.x && clickX <= door.x + door.width &&
-                    clickY >= door.y && clickY <= door.y + door.height) {
-                    openRoom(door.id);
-                    return;
-                }
-            }
-        }
-        
-        function drawDoors() {
-            for (let door of doors) {
-                const distToDoor = Math.sqrt((player.x - (door.x + door.width/2)) ** 2 + (player.y - (door.y + door.height/2)) ** 2);
-                const isNear = distToDoor < 150;
-                hubCtx.fillStyle = isNear ? door.color + '40' : door.color + '20';
-                hubCtx.fillRect(door.x, door.y, door.width, door.height);
-                hubCtx.strokeStyle = isNear ? door.color : door.color + '80';
-                hubCtx.lineWidth = isNear ? 3 : 2;
-                hubCtx.strokeRect(door.x, door.y, door.width, door.height);
-                hubCtx.fillStyle = door.color;
-                hubCtx.font = 'bold 12px Arial';
-                hubCtx.textAlign = 'center';
-                hubCtx.textBaseline = 'middle';
-                hubCtx.fillText(door.name, door.x + door.width / 2, door.y + door.height / 2);
-                if (isNear) {
-                    hubCtx.fillStyle = '#00ff88';
-                    hubCtx.font = 'bold 11px Arial';
-                    hubCtx.fillText('[E or CLICK]', door.x + door.width / 2, door.y + door.height + 20);
-                }
-            }
-        }
-        
-        function drawShipLayout() {
-            hubCtx.fillStyle = '#0a0e27';
-            hubCtx.fillRect(0, 0, shipHubWidth, shipHubHeight);
-            hubCtx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
-            hubCtx.lineWidth = 1;
-            const gridSize = 50;
-            for (let x = 0; x < shipHubWidth; x += gridSize) {
-                hubCtx.beginPath();
-                hubCtx.moveTo(x, 0);
-                hubCtx.lineTo(x, shipHubHeight);
-                hubCtx.stroke();
-            }
-            for (let y = 0; y < shipHubHeight; y += gridSize) {
-                hubCtx.beginPath();
-                hubCtx.moveTo(0, y);
-                hubCtx.lineTo(shipHubWidth, y);
-                hubCtx.stroke();
-            }
-            hubCtx.strokeStyle = '#00ff88';
-            hubCtx.lineWidth = 4;
-            hubCtx.strokeRect(50, 100, shipHubWidth - 100, shipHubHeight - 200);
-        }
-        
-        function openRoom(roomId) {
-            gameState.location = 'room';
-            gameState.currentRoom = roomId;
-            document.getElementById('roomModalOverlay').style.display = 'block';
-            const roomModal = document.getElementById(roomId + 'Room') || document.getElementById(roomId + 'Modal2');
-            if (roomModal) {
-                roomModal.style.display = 'block';
-            }
-        }
-        
-        function closeRoomModal() {
-            if (gameState.location === 'room') {
-                gameState.location = 'hub';
-                document.getElementById('roomModalOverlay').style.display = 'none';
-                document.getElementById('communicationsRoom').style.display = 'none';
-                document.getElementById('engineeringRoom').style.display = 'none';
-                document.getElementById('armoryRoom').style.display = 'none';
-                document.getElementById('controlRoomModal2').style.display = 'none';
-                document.getElementById('hangarRoom').style.display = 'none';
-                document.getElementById('cargoBayRoom').style.display = 'none';
-            }
-        }
-        
-        function exitShipHub() {
-            if (confirm('Exit to menu? (Mission will be abandoned)')) {
-                document.getElementById('shipHub').style.display = 'none';
-                document.getElementById('shipCanvas').style.display = 'none';
-                document.getElementById('header').style.display = 'none';
-                document.getElementById('mainMenu').style.display = 'flex';
-                closeRoomModal();
-                shipHubRunning = false;
-            }
-        }
-        
-        function updateShipHub() {
-            handleInput();
-            player.update();
-            drawShipLayout();
-            drawDoors();
-            player.draw();
-        }
-        
-        let shipHubRunning = false;
-        function shipHubLoop() {
-            if (!shipHubRunning) return;
-            updateShipHub();
-            requestAnimationFrame(shipHubLoop);
-        }
-        
-        function initializeShipHub() {
-            document.getElementById('shipHub').style.display = 'block';
-            shipHubRunning = true;
-            player.x = shipHubWidth / 2;
-            player.y = shipHubHeight / 2;
-            player.velocityX = 0;
-            player.velocityY = 0;
-            shipHubLoop();
-        }
-        
-        window.addEventListener('resize', () => {
-            shipHubWidth = window.innerWidth;
-            shipHubHeight = window.innerHeight;
-            shipHubCanvas.width = shipHubWidth;
-            shipHubCanvas.height = shipHubHeight;
-        });
-        
-        // ========== GAME ENGINE CODE ==========
-        const canvas = document.getElementById('shipCanvas');
-        const ctx = canvas.getContext('2d');
 
-        let cw = window.innerWidth;
-        let ch = window.innerHeight;
-        canvas.width = cw;
-        canvas.height = ch;
-        
-        let gameRunning = false;
-
-        function shootBullet(x, y, weaponType) {
-            const bullet = {
-                x: x,
-                y: y,
-                speed: 10,
-                size: 5,
-                color: '#ff4444',
-                damage: 10
-            };
-            bullets.push(bullet);
+        // Initialize starfield
+        function initStarfield() {
+            const container = document.getElementById('starsContainer');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'menu-star';
+                star.style.width = Math.random() * 2 + 'px';
+                star.style.height = star.style.width;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(star);
+            }
         }
 
-        let bullets = [];
+        // Start game - load ship hub
+        function startGame() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('shipHubContainer').style.display = 'block';
+            gameState.currentLocation = 'ship';
+            gameState.playerX = 475;
+            gameState.playerY = 400;
+            initShipHub();
+        }
 
-        function update() {
-            ctx.clearRect(0, 0, cw, ch);
+        // Initialize ship hub
+        let shipCanvas, shipCtx;
+        function initShipHub() {
+            shipCanvas = document.getElementById('shipHubCanvas');
+            shipCtx = shipCanvas.getContext('2d');
+            shipCanvas.width = window.innerWidth;
+            shipCanvas.height = window.innerHeight;
+            renderShipHub();
+        }
 
-            bullets.forEach((bullet, index) => {
-                bullet.x += bullet.speed;
-                if (bullet.x > cw) {
-                    bullets.splice(index, 1);
-                } else {
-                    ctx.beginPath();
-                    ctx.arc(bullet.x, bullet.y, bullet.size, 0, Math.PI * 2);
-                    ctx.fillStyle = bullet.color;
-                    ctx.fill();
-                }
+        // Render ship hub
+        function renderShipHub() {
+            // Clear canvas
+            shipCtx.fillStyle = 'rgba(10, 14, 39, 0.9)';
+            shipCtx.fillRect(0, 0, shipCanvas.width, shipCanvas.height);
+
+            // Draw grid background
+            shipCtx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
+            shipCtx.lineWidth = 1;
+            for (let x = 0; x < shipCanvas.width; x += 50) {
+                shipCtx.beginPath();
+                shipCtx.moveTo(x, 0);
+                shipCtx.lineTo(x, shipCanvas.height);
+                shipCtx.stroke();
+            }
+            for (let y = 0; y < shipCanvas.height; y += 50) {
+                shipCtx.beginPath();
+                shipCtx.moveTo(0, y);
+                shipCtx.lineTo(shipCanvas.width, y);
+                shipCtx.stroke();
+            }
+
+            // Draw rooms
+            Object.values(rooms).forEach(room => {
+                // Room background
+                shipCtx.fillStyle = room.color;
+                shipCtx.fillRect(room.x, room.y, room.width, room.height);
+
+                // Room border
+                shipCtx.strokeStyle = '#00ff88';
+                shipCtx.lineWidth = 2;
+                shipCtx.strokeRect(room.x, room.y, room.width, room.height);
+
+                // Room label
+                shipCtx.fillStyle = '#00ff88';
+                shipCtx.font = 'bold 16px Arial';
+                shipCtx.textAlign = 'center';
+                shipCtx.textBaseline = 'middle';
+                shipCtx.fillText(room.icon + ' ' + room.name, room.x + room.width / 2, room.y + room.height / 2);
             });
+
+            // Draw player
+            shipCtx.fillStyle = '#ff6b00';
+            shipCtx.beginPath();
+            shipCtx.arc(gameState.playerX, gameState.playerY, 15, 0, Math.PI * 2);
+            shipCtx.fill();
+
+            // Player outline
+            shipCtx.strokeStyle = '#ffaa00';
+            shipCtx.lineWidth = 2;
+            shipCtx.beginPath();
+            shipCtx.arc(gameState.playerX, gameState.playerY, 15, 0, Math.PI * 2);
+            shipCtx.stroke();
+
+            // Update player position from input
+            if (keys['w'] || keys['arrowup']) gameState.playerY -= gameState.playerSpeed;
+            if (keys['s'] || keys['arrowdown']) gameState.playerY += gameState.playerSpeed;
+            if (keys['a'] || keys['arrowleft']) gameState.playerX -= gameState.playerSpeed;
+            if (keys['d'] || keys['arrowright']) gameState.playerX += gameState.playerSpeed;
+
+            // Boundary check
+            gameState.playerX = Math.max(0, Math.min(shipCanvas.width, gameState.playerX));
+            gameState.playerY = Math.max(0, Math.min(shipCanvas.height, gameState.playerY));
+
+            // Continue animation
+            requestAnimationFrame(renderShipHub);
         }
 
-        function draw() {
-            if (!gameRunning) {
-                requestAnimationFrame(draw);
-                return;
+        // Handle interaction
+        function handleInteraction() {
+            // Check if player is in any room
+            for (const [key, room] of Object.entries(rooms)) {
+                if (isPlayerInRoom(room)) {
+                    showRoomUI(key);
+                    return;
+                }
             }
-            requestAnimationFrame(draw);
-            update();
         }
 
-        draw();
+        // Check if player is in room
+        function isPlayerInRoom(room) {
+            return gameState.playerX > room.x &&
+                   gameState.playerX < room.x + room.width &&
+                   gameState.playerY > room.y &&
+                   gameState.playerY < room.y + room.height;
+        }
 
-        // ========== INITIALIZATION ==========
-        initializeMenu();
-        
-        document.getElementById('roomModalOverlay').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeRoomModal();
+        // Show room UI based on room type
+        function showRoomUI(roomKey) {
+            const modalContent = document.getElementById('modalContent');
+            
+            switch(roomKey) {
+                case 'armory':
+                    modalContent.innerHTML = `
+                        <div class="interaction-modal-header">⚔ ARMORY</div>
+                        <div class="interaction-modal-content">
+                            <p>Weapon upgrades coming soon!</p>
+                        </div>
+                    `;
+                    break;
+                case 'engineering':
+                    modalContent.innerHTML = `
+                        <div class="interaction-modal-header">⚙ ENGINEERING</div>
+                        <div class="interaction-modal-content">
+                            <p>Ship upgrades coming soon!</p>
+                        </div>
+                    `;
+                    break;
+                case 'controlRoom':
+                    modalContent.innerHTML = `
+                        <div class="interaction-modal-header">📡 CONTROL ROOM</div>
+                        <div class="interaction-modal-content">
+                            <p>Select your mission:</p>
+                            <div class="planet-grid">
+                                ${planets.map((planet, idx) => `
+                                    <div class="planet-card">
+                                        <div class="planet-name">${planet.name}</div>
+                                        <div class="planet-info">Type: ${planet.type}</div>
+                                        <div class="planet-info">Enemies: ${planet.enemies}</div>
+                                        <div class="difficulty ${planet.difficulty.toLowerCase()}">${planet.difficulty}</div>
+                                        <button class="planet-btn" onclick="selectPlanet(${idx})">SELECT MISSION</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'centralHub':
+                    modalContent.innerHTML = `
+                        <div class="interaction-modal-header">● CENTRAL HUB</div>
+                        <div class="interaction-modal-content">
+                            <p>Welcome to the Mothership! Move around to explore:</p>
+                            <ul style="margin-top: 15px; margin-left: 20px;">
+                                <li>⚔ <strong>Armory</strong> - Weapon upgrades</li>
+                                <li>⚙ <strong>Engineering</strong> - Ship upgrades</li>
+                                <li>📡 <strong>Control Room</strong> - Mission selection</li>
+                            </ul>
+                        </div>
+                    `;
+                    break;
+            }
+
+            document.getElementById('modalOverlay').classList.add('show');
+            document.getElementById('interactionModal').classList.add('show');
+        }
+
+        function closeInteractionModal() {
+            document.getElementById('modalOverlay').classList.remove('show');
+            document.getElementById('interactionModal').classList.remove('show');
+        }
+
+        function selectPlanet(idx) {
+            const planet = planets[idx];
+            alert(`Loading mission: ${planet.name}`);
+            // TODO: Load actual mission
+        }
+
+        function exitToMenu() {
+            document.getElementById('shipHubContainer').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'flex';
+            closeInteractionModal();
+        }
+
+        function exitGame() {
+            alert('Thanks for playing Planetfall!');
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initStarfield();
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (gameState.currentLocation === 'ship' && shipCanvas) {
+                shipCanvas.width = window.innerWidth;
+                shipCanvas.height = window.innerHeight;
             }
         });
     </script>
