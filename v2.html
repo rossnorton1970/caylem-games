@@ -185,7 +185,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            background: #0a0e1f;
             z-index: 100;
         }
 
@@ -211,11 +211,12 @@
             position: fixed;
             top: 20px;
             left: 20px;
-            color: #00ff88;
+            color: #00d4ff;
             font-size: 18px;
             font-weight: bold;
             pointer-events: auto;
             z-index: 102;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
         }
 
         .ship-hint {
@@ -223,15 +224,15 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            color: #aaa;
-            font-size: 14px;
+            color: #888;
+            font-size: 13px;
             text-align: center;
             pointer-events: auto;
             z-index: 102;
         }
 
         .ship-hint-highlight {
-            color: #00ff88;
+            color: #00d4ff;
             font-weight: bold;
         }
 
@@ -257,6 +258,22 @@
         }
 
         /* INTERACTION MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 104;
+            pointer-events: auto;
+        }
+
+        .modal-overlay.show {
+            display: block;
+        }
+
         .interaction-modal {
             display: none;
             position: fixed;
@@ -264,14 +281,14 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: rgba(10, 14, 39, 0.98);
-            border: 2px solid #00ff88;
+            border: 2px solid #00d4ff;
             border-radius: 10px;
             padding: 40px;
             min-width: 500px;
             max-height: 80vh;
             overflow-y: auto;
             z-index: 105;
-            box-shadow: 0 0 40px rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
             pointer-events: auto;
         }
 
@@ -280,12 +297,13 @@
         }
 
         .interaction-modal-header {
-            color: #00ff88;
+            color: #00d4ff;
             font-size: 28px;
             font-weight: bold;
             margin-bottom: 20px;
-            border-bottom: 2px solid #00ff88;
+            border-bottom: 2px solid #00d4ff;
             padding-bottom: 15px;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
         }
 
         .interaction-modal-content {
@@ -313,22 +331,6 @@
             background: #ff6666;
         }
 
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 104;
-            pointer-events: auto;
-        }
-
-        .modal-overlay.show {
-            display: block;
-        }
-
         /* PLANET SELECTION */
         .planet-grid {
             display: grid;
@@ -347,12 +349,13 @@
         }
 
         .planet-card:hover {
-            border-color: #00ff88;
+            border-color: #00d4ff;
             background: #2a2f4a;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
         }
 
         .planet-name {
-            color: #00ff88;
+            color: #00d4ff;
             font-weight: bold;
             font-size: 18px;
             margin-bottom: 10px;
@@ -443,49 +446,90 @@
         // Game state
         const gameState = {
             currentLocation: 'menu',
-            credits: 500,
             playerX: 0,
             playerY: 0,
-            playerSpeed: 5
+            playerSpeed: 3,
+            playerSize: 12
         };
 
-        // Rooms definition
+        // Define rooms with layout
         const rooms = {
             centralHub: {
-                name: 'Central Hub',
-                x: 400,
+                name: 'CENTRAL HUB',
+                x: 350,
                 y: 300,
                 width: 200,
-                height: 200,
-                color: '#1a4d6d',
-                icon: '●'
+                height: 180,
+                color: '#1a3a52',
+                borderColor: '#00d4ff',
+                icon: '●',
+                interactionKey: 'centralHub'
             },
             armory: {
-                name: 'Armory',
-                x: 100,
-                y: 150,
+                name: 'ARMORY',
+                x: 600,
+                y: 200,
                 width: 150,
-                height: 150,
-                color: '#4d1a1a',
-                icon: '⚔'
+                height: 140,
+                color: '#4d2a1a',
+                borderColor: '#ff8800',
+                icon: '⚔',
+                interactionKey: 'armory'
             },
             engineering: {
-                name: 'Engineering',
-                x: 700,
-                y: 150,
+                name: 'ENGINEERING',
+                x: 100,
+                y: 200,
                 width: 150,
-                height: 150,
-                color: '#4d4d1a',
-                icon: '⚙'
+                height: 140,
+                color: '#3a3a1a',
+                borderColor: '#ff8800',
+                icon: '⚙',
+                interactionKey: 'engineering'
+            },
+            communications: {
+                name: 'COMMUNICATIONS',
+                x: 100,
+                y: 50,
+                width: 150,
+                height: 100,
+                color: '#1a2a3a',
+                borderColor: '#00d4ff',
+                icon: '📡',
+                interactionKey: 'communications'
             },
             controlRoom: {
-                name: 'Control Room',
-                x: 400,
+                name: 'CONTROL ROOM',
+                x: 350,
                 y: 550,
+                width: 200,
+                height: 140,
+                color: '#1a3a1a',
+                borderColor: '#00ff88',
+                icon: '🖥',
+                interactionKey: 'controlRoom'
+            },
+            dropship: {
+                name: 'DROPSHIP',
+                x: 600,
+                y: 450,
                 width: 150,
-                height: 150,
-                color: '#1a4d1a',
-                icon: '📡'
+                height: 120,
+                color: '#3a2a1a',
+                borderColor: '#ff8800',
+                icon: '🚀',
+                interactionKey: 'dropship'
+            },
+            cargoBay: {
+                name: 'CARGO BAY',
+                x: 100,
+                y: 450,
+                width: 150,
+                height: 120,
+                color: '#3a3a1a',
+                borderColor: '#ffcc00',
+                icon: '📦',
+                interactionKey: 'cargoBay'
             }
         };
 
@@ -498,10 +542,18 @@
 
         // Key tracking
         const keys = {};
+        let lastInteractionTime = 0;
+
         window.addEventListener('keydown', (e) => {
             keys[e.key.toLowerCase()] = true;
-            if (e.key.toLowerCase() === 'e') handleInteraction();
+            if (e.key.toLowerCase() === 'e') {
+                if (Date.now() - lastInteractionTime > 200) {
+                    handleInteraction();
+                    lastInteractionTime = Date.now();
+                }
+            }
         });
+        
         window.addEventListener('keyup', (e) => {
             keys[e.key.toLowerCase()] = false;
         });
@@ -521,13 +573,13 @@
             }
         }
 
-        // Start game - load ship hub
+        // Start game
         function startGame() {
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('shipHubContainer').style.display = 'block';
             gameState.currentLocation = 'ship';
-            gameState.playerX = 475;
-            gameState.playerY = 400;
+            gameState.playerX = 450;
+            gameState.playerY = 390;
             initShipHub();
         }
 
@@ -538,17 +590,21 @@
             shipCtx = shipCanvas.getContext('2d');
             shipCanvas.width = window.innerWidth;
             shipCanvas.height = window.innerHeight;
+            
+            // Set up canvas coordinate system for isometric-like view
+            shipCtx.imageSmoothingEnabled = true;
+            
             renderShipHub();
         }
 
         // Render ship hub
         function renderShipHub() {
-            // Clear canvas
-            shipCtx.fillStyle = 'rgba(10, 14, 39, 0.9)';
+            // Clear canvas with dark background
+            shipCtx.fillStyle = '#0a0e1f';
             shipCtx.fillRect(0, 0, shipCanvas.width, shipCanvas.height);
 
-            // Draw grid background
-            shipCtx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
+            // Draw subtle grid
+            shipCtx.strokeStyle = 'rgba(0, 212, 255, 0.05)';
             shipCtx.lineWidth = 1;
             for (let x = 0; x < shipCanvas.width; x += 50) {
                 shipCtx.beginPath();
@@ -563,58 +619,113 @@
                 shipCtx.stroke();
             }
 
-            // Draw rooms
+            // Draw all rooms
             Object.values(rooms).forEach(room => {
-                // Room background
-                shipCtx.fillStyle = room.color;
-                shipCtx.fillRect(room.x, room.y, room.width, room.height);
-
-                // Room border
-                shipCtx.strokeStyle = '#00ff88';
-                shipCtx.lineWidth = 2;
-                shipCtx.strokeRect(room.x, room.y, room.width, room.height);
-
-                // Room label
-                shipCtx.fillStyle = '#00ff88';
-                shipCtx.font = 'bold 16px Arial';
-                shipCtx.textAlign = 'center';
-                shipCtx.textBaseline = 'middle';
-                shipCtx.fillText(room.icon + ' ' + room.name, room.x + room.width / 2, room.y + room.height / 2);
+                drawRoom(room);
             });
 
+            // Update player movement
+            updatePlayerMovement();
+
             // Draw player
-            shipCtx.fillStyle = '#ff6b00';
-            shipCtx.beginPath();
-            shipCtx.arc(gameState.playerX, gameState.playerY, 15, 0, Math.PI * 2);
-            shipCtx.fill();
-
-            // Player outline
-            shipCtx.strokeStyle = '#ffaa00';
-            shipCtx.lineWidth = 2;
-            shipCtx.beginPath();
-            shipCtx.arc(gameState.playerX, gameState.playerY, 15, 0, Math.PI * 2);
-            shipCtx.stroke();
-
-            // Update player position from input
-            if (keys['w'] || keys['arrowup']) gameState.playerY -= gameState.playerSpeed;
-            if (keys['s'] || keys['arrowdown']) gameState.playerY += gameState.playerSpeed;
-            if (keys['a'] || keys['arrowleft']) gameState.playerX -= gameState.playerSpeed;
-            if (keys['d'] || keys['arrowright']) gameState.playerX += gameState.playerSpeed;
-
-            // Boundary check
-            gameState.playerX = Math.max(0, Math.min(shipCanvas.width, gameState.playerX));
-            gameState.playerY = Math.max(0, Math.min(shipCanvas.height, gameState.playerY));
+            drawPlayer();
 
             // Continue animation
             requestAnimationFrame(renderShipHub);
         }
 
+        // Draw a room
+        function drawRoom(room) {
+            // Room background
+            shipCtx.fillStyle = room.color;
+            shipCtx.fillRect(room.x, room.y, room.width, room.height);
+
+            // Room border
+            shipCtx.strokeStyle = room.borderColor;
+            shipCtx.lineWidth = 2;
+            shipCtx.strokeRect(room.x, room.y, room.width, room.height);
+
+            // Room glow effect
+            shipCtx.shadowColor = room.borderColor;
+            shipCtx.shadowBlur = 15;
+            shipCtx.shadowOffsetX = 0;
+            shipCtx.shadowOffsetY = 0;
+            shipCtx.strokeStyle = room.borderColor;
+            shipCtx.lineWidth = 1;
+            shipCtx.globalAlpha = 0.3;
+            shipCtx.strokeRect(room.x - 5, room.y - 5, room.width + 10, room.height + 10);
+            shipCtx.globalAlpha = 1.0;
+            shipCtx.shadowColor = 'transparent';
+
+            // Room label
+            shipCtx.fillStyle = room.borderColor;
+            shipCtx.font = 'bold 14px Arial';
+            shipCtx.textAlign = 'center';
+            shipCtx.textBaseline = 'middle';
+            shipCtx.fillText(room.name, room.x + room.width / 2, room.y + room.height / 2 - 15);
+            
+            shipCtx.font = '20px Arial';
+            shipCtx.fillText(room.icon, room.x + room.width / 2, room.y + room.height / 2 + 15);
+        }
+
+        // Update player movement
+        function updatePlayerMovement() {
+            let newX = gameState.playerX;
+            let newY = gameState.playerY;
+
+            if (keys['w'] || keys['arrowup']) newY -= gameState.playerSpeed;
+            if (keys['s'] || keys['arrowdown']) newY += gameState.playerSpeed;
+            if (keys['a'] || keys['arrowleft']) newX -= gameState.playerSpeed;
+            if (keys['d'] || keys['arrowright']) newX += gameState.playerSpeed;
+
+            // Simple collision detection
+            if (!checkCollision(newX, newY)) {
+                gameState.playerX = newX;
+                gameState.playerY = newY;
+            }
+
+            // Boundary check
+            gameState.playerX = Math.max(gameState.playerSize, Math.min(shipCanvas.width - gameState.playerSize, gameState.playerX));
+            gameState.playerY = Math.max(gameState.playerSize, Math.min(shipCanvas.height - gameState.playerSize, gameState.playerY));
+        }
+
+        // Check collision with rooms
+        function checkCollision(x, y) {
+            for (const room of Object.values(rooms)) {
+                if (x > room.x && x < room.x + room.width &&
+                    y > room.y && y < room.y + room.height) {
+                    return false; // Can move into rooms
+                }
+            }
+            return false; // Can move anywhere for now
+        }
+
+        // Draw player
+        function drawPlayer() {
+            // Player body
+            shipCtx.fillStyle = '#ff6b00';
+            shipCtx.beginPath();
+            shipCtx.arc(gameState.playerX, gameState.playerY, gameState.playerSize, 0, Math.PI * 2);
+            shipCtx.fill();
+
+            // Player glow
+            shipCtx.strokeStyle = '#ffaa00';
+            shipCtx.lineWidth = 2;
+            shipCtx.beginPath();
+            shipCtx.arc(gameState.playerX, gameState.playerY, gameState.playerSize, 0, Math.PI * 2);
+            shipCtx.stroke();
+
+            // Player direction indicator
+            shipCtx.fillStyle = '#ffaa00';
+            shipCtx.fillRect(gameState.playerX - 2, gameState.playerY - gameState.playerSize - 5, 4, 5);
+        }
+
         // Handle interaction
         function handleInteraction() {
-            // Check if player is in any room
+            // Check which room player is in
             for (const [key, room] of Object.entries(rooms)) {
                 if (isPlayerInRoom(room)) {
-                    showRoomUI(key);
+                    showRoomUI(key, room);
                     return;
                 }
             }
@@ -628,8 +739,8 @@
                    gameState.playerY < room.y + room.height;
         }
 
-        // Show room UI based on room type
-        function showRoomUI(roomKey) {
+        // Show room UI
+        function showRoomUI(roomKey, room) {
             const modalContent = document.getElementById('modalContent');
             
             switch(roomKey) {
@@ -637,7 +748,8 @@
                     modalContent.innerHTML = `
                         <div class="interaction-modal-header">⚔ ARMORY</div>
                         <div class="interaction-modal-content">
-                            <p>Weapon upgrades coming soon!</p>
+                            <p>Weapon loadouts and upgrades coming soon!</p>
+                            <p style="margin-top: 15px; font-size: 12px; color: #666;">Tactical weapons storage | Armor configurations</p>
                         </div>
                     `;
                     break;
@@ -645,38 +757,70 @@
                     modalContent.innerHTML = `
                         <div class="interaction-modal-header">⚙ ENGINEERING</div>
                         <div class="interaction-modal-content">
-                            <p>Ship upgrades coming soon!</p>
+                            <p>Ship upgrades and modifications coming soon!</p>
+                            <p style="margin-top: 15px; font-size: 12px; color: #666;">Engine upgrades | Shield optimization | Reactor management</p>
+                        </div>
+                    `;
+                    break;
+                case 'communications':
+                    modalContent.innerHTML = `
+                        <div class="interaction-modal-header">📡 COMMUNICATIONS</div>
+                        <div class="interaction-modal-content">
+                            <p>Mission briefings and story logs coming soon!</p>
+                            <p style="margin-top: 15px; font-size: 12px; color: #666;">Incoming transmissions | Mission logs | Command briefings</p>
                         </div>
                     `;
                     break;
                 case 'controlRoom':
                     modalContent.innerHTML = `
-                        <div class="interaction-modal-header">📡 CONTROL ROOM</div>
+                        <div class="interaction-modal-header">🖥 CONTROL ROOM</div>
                         <div class="interaction-modal-content">
-                            <p>Select your mission:</p>
+                            <p style="margin-bottom: 15px;">Select your mission:</p>
                             <div class="planet-grid">
                                 ${planets.map((planet, idx) => `
                                     <div class="planet-card">
                                         <div class="planet-name">${planet.name}</div>
                                         <div class="planet-info">Type: ${planet.type}</div>
                                         <div class="planet-info">Enemies: ${planet.enemies}</div>
-                                        <div class="difficulty ${planet.difficulty.toLowerCase()}">${planet.difficulty}</div>
-                                        <button class="planet-btn" onclick="selectPlanet(${idx})">SELECT MISSION</button>
+                                        <div class="difficulty ${planet.difficulty.toLowerCase()}">${planet.difficulty.toUpperCase()}</div>
+                                        <button class="planet-btn" onclick="selectPlanet(${idx})">SELECT</button>
                                     </div>
                                 `).join('')}
                             </div>
                         </div>
                     `;
                     break;
+                case 'dropship':
+                    modalContent.innerHTML = `
+                        <div class="interaction-modal-header">🚀 DROPSHIP</div>
+                        <div class="interaction-modal-content">
+                            <p>Deployment platform ready for launch!</p>
+                            <p style="margin-top: 15px; font-size: 12px; color: #666;">Select a mission from the Control Room to launch.</p>
+                        </div>
+                    `;
+                    break;
+                case 'cargoBay':
+                    modalContent.innerHTML = `
+                        <div class="interaction-modal-header">📦 CARGO BAY</div>
+                        <div class="interaction-modal-content">
+                            <p>Storage and loot management coming soon!</p>
+                            <p style="margin-top: 15px; font-size: 12px; color: #666;">Mission rewards | Equipment storage | Inventory management</p>
+                        </div>
+                    `;
+                    break;
                 case 'centralHub':
+                default:
                     modalContent.innerHTML = `
                         <div class="interaction-modal-header">● CENTRAL HUB</div>
                         <div class="interaction-modal-content">
-                            <p>Welcome to the Mothership! Move around to explore:</p>
+                            <p>Welcome to the Mothership! Navigate to different areas:</p>
                             <ul style="margin-top: 15px; margin-left: 20px;">
-                                <li>⚔ <strong>Armory</strong> - Weapon upgrades</li>
-                                <li>⚙ <strong>Engineering</strong> - Ship upgrades</li>
-                                <li>📡 <strong>Control Room</strong> - Mission selection</li>
+                                <li>⚔ <strong>ARMORY</strong> — Weapons & loadouts</li>
+                                <li>⚙ <strong>ENGINEERING</strong> — Ship upgrades</li>
+                                <li>📡 <strong>COMMUNICATIONS</strong> — Mission briefings</li>
+                                <li>🖥 <strong>CONTROL ROOM</strong> — Select missions</li>
+                                <li>🚀 <strong>DROPSHIP</strong> — Launch pad</li>
+                                <li>📦 <strong>CARGO BAY</strong> — Storage</li>
                             </ul>
                         </div>
                     `;
@@ -694,8 +838,8 @@
 
         function selectPlanet(idx) {
             const planet = planets[idx];
-            alert(`Loading mission: ${planet.name}`);
-            // TODO: Load actual mission
+            alert(`Mission ready: ${planet.name}\n\nDeployment coming soon!`);
+            closeInteractionModal();
         }
 
         function exitToMenu() {
