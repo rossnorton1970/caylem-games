@@ -449,7 +449,10 @@
             playerX: 0,
             playerY: 0,
             playerSpeed: 3,
-            playerSize: 12
+            playerSize: 12,
+            credits: 500,
+            materials: 2,
+            lastMissionReward: null
         };
 
         // Define rooms with layout
@@ -841,10 +844,37 @@
                     break;
                 case 'cargoBay':
                     modalContent.innerHTML = `
-                        <div class="interaction-modal-header">📦 CARGO BAY</div>
-                        <div class="interaction-modal-content">
-                            <p>Storage and loot management coming soon!</p>
-                            <p style="margin-top: 15px; font-size: 12px; color: #666;">Mission rewards | Equipment storage | Inventory management</p>
+                        <div class="interaction-modal-header">📦 CARGO BAY — REWARD STORAGE</div>
+                        <div class="interaction-modal-content" style="font-size: 14px;">
+                            <div style="background: rgba(255, 204, 0, 0.1); border-left: 4px solid #ffcc00; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                                <div style="color: #ffcc00; font-weight: bold; margin-bottom: 10px;">💾 STORED INVENTORY</div>
+                                <div style="color: #aaa; font-size: 13px; line-height: 1.8;">
+                                    <div><strong style="color: #fff;">CREDITS:</strong> <span style="color: #ffcc00; font-weight: bold;">${gameState.credits.toLocaleString()} ⚡</span></div>
+                                    <div><strong style="color: #fff;">MATERIALS:</strong> <span style="color: #ff8800; font-weight: bold;">${gameState.materials} units</span></div>
+                                </div>
+                            </div>
+
+                            ${gameState.lastMissionReward ? `
+                            <div style="background: rgba(0, 255, 136, 0.1); border-left: 4px solid #00ff88; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                                <div style="color: #00ff88; font-weight: bold; margin-bottom: 10px;">✓ LAST MISSION REWARDS</div>
+                                <div style="color: #aaa; font-size: 13px; line-height: 1.8;">
+                                    <div><strong style="color: #fff;">CREDITS EARNED:</strong> <span style="color: #ffcc00;">+${gameState.lastMissionReward.credits}</span></div>
+                                    <div><strong style="color: #fff;">MATERIALS GAINED:</strong> <span style="color: #ff8800;">+${gameState.lastMissionReward.materials}</span></div>
+                                    <div style="margin-top: 8px; color: #888; font-size: 12px;">Stored in cargo hold. Ready for upgrades.</div>
+                                </div>
+                            </div>
+                            ` : `
+                            <div style="background: rgba(100, 100, 100, 0.2); border-left: 4px solid #666; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                                <div style="color: #888; font-weight: bold; margin-bottom: 5px;">⚠ NO RECENT MISSIONS</div>
+                                <div style="color: #666; font-size: 12px;">Complete a mission to earn rewards.</div>
+                            </div>
+                            `}
+
+                            <div style="background: rgba(100, 100, 100, 0.15); padding: 15px; border-radius: 5px; margin-top: 20px;">
+                                <div style="color: #888; font-size: 12px; line-height: 1.6;">
+                                    💡 <strong>Cargo Bay Status:</strong> Industrial storage active. Rewards secure. Equipment ready for upgrades in Engineering.
+                                </div>
+                            </div>
                         </div>
                     `;
                     break;
@@ -942,9 +972,22 @@
         // Deploy to mission
         function deployToMission(idx) {
             const planet = planets[idx];
+            
+            // Simulate mission completion with random reward
+            const reward = {
+                credits: Math.floor(Math.random() * (planet.rewardMax - planet.rewardMin + 1)) + planet.rewardMin,
+                materials: Math.floor(Math.random() * 4) + 1
+            };
+            
+            // Update game state
+            gameState.lastMissionReward = reward;
+            gameState.credits += reward.credits;
+            gameState.materials += reward.materials;
+            
             closeInteractionModal();
-            // TODO: Load actual mission
-            alert(`DESCENDING TO: ${planet.name}\n\nMission loading...`);
+            
+            // Show mission complete screen briefly
+            alert(`MISSION COMPLETE: ${planet.name}\n\nREWARDS EARNED:\n+${reward.credits} Credits\n+${reward.materials} Materials\n\nReturning to ship...`);
         }
 
         function exitToMenu() {
