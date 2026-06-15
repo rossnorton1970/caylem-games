@@ -20,13 +20,13 @@
 
         /* HEADER & NAV */
         header {
-            background: #000;
+            background: #1a1a1a;
             color: #fff;
             padding: 1.2rem 0;
             position: sticky;
             top: 0;
             z-index: 100;
-            border-bottom: 1px solid #222;
+            border-bottom: 2px solid #2ecc71;
         }
 
         .header-content {
@@ -39,10 +39,14 @@
         }
 
         .logo {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 20px;
+            font-weight: 700;
             letter-spacing: 3px;
-            text-transform: uppercase;
+            color: white;
+        }
+
+        .logo .green {
+            color: #2ecc71;
         }
 
         nav {
@@ -60,7 +64,7 @@
         }
 
         nav a:hover {
-            color: #c9a961;
+            color: #2ecc71;
         }
 
         .mobile-menu-btn {
@@ -92,7 +96,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 30% 50%, rgba(201, 169, 97, 0.05) 0%, transparent 50%);
+            background: radial-gradient(circle at 30% 50%, rgba(46, 204, 113, 0.08) 0%, transparent 50%);
             pointer-events: none;
         }
 
@@ -113,14 +117,14 @@
             font-size: 16px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: #c9a961;
+            color: #2ecc71;
             margin-bottom: 40px;
             font-weight: 400;
         }
 
         .cta-button {
             display: inline-block;
-            background: #c9a961;
+            background: #2ecc71;
             color: #000;
             padding: 16px 50px;
             text-decoration: none;
@@ -129,23 +133,23 @@
             letter-spacing: 1px;
             text-transform: uppercase;
             transition: all 0.4s;
-            border: 2px solid #c9a961;
+            border: 2px solid #2ecc71;
             cursor: pointer;
         }
 
         .cta-button:hover {
             background: transparent;
-            color: #c9a961;
+            color: #2ecc71;
         }
 
         .cta-button.secondary {
             background: transparent;
-            color: #c9a961;
+            color: #2ecc71;
             margin-left: 30px;
         }
 
         .cta-button.secondary:hover {
-            background: #c9a961;
+            background: #2ecc71;
             color: #000;
         }
 
@@ -187,10 +191,12 @@
             padding: 0;
             text-align: center;
             transition: all 0.3s;
+            border-left: 3px solid transparent;
         }
 
         .service-card:hover {
             transform: translateY(-8px);
+            border-left: 3px solid #2ecc71;
         }
 
         .service-icon {
@@ -210,7 +216,7 @@
         }
 
         .service-price {
-            color: #c9a961;
+            color: #2ecc71;
             font-weight: 600;
             font-size: 16px;
             letter-spacing: 0.5px;
@@ -252,6 +258,7 @@
             height: 50px;
             display: flex;
             align-items: center;
+            color: #2ecc71;
         }
 
         /* GALLERY/PORTFOLIO */
@@ -266,21 +273,23 @@
         }
 
         .gallery-item {
-            background: linear-gradient(135deg, #333 0%, #1a1a1a 100%);
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
             aspect-ratio: 1;
             border-radius: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: #2ecc71;
             font-size: 52px;
             overflow: hidden;
             position: relative;
             transition: all 0.4s;
+            border: 2px solid #2ecc71;
         }
 
         .gallery-item:hover {
             transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(46, 204, 113, 0.2);
         }
 
         .gallery-item::after {
@@ -289,11 +298,12 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             padding: 20px;
             font-size: 14px;
             width: 100%;
             letter-spacing: 1px;
+            color: #2ecc71;
         }
 
         /* TESTIMONIALS */
@@ -311,11 +321,11 @@
         .testimonial-card {
             background: #fff;
             padding: 40px;
-            border: 1px solid #e0e0e0;
+            border-left: 4px solid #2ecc71;
         }
 
         .testimonial-stars {
-            color: #c9a961;
+            color: #2ecc71;
             font-size: 14px;
             margin-bottom: 20px;
             letter-spacing: 1px;
@@ -352,6 +362,7 @@
             background: #f5f5f5;
             padding: 40px;
             border: 1px solid #e0e0e0;
+            border-left: 4px solid #2ecc71;
         }
 
         .location-card h4 {
@@ -369,7 +380,7 @@
         }
 
         .location-card a {
-            color: #c9a961;
+            color: #2ecc71;
             text-decoration: none;
             font-weight: 600;
             font-size: 12px;
@@ -383,15 +394,30 @@
 
         /* CTA SECTION */
         .cta-section {
-            background: #000;
+            background: #1a1a1a;
             color: white;
             text-align: center;
             padding: 120px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(46, 204, 113, 0.05) 0%, transparent 60%);
+            pointer-events: none;
         }
 
         .cta-section h2 {
             color: white;
             margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
         }
 
         .cta-section p {
@@ -399,15 +425,22 @@
             margin-bottom: 40px;
             color: #bbb;
             letter-spacing: 0.5px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-section .cta-button {
+            position: relative;
+            z-index: 2;
         }
 
         /* FOOTER */
         footer {
-            background: #000;
+            background: #0a0a0a;
             color: white;
             padding: 60px 40px;
             text-align: center;
-            border-top: 1px solid #222;
+            border-top: 2px solid #2ecc71;
         }
 
         .footer-content {
@@ -424,6 +457,10 @@
             font-weight: 400;
         }
 
+        .footer-content h3 .green {
+            color: #2ecc71;
+        }
+
         .social-links {
             margin: 30px 0;
         }
@@ -432,18 +469,19 @@
             display: inline-block;
             width: 36px;
             height: 36px;
-            background: #222;
-            color: #c9a961;
+            background: #2ecc71;
+            color: #000;
             border-radius: 50%;
             line-height: 36px;
             margin: 0 12px;
             text-decoration: none;
             transition: all 0.3s;
             font-size: 14px;
+            font-weight: bold;
         }
 
         .social-links a:hover {
-            background: #c9a961;
+            background: white;
             color: #000;
         }
 
@@ -504,7 +542,7 @@
 <!-- HEADER -->
 <header>
     <div class="header-content">
-        <div class="logo">Urban Men</div>
+        <div class="logo">URBAN <span class="green">MEN</span></div>
         <nav>
             <a href="#services">Services</a>
             <a href="#why">Approach</a>
@@ -561,7 +599,7 @@
             <div class="service-price">From R80</div>
         </div>
         <div class="service-card">
-            <div class="service-icon">💇</div>
+            <div class="service-icon">👑</div>
             <h3>Members Program</h3>
             <p>Exclusive membership with priority booking, member rates, and complimentary treatments.</p>
             <div class="service-price">Inquire</div>
@@ -706,11 +744,11 @@
 <!-- FOOTER -->
 <footer>
     <div class="footer-content">
-        <h3>Urban Men</h3>
+        <h3>URBAN <span class="green">MEN</span></h3>
         <p style="margin-top: 10px; color: #999; font-size: 13px;">Premium Men's Grooming Studio</p>
         <div class="social-links">
             <a href="https://facebook.com/UrbanMenZA" target="_blank">f</a>
-            <a href="https://instagram.com/urbanmen_montclare" target="_blank">In</a>
+            <a href="https://instagram.com/urbanmen_montclare" target="_blank">📷</a>
         </div>
         <div class="footer-bottom">
             <p>© 2026 Urban Men. All rights reserved.</p>
