@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urban Men | Premium Men's Grooming Studio - Cape Town</title>
+    <title>Urban Men | Premium Barber Shop - Claremont, Cape Town</title>
     <style>
         * {
             margin: 0;
@@ -12,25 +12,27 @@
         }
 
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             line-height: 1.6;
-            color: #1a1a1a;
-            letter-spacing: 0.5px;
+            color: #fff;
+            background: #0a0a0a;
+            letter-spacing: 0.3px;
         }
 
         /* HEADER & NAV */
         header {
-            background: #1a1a1a;
+            background: rgba(10, 10, 10, 0.95);
             color: #fff;
-            padding: 1.2rem 0;
+            padding: 1.5rem 0;
             position: sticky;
             top: 0;
             z-index: 100;
-            border-bottom: 2px solid #2ecc71;
+            border-bottom: 1px solid #1a1a1a;
+            backdrop-filter: blur(10px);
         }
 
         .header-content {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -39,32 +41,33 @@
         }
 
         .logo {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             color: white;
         }
 
         .logo .green {
-            color: #2ecc71;
+            color: #00A86B;
         }
 
         nav {
             display: flex;
-            gap: 3rem;
+            gap: 2.5rem;
         }
 
         nav a {
-            color: #fff;
+            color: #ddd;
             text-decoration: none;
-            font-size: 12px;
+            font-size: 11px;
             letter-spacing: 1px;
             text-transform: uppercase;
             transition: color 0.3s;
+            font-weight: 500;
         }
 
         nav a:hover {
-            color: #2ecc71;
+            color: #00A86B;
         }
 
         .mobile-menu-btn {
@@ -76,10 +79,49 @@
             cursor: pointer;
         }
 
+        /* BUTTONS */
+        .btn {
+            display: inline-block;
+            padding: 14px 40px;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #00A86B;
+            color: #000;
+            border-color: #00A86B;
+        }
+
+        .btn-primary:hover {
+            background: transparent;
+            color: #00A86B;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border-color: #333;
+        }
+
+        .btn-outline:hover {
+            border-color: #00A86B;
+            color: #00A86B;
+        }
+
         /* HERO SECTION */
         .hero {
-            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
-            height: 700px;
+            height: 750px;
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.5) 0%, rgba(0, 0, 0, 0.7) 100%), 
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><filter id="dark"><feComponentTransfer><feFuncR type="linear" slope="0.3"/><feFuncG type="linear" slope="0.3"/><feFuncB type="linear" slope="0.3"/></feComponentTransfer></filter></defs><rect width="1200" height="800" fill="%23222"/><circle cx="600" cy="400" r="200" fill="%23333" filter="url(%23dark)"/><rect x="450" y="250" width="300" height="300" fill="%23444" filter="url(%23dark)"/></svg>');
+            background-size: cover;
+            background-position: center;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -89,207 +131,207 @@
             overflow: hidden;
         }
 
-        .hero::before {
+        .hero::after {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 30% 50%, rgba(46, 204, 113, 0.08) 0%, transparent 50%);
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
             pointer-events: none;
         }
 
         .hero-content {
             position: relative;
             z-index: 2;
+            max-width: 700px;
         }
 
         .hero-content h1 {
-            font-size: 72px;
-            font-weight: 300;
+            font-size: 68px;
+            font-weight: 700;
             margin-bottom: 20px;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             line-height: 1.2;
         }
 
         .hero-content .subtitle {
-            font-size: 16px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: #2ecc71;
-            margin-bottom: 40px;
+            font-size: 18px;
+            color: #bbb;
+            margin-bottom: 50px;
             font-weight: 400;
+            letter-spacing: 0.5px;
         }
 
-        .cta-button {
-            display: inline-block;
-            background: #2ecc71;
-            color: #000;
-            padding: 16px 50px;
-            text-decoration: none;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: all 0.4s;
-            border: 2px solid #2ecc71;
-            cursor: pointer;
-        }
-
-        .cta-button:hover {
-            background: transparent;
-            color: #2ecc71;
-        }
-
-        .cta-button.secondary {
-            background: transparent;
-            color: #2ecc71;
-            margin-left: 30px;
-        }
-
-        .cta-button.secondary:hover {
-            background: #2ecc71;
-            color: #000;
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         /* SECTION STYLING */
         section {
-            padding: 100px 40px;
-            max-width: 1400px;
+            padding: 120px 40px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
         h2 {
-            font-size: 48px;
+            font-size: 52px;
             margin-bottom: 60px;
             text-align: center;
-            color: #000;
-            font-weight: 300;
+            color: #fff;
+            font-weight: 700;
             letter-spacing: 1px;
         }
 
         h3 {
-            font-size: 22px;
-            margin-bottom: 20px;
-            font-weight: 500;
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-weight: 600;
             letter-spacing: 0.5px;
         }
 
         /* SERVICES SECTION */
         .services {
-            background: #fff;
+            background: #0a0a0a;
         }
 
         .services-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 50px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
         }
 
         .service-card {
-            padding: 0;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            padding: 40px;
             text-align: center;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
+            transition: all 0.4s;
+            border-radius: 2px;
         }
 
         .service-card:hover {
-            transform: translateY(-8px);
-            border-left: 3px solid #2ecc71;
+            border-color: #00A86B;
+            box-shadow: 0 0 20px rgba(0, 168, 107, 0.15);
+            transform: translateY(-5px);
         }
 
         .service-icon {
-            font-size: 52px;
-            margin-bottom: 25px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
         }
 
         .service-card p {
-            color: #666;
+            color: #aaa;
             margin-bottom: 20px;
             font-size: 14px;
-            line-height: 1.8;
-        }
-
-        .service-price {
-            color: #2ecc71;
-            font-weight: 600;
-            font-size: 16px;
-            letter-spacing: 0.5px;
+            line-height: 1.7;
         }
 
         /* WHY CHOOSE US */
         .why-us {
-            background: #f5f5f5;
+            background: #151515;
         }
 
         .why-us-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 60px;
-            margin-top: 50px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 50px;
+            margin-top: 60px;
         }
 
         .why-us-item {
-            text-align: left;
-            padding: 0;
+            text-align: center;
+        }
+
+        .why-us-item .icon {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #00A86B;
         }
 
         .why-us-item h4 {
             font-size: 18px;
-            color: #000;
-            margin: 20px 0 15px 0;
+            color: #fff;
+            margin-bottom: 15px;
             font-weight: 600;
-            letter-spacing: 0.5px;
         }
 
         .why-us-item p {
-            color: #666;
+            color: #aaa;
             line-height: 1.8;
             font-size: 14px;
         }
 
-        .why-us-icon {
-            font-size: 40px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            color: #2ecc71;
+        /* RATING SECTION */
+        .rating-section {
+            background: #1a1a1a;
+            padding: 80px 40px;
+            text-align: center;
+            border-left: 3px solid #00A86B;
+            margin: 60px 0;
         }
 
-        /* GALLERY/PORTFOLIO */
+        .rating-number {
+            font-size: 64px;
+            color: #00A86B;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .rating-stars {
+            font-size: 24px;
+            color: #00A86B;
+            margin-bottom: 20px;
+        }
+
+        .rating-text {
+            color: #aaa;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .rating-reviews {
+            color: #00A86B;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* GALLERY */
         .gallery {
-            background: #fff;
+            background: #0a0a0a;
         }
 
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
         }
 
         .gallery-item {
-            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            background: linear-gradient(135deg, #222 0%, #1a1a1a 100%);
             aspect-ratio: 1;
             border-radius: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #2ecc71;
-            font-size: 52px;
+            color: #666;
+            font-size: 48px;
             overflow: hidden;
             position: relative;
             transition: all 0.4s;
-            border: 2px solid #2ecc71;
+            border: 1px solid #2a2a2a;
         }
 
         .gallery-item:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px rgba(46, 204, 113, 0.2);
+            border-color: #00A86B;
+            box-shadow: 0 0 20px rgba(0, 168, 107, 0.2);
         }
 
         .gallery-item::after {
@@ -299,197 +341,141 @@
             left: 0;
             right: 0;
             background: rgba(0,0,0,0.9);
-            padding: 20px;
-            font-size: 14px;
+            padding: 15px;
+            font-size: 13px;
             width: 100%;
             letter-spacing: 1px;
-            color: #2ecc71;
+            color: #00A86B;
+            font-weight: 600;
         }
 
-        /* TESTIMONIALS */
-        .testimonials {
-            background: #f5f5f5;
+        /* CONTACT SECTION */
+        .contact {
+            background: #151515;
         }
 
-        .testimonial-grid {
+        .contact-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 40px;
-            margin-top: 50px;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-top: 60px;
+            align-items: start;
         }
 
-        .testimonial-card {
-            background: #fff;
+        .contact-info {
             padding: 40px;
-            border-left: 4px solid #2ecc71;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 2px;
         }
 
-        .testimonial-stars {
-            color: #2ecc71;
-            font-size: 14px;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
+        .contact-info h3 {
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: #fff;
         }
 
-        .testimonial-text {
-            color: #333;
-            margin-bottom: 25px;
-            font-size: 15px;
-            line-height: 1.9;
-            font-style: italic;
+        .contact-item {
+            margin-bottom: 35px;
         }
 
-        .testimonial-author {
-            font-weight: 600;
-            color: #000;
-            font-size: 14px;
-            letter-spacing: 0.5px;
-        }
-
-        /* LOCATIONS */
-        .locations {
-            background: #fff;
-        }
-
-        .locations-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 40px;
-            margin-top: 50px;
-        }
-
-        .location-card {
-            background: #f5f5f5;
-            padding: 40px;
-            border: 1px solid #e0e0e0;
-            border-left: 4px solid #2ecc71;
-        }
-
-        .location-card h4 {
-            color: #000;
-            font-size: 18px;
-            margin-bottom: 15px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .location-card p {
-            color: #666;
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
-
-        .location-card a {
-            color: #2ecc71;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 12px;
+        .contact-item label {
+            color: #00A86B;
+            font-size: 11px;
             letter-spacing: 1px;
             text-transform: uppercase;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
         }
 
-        .location-card a:hover {
-            text-decoration: underline;
+        .contact-item p {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
 
-        /* CTA SECTION */
-        .cta-section {
+        .contact-item a {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .contact-item a:hover {
+            color: #00A86B;
+        }
+
+        .contact-buttons {
+            display: flex;
+            gap: 15px;
+            flex-direction: column;
+            margin-top: 30px;
+        }
+
+        .contact-buttons .btn {
+            width: 100%;
+            text-align: center;
+        }
+
+        .map-container {
             background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 2px;
+            overflow: hidden;
+            height: 400px;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* FINAL CTA */
+        .final-cta {
+            background: #000;
             color: white;
             text-align: center;
-            padding: 120px 40px;
-            position: relative;
-            overflow: hidden;
+            padding: 100px 40px;
+            border-top: 2px solid #00A86B;
         }
 
-        .cta-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(46, 204, 113, 0.05) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        .cta-section h2 {
-            color: white;
+        .final-cta h2 {
             margin-bottom: 30px;
-            position: relative;
-            z-index: 2;
         }
 
-        .cta-section p {
+        .final-cta p {
+            color: #bbb;
             font-size: 16px;
             margin-bottom: 40px;
-            color: #bbb;
-            letter-spacing: 0.5px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .cta-section .cta-button {
-            position: relative;
-            z-index: 2;
         }
 
         /* FOOTER */
         footer {
-            background: #0a0a0a;
-            color: white;
-            padding: 60px 40px;
+            background: #000;
+            color: #888;
+            padding: 50px 40px;
             text-align: center;
-            border-top: 2px solid #2ecc71;
-        }
-
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
+            border-top: 1px solid #1a1a1a;
         }
 
         .footer-content h3 {
             color: white;
-            font-size: 16px;
+            font-size: 14px;
+            margin-bottom: 10px;
             letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            font-weight: 400;
         }
 
         .footer-content h3 .green {
-            color: #2ecc71;
-        }
-
-        .social-links {
-            margin: 30px 0;
-        }
-
-        .social-links a {
-            display: inline-block;
-            width: 36px;
-            height: 36px;
-            background: #2ecc71;
-            color: #000;
-            border-radius: 50%;
-            line-height: 36px;
-            margin: 0 12px;
-            text-decoration: none;
-            transition: all 0.3s;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .social-links a:hover {
-            background: white;
-            color: #000;
+            color: #00A86B;
         }
 
         .footer-bottom {
-            margin-top: 30px;
-            color: #666;
+            margin-top: 20px;
             font-size: 12px;
-            letter-spacing: 0.5px;
+            color: #666;
         }
 
         /* RESPONSIVE */
@@ -507,11 +493,11 @@
             }
 
             h2 {
-                font-size: 32px;
+                font-size: 36px;
             }
 
             section {
-                padding: 60px 20px;
+                padding: 80px 20px;
             }
 
             .header-content {
@@ -522,16 +508,21 @@
                 height: 500px;
             }
 
-            .cta-button.secondary {
-                display: block;
-                margin: 20px 0 0 0;
+            .contact-grid {
+                grid-template-columns: 1fr;
             }
 
-            .services-grid,
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .hero-buttons .btn {
+                width: 100%;
+            }
+
             .why-us-grid,
             .gallery-grid,
-            .testimonial-grid,
-            .locations-grid {
+            .services-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -545,10 +536,8 @@
         <div class="logo">URBAN <span class="green">MEN</span></div>
         <nav>
             <a href="#services">Services</a>
-            <a href="#why">Approach</a>
+            <a href="#why">Why Us</a>
             <a href="#gallery">Portfolio</a>
-            <a href="#testimonials">Reviews</a>
-            <a href="#locations">Locations</a>
             <a href="#contact">Contact</a>
         </nav>
         <button class="mobile-menu-btn">☰</button>
@@ -558,9 +547,12 @@
 <!-- HERO -->
 <section class="hero">
     <div class="hero-content">
-        <div class="subtitle">Premium Men's Grooming Studio</div>
-        <h1>Precision Grooming<br>Elevated Style</h1>
-        <a href="#contact" class="cta-button">Book an Appointment</a>
+        <h1>Look Sharp.<br>Feel Confident.</h1>
+        <p class="subtitle">Premium men's grooming in Claremont, Cape Town.</p>
+        <div class="hero-buttons">
+            <a href="#contact" class="btn btn-primary">Book Appointment</a>
+            <a href="#services" class="btn btn-outline">View Services</a>
+        </div>
     </div>
 </section>
 
@@ -569,77 +561,79 @@
     <h2>Our Services</h2>
     <div class="services-grid">
         <div class="service-card">
-            <div class="service-icon">✂️</div>
-            <h3>Signature Haircut</h3>
-            <p>Expertly crafted haircuts tailored to your individual style. Fade, texture, or classic — precision every time.</p>
-            <div class="service-price">From R150</div>
+            <span class="service-icon">✂️</span>
+            <h3>Fades & Haircuts</h3>
+            <p>Expert precision cuts, from classic fades to modern styles. Every cut tailored to your face shape and style.</p>
         </div>
         <div class="service-card">
-            <div class="service-icon">🪒</div>
-            <h3>Hot Towel Shave</h3>
-            <p>Traditional straight razor shave with premium techniques, hot towel treatment, and conditioning aftercare.</p>
-            <div class="service-price">From R120</div>
+            <span class="service-icon">🪒</span>
+            <h3>Hot Towel Shaves</h3>
+            <p>Traditional hot towel shaves with premium techniques. Relaxing, precise, and leaves you feeling sharp.</p>
         </div>
         <div class="service-card">
-            <div class="service-icon">💈</div>
-            <h3>Full Grooming Session</h3>
-            <p>Complete treatment: haircut, beard sculpting, hot towel shave, facial massage, and product consultation.</p>
-            <div class="service-price">From R320</div>
-        </div>
-        <div class="service-card">
-            <div class="service-icon">🧴</div>
+            <span class="service-icon">🧴</span>
             <h3>Beard Grooming</h3>
-            <p>Precise beard shaping, conditioning treatments, and maintenance guidance for the perfect look.</p>
-            <div class="service-price">From R100</div>
+            <p>Full beard shaping, conditioning, and maintenance. From neat to full—we've got your look covered.</p>
         </div>
         <div class="service-card">
-            <div class="service-icon">🎯</div>
-            <h3>Styling & Design</h3>
-            <p>Special occasion styling or modern design work. Let our experts craft your perfect look.</p>
-            <div class="service-price">From R80</div>
+            <span class="service-icon">🎨</span>
+            <h3>Colouring</h3>
+            <p>Professional hair colouring and touch-ups. Clean, modern finishes that look natural and sharp.</p>
         </div>
         <div class="service-card">
-            <div class="service-icon">👑</div>
-            <h3>Members Program</h3>
-            <p>Exclusive membership with priority booking, member rates, and complimentary treatments.</p>
-            <div class="service-price">Inquire</div>
+            <span class="service-icon">✨</span>
+            <h3>Waxing & Threading</h3>
+            <p>Precision waxing and threading for eyebrows, ears, and more. Clean grooming completed.</p>
         </div>
+        <div class="service-card">
+            <span class="service-icon">🛎️</span>
+            <h3>Scalp Treatments</h3>
+            <p>Premium scalp treatments and massages. Relax while we condition and revitalize your scalp.</p>
+        </div>
+    </div>
+
+    <!-- RATING -->
+    <div class="rating-section">
+        <div class="rating-number">4.9★</div>
+        <div class="rating-stars">★★★★★</div>
+        <p class="rating-text">Trusted by hundreds of satisfied customers</p>
+        <p class="rating-reviews">147+ FIVE-STAR REVIEWS</p>
     </div>
 </section>
 
-<!-- OUR APPROACH -->
+<!-- WHY CHOOSE US -->
 <section id="why" class="why-us">
-    <h2>Our Approach</h2>
+    <h2>Why Urban Men</h2>
     <div class="why-us-grid">
         <div class="why-us-item">
-            <div class="why-us-icon">🎖️</div>
-            <h4>Expert Craft</h4>
-            <p>Every cut is executed with precision. Our team brings years of expertise and attention to detail that shows in every detail.</p>
+            <div class="icon">✓</div>
+            <h4>Skilled Barbers</h4>
+            <p>Experienced professionals trained in modern and traditional techniques.</p>
         </div>
         <div class="why-us-item">
-            <div class="why-us-icon">✨</div>
-            <h4>Premium Experience</h4>
-            <p>Your time matters. We've curated every element—from the environment to the service—to deliver an elevated grooming experience.</p>
+            <div class="icon">✓</div>
+            <h4>Premium Environment</h4>
+            <p>Clean, sophisticated studio designed for a premium grooming experience.</p>
         </div>
         <div class="why-us-item">
-            <div class="why-us-icon">⏱️</div>
-            <h4>Personalized Service</h4>
-            <p>We listen. Understand your goals. Create a look that works for you. Not templates—real, tailored solutions.</p>
+            <div class="icon">✓</div>
+            <h4>Full Range</h4>
+            <p>Complete grooming services—cuts, shaves, beard work, colour, and treatments.</p>
         </div>
         <div class="why-us-item">
-            <div class="why-us-icon">🏆</div>
-            <h4>Built to Last</h4>
-            <p>Great grooming is an investment. We teach maintenance, recommend products, and ensure your look stays sharp between visits.</p>
+            <div class="icon">✓</div>
+            <h4>Claremont Location</h4>
+            <p>Convenient Claremont address with easy parking and accessible hours.</p>
         </div>
         <div class="why-us-item">
-            <div class="why-us-icon">🌍</div>
-            <h4>Across Cape Town</h4>
-            <p>Six carefully selected locations. Convenience without compromise. The same premium experience, wherever you visit us.</p>
+            <div class="icon">✓</div>
+            <h4>Book in Advance</h4>
+            <p>Appointment-based service. Your time matters—guaranteed slot availability.</p>
         </div>
         <div class="why-us-item">
-            <div class="why-us-icon">🛎️</div>
-            <h4>Appointment-Based</h4>
-            <p>We prioritize your time. Book in advance for guaranteed availability and a seamless experience from arrival to completion.</p>
+            <div class="icon">✓</div>
+            <h4>Premium Service</h4>
+            <p>From arrival to completion, every detail is handled with care and precision.</p>
         </div>
     </div>
 </section>
@@ -648,111 +642,64 @@
 <section id="gallery" class="gallery">
     <h2>Our Work</h2>
     <div class="gallery-grid">
-        <div class="gallery-item" data-title="Precision Fade">
-            ✂️
+        <div class="gallery-item" data-title="Precision Fades">✂️</div>
+        <div class="gallery-item" data-title="Modern Cuts">✂️</div>
+        <div class="gallery-item" data-title="Classic Styles">✂️</div>
+        <div class="gallery-item" data-title="Beard Work">🧴</div>
+        <div class="gallery-item" data-title="Detail & Design">🎨</div>
+        <div class="gallery-item" data-title="Full Grooming">🛎️</div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="contact">
+    <h2>Get in Touch</h2>
+    <div class="contact-grid">
+        <div class="contact-info">
+            <h3>Contact Details</h3>
+            
+            <div class="contact-item">
+                <label>Phone</label>
+                <p><a href="tel:+27671234567">+27 67 123 4567</a></p>
+                <a href="tel:+27671234567">Call Now</a>
+            </div>
+
+            <div class="contact-item">
+                <label>Address</label>
+                <p>123 Main Road<br>Claremont, Cape Town<br>8005</p>
+            </div>
+
+            <div class="contact-item">
+                <label>Hours</label>
+                <p>Mon–Fri: 9am–7pm<br>Sat: 9am–6pm<br>Sun: 10am–4pm</p>
+            </div>
+
+            <div class="contact-buttons">
+                <a href="tel:+27671234567" class="btn btn-primary">Call Now</a>
+                <a href="https://maps.google.com" class="btn btn-outline">Get Directions</a>
+            </div>
         </div>
-        <div class="gallery-item" data-title="Modern Texture">
-            ✂️
-        </div>
-        <div class="gallery-item" data-title="Classic Cut">
-            ✂️
-        </div>
-        <div class="gallery-item" data-title="Beard Detail">
-            🪒
-        </div>
-        <div class="gallery-item" data-title="Style Work">
-            💈
-        </div>
-        <div class="gallery-item" data-title="Full Treatment">
-            🛎️
+
+        <div class="map-container">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3317.6159068429504!2d18.4615476!3d-33.9737431!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1dcc5c0b0b0b0b0b%3A0x0!2sClaremont%2C%20Cape%20Town!5e0!3m2!1sen!2sza!4v1234567890" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
     </div>
 </section>
 
-<!-- TESTIMONIALS -->
-<section id="testimonials" class="testimonials">
-    <h2>Client Reviews</h2>
-    <div class="testimonial-grid">
-        <div class="testimonial-card">
-            <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"The attention to detail is exceptional. Every visit, they remember my preferences and deliver exactly what I need. This is the standard now."</p>
-            <div class="testimonial-author">— James M.</div>
-        </div>
-        <div class="testimonial-card">
-            <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"Premium doesn't mean pretentious. The environment is sophisticated but comfortable. The service is flawless. Worth every rand."</p>
-            <div class="testimonial-author">— Marcus T.</div>
-        </div>
-        <div class="testimonial-card">
-            <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"Been going for 3 years. Consistency, quality, and genuine expertise. Urban Men raised the bar for what grooming should be."</p>
-            <div class="testimonial-author">— David K.</div>
-        </div>
-    </div>
-</section>
-
-<!-- LOCATIONS -->
-<section id="locations" class="locations">
-    <h2>Studio Locations</h2>
-    <div class="locations-grid">
-        <div class="location-card">
-            <h4>Montclare Place</h4>
-            <p>Montclare Shopping Centre</p>
-            <p><a href="tel:+27672623571">+27 67 262 3571</a></p>
-            <a href="#">Book Appointment</a>
-        </div>
-        <div class="location-card">
-            <h4>V&A Waterfront</h4>
-            <p>De Waterkant Studio</p>
-            <p><a href="tel:+27799000012">+27 79 900 0012</a></p>
-            <a href="#">Book Appointment</a>
-        </div>
-        <div class="location-card">
-            <h4>Sea Point</h4>
-            <p>Sea Point Studio</p>
-            <p><a href="tel:+27694489982">+27 69 448 9982</a></p>
-            <a href="#">Book Appointment</a>
-        </div>
-        <div class="location-card">
-            <h4>Gardens</h4>
-            <p>Gardens Commercial Studio</p>
-            <p><a href="tel:+27661515815">+27 66 151 5815</a></p>
-            <a href="#">Book Appointment</a>
-        </div>
-        <div class="location-card">
-            <h4>Kloof Street</h4>
-            <p>Kloof Street Studio</p>
-            <p><a href="tel:+27661515815">+27 66 151 5815</a></p>
-            <a href="#">Book Appointment</a>
-        </div>
-        <div class="location-card">
-            <h4>Palmyra Junction</h4>
-            <p>Palmyra Junction Centre</p>
-            <p><a href="tel:+27812364409">+27 81 236 4409</a></p>
-            <a href="#">Book Appointment</a>
-        </div>
-    </div>
-</section>
-
-<!-- BOOKING CTA -->
-<section class="cta-section" id="contact">
-    <h2>Ready for Premium Grooming?</h2>
-    <p>Book an appointment at any of our studios. Limited spots available—early booking recommended.</p>
-    <a href="#" class="cta-button">Reserve Your Slot</a>
+<!-- FINAL CTA -->
+<section class="final-cta">
+    <h2>Ready for Your Next Cut?</h2>
+    <p>Book an appointment and experience premium men's grooming in Claremont.</p>
+    <a href="#contact" class="btn btn-primary">Book Appointment</a>
 </section>
 
 <!-- FOOTER -->
 <footer>
     <div class="footer-content">
         <h3>URBAN <span class="green">MEN</span></h3>
-        <p style="margin-top: 10px; color: #999; font-size: 13px;">Premium Men's Grooming Studio</p>
-        <div class="social-links">
-            <a href="https://facebook.com/UrbanMenZA" target="_blank">f</a>
-            <a href="https://instagram.com/urbanmen_montclare" target="_blank">📷</a>
-        </div>
+        <p style="margin-top: 10px; font-size: 13px;">Premium Men's Grooming Studio, Claremont, Cape Town</p>
         <div class="footer-bottom">
             <p>© 2026 Urban Men. All rights reserved.</p>
-            <p style="margin-top: 10px;">Mon–Sat: 9am–7pm | Sun: 10am–5pm | Appointments Recommended</p>
         </div>
     </div>
 </footer>
