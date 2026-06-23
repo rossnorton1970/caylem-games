@@ -24,41 +24,8 @@
         .menu-bg-glow {
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at top, rgba(59, 130, 246, 0.1), transparent 45%),
-                        radial-gradient(circle at bottom, rgba(249, 115, 22, 0.1), transparent 45%);
+            background: linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(10,10,20,0.8) 50%, rgba(0,0,0,1) 100%);
             z-index: 1;
-        }
-
-        .menu-bg-planet {
-            position: absolute;
-            bottom: -200px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(249, 115, 22, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
-            filter: blur(80px);
-            z-index: 1;
-        }
-
-        .menu-stars {
-            position: absolute;
-            inset: 0;
-            opacity: 0.3;
-            z-index: 2;
-        }
-
-        .menu-star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle 3s infinite;
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
         }
 
         .menu-content {
@@ -402,8 +369,6 @@
     <!-- MAIN MENU -->
     <div id="mainMenu">
         <div class="menu-bg-glow"></div>
-        <div class="menu-bg-planet"></div>
-        <div class="menu-stars" id="starsContainer"></div>
 
         <div class="menu-content">
             <div class="menu-logo">
@@ -599,20 +564,6 @@
         });
 
         // Initialize starfield
-        function initStarfield() {
-            const container = document.getElementById('starsContainer');
-            for (let i = 0; i < 100; i++) {
-                const star = document.createElement('div');
-                star.className = 'menu-star';
-                star.style.width = Math.random() * 2 + 'px';
-                star.style.height = star.style.width;
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 100 + '%';
-                star.style.animationDelay = Math.random() * 3 + 's';
-                container.appendChild(star);
-            }
-        }
-
         // Start game
         function startGame() {
             document.getElementById('mainMenu').style.display = 'none';
@@ -1002,7 +953,7 @@
 
         // Initialize on load
         window.addEventListener('load', () => {
-            initStarfield();
+            // Menu ready
         });
 
         // Handle window resize
