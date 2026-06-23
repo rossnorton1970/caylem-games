@@ -1443,8 +1443,22 @@
                 rightColumn += '</div>';
                 rightColumn += '</div>';
                 
-                // Save button
-                rightColumn += '<button class="armory-save-btn" onclick="saveLoadout()">✓ SAVE LOADOUT</button>';
+                // Equipment slots display
+                rightColumn += '<div style="background: rgba(0, 212, 255, 0.1); border: 2px solid #00d4ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;">';
+                rightColumn += '<div class="armory-section-title" style="color: #00d4ff; border-color: #00d4ff; margin-bottom: 12px;">⚡ EQUIPMENT SLOTS</div>';
+                rightColumn += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">';
+                rightColumn += `<div style="background: rgba(255, 136, 0, 0.15); padding: 10px; border-radius: 3px; border-left: 3px solid #ff8800;"><div style="color: #ff8800; font-size: 11px; font-weight: bold;">PRIMARY</div><div style="color: #fff; font-size: 13px; margin-top: 3px;">${primaryWeapon.icon} ${primaryWeapon.name}</div></div>`;
+                rightColumn += `<div style="background: rgba(0, 212, 255, 0.15); padding: 10px; border-radius: 3px; border-left: 3px solid #00d4ff;"><div style="color: #00d4ff; font-size: 11px; font-weight: bold;">SECONDARY</div><div style="color: #fff; font-size: 13px; margin-top: 3px;">${secondaryWeapon.icon} ${secondaryWeapon.name}</div></div>`;
+                rightColumn += `<div style="background: rgba(255, 170, 0, 0.15); padding: 10px; border-radius: 3px; border-left: 3px solid #ffaa00;"><div style="color: #ffaa00; font-size: 11px; font-weight: bold;">ARMOR</div><div style="color: #fff; font-size: 13px; margin-top: 3px;">${armor.icon} ${armor.name}</div></div>`;
+                rightColumn += `<div style="background: rgba(187, 0, 255, 0.15); padding: 10px; border-radius: 3px; border-left: 3px solid #bb00ff;"><div style="color: #bb00ff; font-size: 11px; font-weight: bold;">GADGET</div><div style="color: #fff; font-size: 13px; margin-top: 3px;">${gadget.icon} ${gadget.name}</div></div>`;
+                rightColumn += '</div>';
+                rightColumn += '</div>';
+                
+                // Save & Deploy buttons
+                rightColumn += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">';
+                rightColumn += '<button class="armory-save-btn" onclick="saveLoadout()" style="background: #444; border-color: #666;">✓ SAVE</button>';
+                rightColumn += '<button class="armory-save-btn" onclick="deployFromArmory()" style="background: #f97316; border-color: #ff8800; font-size: 16px; font-weight: bold;">🚀 DEPLOY</button>';
+                rightColumn += '</div>';
                 rightColumn += '</div>';
                 
                 modalContent.innerHTML = `
@@ -1471,6 +1485,23 @@
             setTimeout(() => {
                 alert('✓ Loadout saved!\nPrimary: ' + weaponDatabase.primary[gameState.loadout.primary].name + '\nSecondary: ' + weaponDatabase.secondary[gameState.loadout.secondary].name + '\nArmor: ' + armorDatabase[gameState.loadout.armor].name + '\nGadget: ' + gadgetDatabase[gameState.loadout.gadget].name);
             }, 200);
+        }
+        
+        function deployFromArmory() {
+            // Save loadout
+            const loadoutSummary = 
+                weaponDatabase.primary[gameState.loadout.primary].name + ' / ' +
+                weaponDatabase.secondary[gameState.loadout.secondary].name + ' / ' +
+                armorDatabase[gameState.loadout.armor].name + ' / ' +
+                gadgetDatabase[gameState.loadout.gadget].name;
+            
+            gameState.loadoutReady = loadoutSummary;
+            closeInteractionModal();
+            
+            // Navigate to dropship
+            setTimeout(() => {
+                showRoomUI('dropship', rooms.dropship);
+            }, 100);
         }
         
         // Start game
