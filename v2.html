@@ -3319,24 +3319,15 @@
         }
         
         function drawHUDPlayerStatus(ctx, canvas) {
-            const x = canvas.width * 0.02;
-            const y = canvas.height * 0.04;
+            const x = 20;
+            const y = 40;
             const threatColor = getThreatColor(hudProtoState.threatCycle);
             const glowIntensity = getGlowIntensity(hudProtoState.threatCycle);
             
             ctx.font = 'bold 16px Arial';
             ctx.fillStyle = '#00ff88';
+            ctx.textAlign = 'left';
             ctx.fillText('❤️ 100 HP', x, y);
-            
-            // Health bar
-            ctx.fillStyle = '#ff4444';
-            ctx.fillRect(x + 100, y - 12, 150, 8);
-            ctx.fillStyle = '#00ff88';
-            ctx.fillRect(x + 100, y - 12, 150, 8); // Full health for demo
-            
-            // Shield bar
-            ctx.fillStyle = '#0066ff';
-            ctx.fillRect(x + 100, y + 2, 75, 6);
             
             ctx.font = '13px Arial';
             ctx.fillStyle = '#00d4ff';
@@ -3357,27 +3348,22 @@
         }
         
         function drawHUDWeaponSystem(ctx, canvas) {
-            const x = canvas.width * 0.02;
-            const y = canvas.height - (canvas.height * 0.17);
+            const x = 20;
+            const y = canvas.height - 100;
             
             ctx.font = 'bold 14px Arial';
             ctx.fillStyle = '#ffaa00';
+            ctx.textAlign = 'left';
             ctx.fillText('AR-9 RIFLE', x, y);
             
             ctx.font = '13px Arial';
             ctx.fillStyle = '#fff';
             ctx.fillText('30 / 180', x, y + 25);
-            
-            // Ammo bar
-            ctx.fillStyle = '#333';
-            ctx.fillRect(x + 100, y + 5, 100, 12);
-            ctx.fillStyle = '#ffaa00';
-            ctx.fillRect(x + 100, y + 5, 60, 12); // 60% filled
         }
         
         function drawHUDGadgets(ctx, canvas) {
-            const x = canvas.width - (canvas.width * 0.22);
-            const y = canvas.height - (canvas.height * 0.17);
+            const x = canvas.width - 280;
+            const y = canvas.height - 100;
             const gadgets = [
                 { num: 1, name: 'MEDKIT', status: 'ready', color: '#00ff88' },
                 { num: 2, name: 'SCAN DRONE', status: '8s', color: '#ffaa00' },
@@ -3416,9 +3402,9 @@
         }
         
         function drawHUDMinimap(ctx, canvas) {
-            const x = canvas.width - (canvas.width * 0.10);
-            const y = canvas.height * 0.15;
-            const radius = Math.max(40, canvas.width * 0.05);
+            const x = canvas.width - 100;
+            const y = 120;
+            const radius = 60;
             
             // Circular minimap frame
             ctx.strokeStyle = '#00d4ff';
