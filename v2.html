@@ -1181,7 +1181,8 @@
     <!-- SHIP HUB -->
     <div id="shipHubContainer">
         <canvas id="shipHubCanvas"></canvas>
-        <canvas id="spaceCanvas" style="display: none;"></canvas>
+        <div id="missionContainer" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999;"></div>
+        <canvas id="spaceCanvas" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;"></canvas>
         <div class="ship-ui-layer">
             <div class="ship-header">🚀 MOTHERSHIP HUB</div>
             <div class="ship-hint">Move with <span class="ship-hint-highlight">WASD</span> | Interact with <span class="ship-hint-highlight">E</span></div>
@@ -2102,6 +2103,9 @@
         let lastInteractionTime = 0;
 
         window.addEventListener('keydown', (e) => {
+            // Don't handle ship hub input during missions
+            if (gameState.missionActive) return;
+            
             keys[e.key.toLowerCase()] = true;
             if (e.key.toLowerCase() === 'e') {
                 if (Date.now() - lastInteractionTime > 200) {
@@ -2112,6 +2116,7 @@
         });
         
         window.addEventListener('keyup', (e) => {
+            if (gameState.missionActive) return;
             keys[e.key.toLowerCase()] = false;
         });
 
@@ -4331,6 +4336,7 @@
             // Hide ship hub and modals
             document.getElementById('shipHubContainer').style.display = 'none';
             document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('missionContainer').style.display = 'block';
             
             // Initialize mission state
             gameState.currentLocation = 'mission';
@@ -4743,6 +4749,7 @@
                 // Mark mission as complete
                 gameState.missionActive = false;
                 this.canvas.style.display = 'none';
+                document.getElementById('missionContainer').style.display = 'none';
                 
                 // Return to ship hub
                 document.getElementById('shipHubContainer').style.display = 'block';
@@ -4758,6 +4765,7 @@
                 
                 gameState.missionActive = false;
                 this.canvas.style.display = 'none';
+                document.getElementById('missionContainer').style.display = 'none';
                 document.getElementById('shipHubContainer').style.display = 'block';
                 gameState.currentLocation = 'ship';
                 
