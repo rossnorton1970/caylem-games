@@ -4489,22 +4489,28 @@
             gameLoop() {
                 if (!this.running) return;
                 
-                // Update
-                this.updatePlayerMovement();
-                this.updateEnemies();
-                this.updateProjectiles();
-                this.updateCamera();
-                
-                // Check collisions
-                this.checkArtifactPickup();
-                this.checkProjectileHits();
-                this.checkPlayerHit();
-                
-                // Render
-                this.render();
-                
-                // Check mission end conditions
-                this.checkMissionState();
+                try {
+                    // Update
+                    this.updatePlayerMovement();
+                    this.updateEnemies();
+                    this.updateProjectiles();
+                    this.updateCamera();
+                    
+                    // Check collisions
+                    this.checkArtifactPickup();
+                    this.checkProjectileHits();
+                    this.checkPlayerHit();
+                    
+                    // Render
+                    this.render();
+                    
+                    // Check mission end conditions
+                    this.checkMissionState();
+                } catch (e) {
+                    console.error('Mission error:', e);
+                    this.running = false;
+                    return;
+                }
                 
                 this.animationId = requestAnimationFrame(() => this.gameLoop());
             }
