@@ -3203,76 +3203,52 @@
         // ==================== HUD PROTOTYPE SYSTEM ====================
         
         function launchHUDDemo() {
-            // Create container
-            const container = document.createElement('div');
-            container.id = 'hudDemoContainer';
-            container.style.cssText = `
+            // Create simple fullscreen black overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'hudDemoOverlay';
+            overlay.style.cssText = `
                 position: fixed;
                 top: 0; left: 0;
                 width: 100%; height: 100%;
-                background: #000;
+                background: #0a0e1f;
                 z-index: 200;
-            `;
-            
-            // Create canvas that fills the screen
-            const canvas = document.createElement('canvas');
-            canvas.id = 'hudCanvas';
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            canvas.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                display: block;
-                width: 100%;
-                height: 100%;
-            `;
-            
-            // Create controls overlay
-            const controls = document.createElement('div');
-            controls.style.cssText = `
-                position: fixed;
-                bottom: 30px;
-                left: 50%;
-                transform: translateX(-50%);
-                color: #666;
-                font-size: 13px;
+                padding: 40px;
+                box-sizing: border-box;
+                color: #00ff88;
                 font-family: Arial, sans-serif;
-                z-index: 201;
+                overflow-y: auto;
             `;
-            controls.innerHTML = `Press <span style="color: #00d4ff;">ESC</span> to close`;
             
-            container.appendChild(canvas);
-            document.body.appendChild(container);
-            document.body.appendChild(controls);
+            overlay.innerHTML = `
+                <h1 style="color: #00d4ff; font-size: 32px; margin-top: 0;">⚡ HUD PROTOTYPE</h1>
+                <div style="margin: 40px 0; font-size: 20px;">
+                    <div style="margin: 20px 0;">❤️ HP: 100 / 100</div>
+                    <div style="margin: 20px 0;">🛡️ SHIELD: 50%</div>
+                    <div style="color: #ffaa00; margin: 20px 0;">🟠 THREAT: ACTIVE</div>
+                </div>
+                <div style="margin: 40px 0; border-top: 2px solid #00d4ff; padding-top: 20px;">
+                    <div style="font-size: 18px; color: #ffaa00; margin: 20px 0;">AR-9 RIFLE</div>
+                    <div style="font-size: 18px; margin: 20px 0;">30 / 180 AMMO</div>
+                </div>
+                <div style="position: fixed; bottom: 40px; right: 40px; font-size: 16px; color: #00d4ff;">
+                    Press <span style="color: #fff; font-weight: bold;">ESC</span> to close
+                </div>
+            `;
             
-            // Handle ESC key
-            window.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    container.remove();
-                    controls.remove();
-                    hudProtoState.demoActive = false;
-                }
-            });
-            
-            // Initialize HUD state
-            hudProtoState.canvas = canvas;
-            hudProtoState.ctx = canvas.getContext('2d');
-            hudProtoState.demoActive = true;
-            hudProtoState.startTime = Date.now();
-            hudProtoState.threatCycle = 'green';
-            
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            });
+            document.body.appendChild(overlay);
             
             // Close the interaction modal
             closeInteractionModal();
             
-            // Start rendering
-            renderHUDDemo();
+            // Handle ESC key to close
+            const escHandler = (e) => {
+                if (e.key === 'Escape') {
+                    overlay.remove();
+                    window.removeEventListener('keydown', escHandler);
+                }
+            };
+            window.addEventListener('keydown', escHandler);
+        }
         }
         
         function renderHUDDemo() {
