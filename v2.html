@@ -363,6 +363,209 @@
             box-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
             transform: translateY(-2px);
         }
+
+        /* ARTIFACT PREVIEW CARD */
+        .artifact-preview-card {
+            background: rgba(20, 20, 50, 0.95);
+            border: 2px solid #bb00ff;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(187, 0, 255, 0.2);
+        }
+
+        .artifact-preview-header {
+            font-size: 24px;
+            color: #bb00ff;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #bb00ff;
+            padding-bottom: 10px;
+        }
+
+        .artifact-rarity-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+        }
+
+        .artifact-type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .artifact-benefit {
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 4px solid #00ff88;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 12px;
+        }
+
+        .artifact-benefit-label {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .artifact-benefit-text {
+            color: #00ff88;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .artifact-penalty {
+            background: rgba(255, 68, 68, 0.1);
+            border-left: 4px solid #ff4444;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 12px;
+        }
+
+        .artifact-penalty-label {
+            color: #ff4444;
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .artifact-penalty-text {
+            color: #ff4444;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .artifact-lore {
+            background: rgba(100, 100, 100, 0.15);
+            padding: 12px;
+            border-radius: 5px;
+            color: #aaa;
+            font-size: 12px;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .artifact-action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .artifact-accept-btn {
+            background: #00ff88;
+            color: #000;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .artifact-accept-btn:hover {
+            background: #00dd77;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .artifact-reject-btn {
+            background: #444;
+            color: #aaa;
+            padding: 10px;
+            border: 1px solid #666;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .artifact-reject-btn:hover {
+            background: #555;
+            color: #fff;
+            border-color: #888;
+        }
+
+        /* MISSION SELECTION STYLES */
+        .mission-option-container {
+            background: rgba(30, 30, 60, 0.8);
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mission-option-container:hover {
+            background: rgba(40, 40, 80, 0.8);
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+
+        .mission-option-container.artifact-hunt {
+            border-color: #ff8800;
+        }
+
+        .mission-option-container.artifact-hunt:hover {
+            border-color: #ffaa00;
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.2);
+        }
+
+        .mission-option-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mission-option-desc {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .mission-option-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        .mission-detail-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .mission-detail-label {
+            color: #888;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 4px;
+        }
+
+        .mission-detail-value {
+            color: #fff;
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
@@ -463,6 +666,23 @@
                 bonusType: 'rewardBonus'
             }
         };
+
+        
+        // BENEFICIAL vs DANGEROUS artifact specifications
+        const beneficialArtifactSpecs = [
+            { name: 'Crystalline Core', type: 'WeaponCore', benefit: '+25% weapon damage', penalty: null },
+            { name: 'Enhanced Shield Lattice', type: 'ShieldMatrix', benefit: '+20% shield absorption', penalty: null },
+            { name: 'Efficient Engine Matrix', type: 'EnergyCell', benefit: '+15% engine speed', penalty: null },
+            { name: 'Data Archive', type: 'DataCore', benefit: '+500 research points', penalty: null }
+        ];
+
+        const dangerousArtifactSpecs = [
+            { name: 'Corrupted Energy Cell', type: 'WeaponCore', benefit: '+20% weapon damage', penalty: '-1% shield integrity per mission' },
+            { name: 'Parasitic Symbiote', type: 'DataCore', benefit: '+15% material gain', penalty: 'Repair costs x1.5' },
+            { name: 'Chaotic Propulsion Core', type: 'EnergyCell', benefit: '+10% engine speed', penalty: 'Random engine failures during combat' },
+            { name: 'Toxic Isotope', type: 'WeaponCore', benefit: '+weapon efficiency', penalty: '-2% hull integrity per mission' },
+            { name: 'Unstable Reactor', type: 'ShieldMatrix', benefit: '+30% power output', penalty: '-2% shield drain per combat round' }
+        ];
 
         // Tech system
         const techSystem = {
@@ -583,43 +803,91 @@
         const planets = [
             {
                 name: 'Kepler-442b',
-                missionType: 'ELIMINATION',
-                threatLevel: 35,
-                terrainType: 'Desert Wasteland',
-                enemyType: 'Scavenger Drones',
-                enemyCount: 12,
-                rewardMin: 400,
-                rewardMax: 650
+                mainMission: {
+                    missionType: 'ELIMINATION',
+                    threatLevel: 35,
+                    terrainType: 'Desert Wasteland',
+                    enemyType: 'Scavenger Drones',
+                    enemyCount: 12,
+                    rewardMin: 400,
+                    rewardMax: 650
+                },
+                artifactHunt: {
+                    missionType: 'ARTIFACT_HUNT',
+                    threatLevel: 60,
+                    terrainType: 'Desert Wasteland - Ancient Ruins',
+                    enemyType: 'Guardian Drones',
+                    enemyCount: 18,
+                    rewardMin: 0,
+                    rewardMax: 0,
+                    artifactRewards: 3
+                }
             },
             {
                 name: 'TRAPPIST-1d',
-                missionType: 'SURVIVAL',
-                threatLevel: 52,
-                terrainType: 'Ice World',
-                enemyType: 'Frost Stalkers',
-                enemyCount: 8,
-                rewardMin: 500,
-                rewardMax: 800
+                mainMission: {
+                    missionType: 'SURVIVAL',
+                    threatLevel: 52,
+                    terrainType: 'Ice World',
+                    enemyType: 'Frost Stalkers',
+                    enemyCount: 8,
+                    rewardMin: 500,
+                    rewardMax: 800
+                },
+                artifactHunt: {
+                    missionType: 'ARTIFACT_HUNT',
+                    threatLevel: 70,
+                    terrainType: 'Ice Caverns - Alien Archive',
+                    enemyType: 'Crystalline Sentries',
+                    enemyCount: 12,
+                    rewardMin: 0,
+                    rewardMax: 0,
+                    artifactRewards: 3
+                }
             },
             {
                 name: 'Proxima-b',
-                missionType: 'DEFENSE',
-                threatLevel: 68,
-                terrainType: 'Volcanic Expanse',
-                enemyType: 'Lava Elementals',
-                enemyCount: 15,
-                rewardMin: 700,
-                rewardMax: 1100
+                mainMission: {
+                    missionType: 'DEFENSE',
+                    threatLevel: 68,
+                    terrainType: 'Volcanic Expanse',
+                    enemyType: 'Lava Elementals',
+                    enemyCount: 15,
+                    rewardMin: 700,
+                    rewardMax: 1100
+                },
+                artifactHunt: {
+                    missionType: 'ARTIFACT_HUNT',
+                    threatLevel: 85,
+                    terrainType: 'Volcanic Temple',
+                    enemyType: 'Ancient Guardians',
+                    enemyCount: 20,
+                    rewardMin: 0,
+                    rewardMax: 0,
+                    artifactRewards: 4
+                }
             },
             {
                 name: 'LHS 475 b',
-                missionType: 'SURVIVAL',
-                threatLevel: 45,
-                terrainType: 'Urban Ruins',
-                enemyType: 'Synthetic Remnants',
-                enemyCount: 10,
-                rewardMin: 450,
-                rewardMax: 750
+                mainMission: {
+                    missionType: 'SURVIVAL',
+                    threatLevel: 45,
+                    terrainType: 'Urban Ruins',
+                    enemyType: 'Synthetic Remnants',
+                    enemyCount: 10,
+                    rewardMin: 450,
+                    rewardMax: 750
+                },
+                artifactHunt: {
+                    missionType: 'ARTIFACT_HUNT',
+                    threatLevel: 65,
+                    terrainType: 'Underground Labs',
+                    enemyType: 'Rogue Synthetics',
+                    enemyCount: 14,
+                    rewardMin: 0,
+                    rewardMax: 0,
+                    artifactRewards: 3
+                }
             }
         ];
 
@@ -1011,18 +1279,19 @@
                     modalContent.innerHTML = `
                         <div class="interaction-modal-header">🖥 CONTROL ROOM — AVAILABLE OPERATIONS</div>
                         <div class="interaction-modal-content">
-                            <p style="margin-bottom: 20px; color: #888;">Select an operation to deploy:</p>
+                            <p style="margin-bottom: 20px; color: #888; font-size: 13px;">Select a planet to view mission options:</p>
                             <div class="planet-grid">
                                 ${planets.map((planet, idx) => `
-                                    <div class="planet-card">
+                                    <div class="planet-card" onclick="showMissionOptions(${idx})" style="cursor: pointer;">
                                         <div class="planet-name">${planet.name}</div>
-                                        <div class="planet-mission-type" style="color: ${getMissionTypeColor(planet.missionType)}; font-weight: bold; margin: 8px 0;">${planet.missionType}</div>
-                                        <div class="planet-info" style="margin-top: 10px;">Terrain: ${planet.terrainType}</div>
-                                        <div class="planet-info">Enemies: ${planet.enemyType}</div>
-                                        <div class="planet-info">Count: ${planet.enemyCount}</div>
-                                        <div class="planet-threat" style="margin-top: 10px; color: ${getThreatColor(planet.threatLevel)}; font-weight: bold;">THREAT: ${planet.threatLevel}%</div>
-                                        <div class="planet-reward" style="color: #ffcc00; margin-top: 5px;">Reward: ${planet.rewardMin}–${planet.rewardMax} ⚡</div>
-                                        <button class="planet-btn" onclick="showPreMissionScreen(${idx})">VIEW OPERATION</button>
+                                        <div style="margin-top: 10px; font-size: 12px; color: #aaa;">
+                                            <div>MAIN MISSION: <span style="color: ${getMissionTypeColor(planet.mainMission.missionType)};">${planet.mainMission.missionType}</span></div>
+                                            <div style="margin-top: 8px;">Threat: <span style="color: ${getThreatColor(planet.mainMission.threatLevel)};">${planet.mainMission.threatLevel}%</span></div>
+                                        </div>
+                                        <div style="margin-top: 12px; font-size: 12px; color: #ff8800;">
+                                            <strong>+ ARTIFACT HUNT</strong> available
+                                        </div>
+                                        <button class="planet-btn" style="margin-top: 12px;">SELECT PLANET</button>
                                     </div>
                                 `).join('')}
                             </div>
@@ -1160,18 +1429,68 @@
             }
         }
 
-        // Close pre-mission screen
-        function closePreMissionScreen() {
-            showRoomUI('controlRoom', rooms.controlRoom);
+        // Show artifact preview and acceptance dialog
+        function showArtifactPreview(artifact, onAccept, onReject) {
+            const modalContent = document.getElementById('modalContent');
+            
+            const rarityColor = artifact.rarity === 'exotic' ? '#ff00ff' : artifact.rarity === 'rare' ? '#ffaa00' : '#00d4ff';
+            const typeLabel = artifact.isPositive ? 'BENEFICIAL' : 'DANGEROUS';
+            const typeColor = artifact.isPositive ? '#00ff88' : '#ff4444';
+            
+            let artifactHTML = `
+                <div class="artifact-preview-card">
+                    <div class="artifact-preview-header">🔮 ${artifact.name}</div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <span class="artifact-rarity-badge" style="background: ${rarityColor}33; color: ${rarityColor}; border: 1px solid ${rarityColor};">
+                            ${artifact.rarity.toUpperCase()}
+                        </span>
+                        <span class="artifact-type-badge" style="background: ${typeColor}33; color: ${typeColor}; border: 1px solid ${typeColor};">
+                            ${typeLabel}
+                        </span>
+                    </div>
+
+                    <div class="artifact-benefit">
+                        <div class="artifact-benefit-label">✓ BENEFIT</div>
+                        <div class="artifact-benefit-text">${artifact.benefit}</div>
+                    </div>
+                    
+                    ${artifact.penalty ? `
+                        <div class="artifact-penalty">
+                            <div class="artifact-penalty-label">⚠️ PENALTY</div>
+                            <div class="artifact-penalty-text">${artifact.penalty}</div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="artifact-lore">
+                        "${artifact.lore}"
+                    </div>
+                    
+                    <div class="artifact-action-buttons">
+                        <button class="artifact-accept-btn" onclick="${onAccept}">ACCEPT</button>
+                        <button class="artifact-reject-btn" onclick="${onReject}">REJECT</button>
+                    </div>
+                </div>
+            `;
+            
+            modalContent.innerHTML = artifactHTML;
         }
 
-        // Generate random artifact
-        function generateArtifact() {
-            const types = Object.keys(artifactTypes);
-            const type = types[Math.floor(Math.random() * types.length)];
-            const artifactDef = artifactTypes[type];
-            const rarity = artifactDef.rarity[Math.floor(Math.random() * artifactDef.rarity.length)];
-            const name = artifactDef.names[Math.floor(Math.random() * artifactDef.names.length)];
+        // Generate random artifact with risk/reward
+        function generateArtifact(isPositive = null) {
+            // If not specified, randomly choose beneficial or dangerous
+            if (isPositive === null) {
+                isPositive = Math.random() > 0.4; // 60% beneficial, 40% dangerous
+            }
+
+            let spec, rarity;
+            if (isPositive) {
+                spec = beneficialArtifactSpecs[Math.floor(Math.random() * beneficialArtifactSpecs.length)];
+                rarity = ['common', 'rare', 'exotic'][Math.floor(Math.random() * 3)];
+            } else {
+                spec = dangerousArtifactSpecs[Math.floor(Math.random() * dangerousArtifactSpecs.length)];
+                rarity = ['rare', 'exotic'][Math.floor(Math.random() * 2)]; // Dangerous artifacts are rarer
+            }
             
             const researchValue = rarity === 'exotic' ? 30 : rarity === 'rare' ? 15 : 5;
             const loreSnippets = {
@@ -1180,16 +1499,19 @@
                 EnergyCell: ['Pulses with boundless energy.', 'Propels faster than physics allows.', 'Source of immense kinetic potential.'],
                 DataCore: ['Contains vast computational archives.', 'Holds strategic enemy intelligence.', 'Biological patterns encoded within.']
             };
-            const lore = loreSnippets[type][Math.floor(Math.random() * loreSnippets[type].length)];
+            const lore = loreSnippets[spec.type][Math.floor(Math.random() * loreSnippets[spec.type].length)];
             
             return {
                 id: Date.now() + Math.random(),
-                name: name,
-                type: type,
+                name: spec.name,
+                type: spec.type,
                 rarity: rarity,
                 researchValue: researchValue,
                 lore: lore,
-                unlocksRarity: rarity === 'exotic' ? 'legendary' : rarity
+                unlocksRarity: rarity === 'exotic' ? 'legendary' : rarity,
+                isPositive: isPositive,
+                benefit: spec.benefit,
+                penalty: spec.penalty
             };
         }
 
@@ -1252,42 +1574,71 @@
         }
 
         // Deploy to mission
-        function deployToMission(idx) {
+        function deployToMission(idx, missionType = 'main') {
             const planet = planets[idx];
+            const missionData = missionType === 'main' ? planet.mainMission : planet.artifactHunt;
             
-            // Calculate base reward with analytics bonus
-            let baseCredits = Math.floor(Math.random() * (planet.rewardMax - planet.rewardMin + 1)) + planet.rewardMin;
-            let baseMaterials = Math.floor(Math.random() * 4) + 1;
-            
-            // Apply Advanced Analytics bonus if researched
-            if (gameState.completedResearch.includes('advAnalytics')) {
-                baseCredits = Math.floor(baseCredits * 1.25);
+            if (missionType === 'main') {
+                // MAIN MISSION: Credits + occasional artifacts
+                let baseCredits = Math.floor(Math.random() * (missionData.rewardMax - missionData.rewardMin + 1)) + missionData.rewardMin;
+                let baseMaterials = Math.floor(Math.random() * 4) + 1;
+                
+                // Apply Advanced Analytics bonus if researched
+                if (gameState.completedResearch.includes('advAnalytics')) {
+                    baseCredits = Math.floor(baseCredits * 1.25);
+                }
+                
+                const reward = {
+                    credits: baseCredits,
+                    materials: baseMaterials,
+                    artifacts: []
+                };
+                
+                // Generate 1-3 random artifacts
+                const artifactCount = Math.floor(Math.random() * 3) + 1;
+                for (let i = 0; i < artifactCount; i++) {
+                    reward.artifacts.push(generateArtifact());
+                }
+                
+                // Update game state
+                gameState.lastMissionReward = reward;
+                gameState.credits += reward.credits;
+                gameState.materials += baseMaterials;
+                gameState.artifacts.push(...reward.artifacts);
+                gameState.organizationTrust += 5;
+                
+                closeInteractionModal();
+                
+                // Show mission complete screen
+                let artifactList = reward.artifacts.map(a => `• ${a.name} (${a.rarity})`).join('\n');
+                alert(`MISSION COMPLETE: ${planet.name}\n\nREWARDS EARNED:\n+${reward.credits} Credits\n+${reward.materials} Materials\n\nARTIFACTS RECOVERED:\n${artifactList}\n\nVisit Research Lab to analyze!`);
+            } else {
+                // ARTIFACT HUNT: No credits, 2-4 artifacts (mixed good/dangerous)
+                const artifactCount = missionData.artifactRewards;
+                const reward = {
+                    credits: 0,
+                    materials: 0,
+                    artifacts: []
+                };
+                
+                // Generate mix of beneficial and dangerous artifacts
+                for (let i = 0; i < artifactCount; i++) {
+                    // Higher chance of dangerous in artifact hunts
+                    const isPositive = Math.random() > 0.6; // 40% beneficial, 60% dangerous
+                    reward.artifacts.push(generateArtifact(isPositive));
+                }
+                
+                // Update game state
+                gameState.lastMissionReward = reward;
+                gameState.artifacts.push(...reward.artifacts);
+                gameState.organizationTrust += 3; // Less trust for risky hunts
+                
+                closeInteractionModal();
+                
+                // Show mission complete screen with artifact recovery details
+                let artifactList = reward.artifacts.map(a => `• ${a.name} (${a.rarity}) ${a.isPositive ? '✓' : '⚠'}`).join('\n');
+                alert(`ARTIFACT HUNT COMPLETE: ${planet.name}\n\nARTIFACTS RECOVERED:\n${artifactList}\n\n⚠️ Some artifacts may have side effects!\nAnalyze in Research Lab to learn more.`);
             }
-            
-            const reward = {
-                credits: baseCredits,
-                materials: baseMaterials,
-                artifacts: []
-            };
-            
-            // Generate 1-3 random artifacts
-            const artifactCount = Math.floor(Math.random() * 3) + 1;
-            for (let i = 0; i < artifactCount; i++) {
-                reward.artifacts.push(generateArtifact());
-            }
-            
-            // Update game state
-            gameState.lastMissionReward = reward;
-            gameState.credits += reward.credits;
-            gameState.materials += baseMaterials;
-            gameState.artifacts.push(...reward.artifacts);
-            gameState.organizationTrust += 5;
-            
-            closeInteractionModal();
-            
-            // Show mission complete screen with artifact details
-            let artifactList = reward.artifacts.map(a => `• ${a.name} (${a.rarity})`).join('\n');
-            alert(`MISSION COMPLETE: ${planet.name}\n\nREWARDS EARNED:\n+${reward.credits} Credits\n+${reward.materials} Materials\n\nARTIFACTS RECOVERED:\n${artifactList}\n\nVisit Research Lab to analyze!`);
         }
 
         function exitToMenu() {
