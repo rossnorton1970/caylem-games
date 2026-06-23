@@ -2063,6 +2063,28 @@
                     rewardMax: 0,
                     artifactRewards: 3
                 }
+            },
+            {
+                name: 'HELIOS-7',
+                mainMission: {
+                    missionType: 'EXTRACTION',
+                    threatLevel: 55,
+                    terrainType: 'Desert Ruins - Outpost Sigma',
+                    enemyType: 'Mixed Hostiles',
+                    enemyCount: 30,
+                    rewardMin: 600,
+                    rewardMax: 950
+                },
+                artifactHunt: {
+                    missionType: 'EXTRACTION',
+                    threatLevel: 65,
+                    terrainType: 'Desert Ruins - Deep Facility',
+                    enemyType: 'Advanced Hostiles',
+                    enemyCount: 40,
+                    rewardMin: 0,
+                    rewardMax: 0,
+                    artifactRewards: 2
+                }
             }
         ];
 
@@ -2084,6 +2106,127 @@
             keys[e.key.toLowerCase()] = false;
         });
 
+        // ========== MISSION SYSTEM - HELIOS-7 OUTPOST SIGMA ==========
+        const missionSystem = {
+            currentMission: null,
+            missionState: null,
+            phase: 'idle', // landing, exploration, artifact, extraction
+            phaseStartTime: 0,
+            objectives: [],
+            currentObjective: 0,
+            enemies: [],
+            waves: [],
+            currentWave: 0,
+            extractionTimer: 60,
+            extractionActive: false,
+            enemySpawnLocations: [
+                { zone: 'A', x: 200, y: 150, type: 'ScavengerDrones', count: '2-3' },
+                { zone: 'B', x: 400, y: 250, type: 'Mixed', count: '2-3' },
+                { zone: 'C', x: 450, y: 450, type: 'FrostStalkers', count: '1-2' },
+                { zone: 'D', x: 150, y: 500, type: 'HeavyBroodling', count: '1' }
+            ],
+            beaconX: 0,
+            beaconY: 0
+        };
+        
+        // Enemy type definitions
+        const enemyTypes = {
+            scavengerDrone: {
+                name: 'Scavenger Drone',
+                health: 15,
+                maxHealth: 15,
+                speed: 5,
+                damage: 5,
+                detectionRange: 40,
+                attackRange: 5,
+                attackCooldown: 2,
+                lastAttack: 0,
+                icon: '🐛',
+                color: '#ff6600',
+                loot: { credits: 0, materials: 0, researchPoints: 0 },
+                size: 8
+            },
+            frostStalker: {
+                name: 'Frost Stalker',
+                health: 40,
+                maxHealth: 40,
+                speed: 3.5,
+                damage: 10,
+                detectionRange: 60,
+                attackRange: 50,
+                attackCooldown: 1.5,
+                lastAttack: 0,
+                icon: '❄️',
+                color: '#00d4ff',
+                loot: { credits: 0, materials: 0, researchPoints: 10 },
+                projectileSpeed: 5,
+                slowEffect: { strength: 0.5, duration: 3 },
+                size: 12,
+                visionArc: 180
+            },
+            heavyBroodling: {
+                name: 'Heavy Broodling',
+                health: 80,
+                maxHealth: 80,
+                speed: 2,
+                damage: 25,
+                detectionRange: 90,
+                chargeRange: 100,
+                attackCooldown: 3,
+                lastAttack: 0,
+                chargeCooldown: 3,
+                lastCharge: 0,
+                icon: '👹',
+                color: '#ff4444',
+                loot: { credits: 25, materials: 15, researchPoints: 0 },
+                size: 16,
+                visionArc: 180,
+                chargeSpeed: 8
+            }
+        };
+        
+        // Wave schedule for extraction phase
+        const extractionWaves = [
+            { timeStart: 0, enemies: [{ type: 'scavengerDrone', count: 3 }] },
+            { timeStart: 10, enemies: [{ type: 'frostStalker', count: 2 }, { type: 'scavengerDrone', count: 2 }] },
+            { timeStart: 20, enemies: [{ type: 'scavengerDrone', count: 4 }, { type: 'frostStalker', count: 1 }] },
+            { timeStart: 30, enemies: [{ type: 'heavyBroodling', count: 1 }, { type: 'frostStalker', count: 1 }, { type: 'scavengerDrone', count: 2 }] },
+            { timeStart: 40, enemies: [{ type: 'frostStalker', count: 2 }, { type: 'scavengerDrone', count: 3 }] },
+            { timeStart: 50, enemies: [{ type: 'heavyBroodling', count: 2 }, { type: 'frostStalker', count: 2 }] }
+        ];
+        
+        // Initialize Helios-7 mission
+        const initializeHelios7Mission = () => {
+            missionSystem.currentMission = {
+                name: 'HELIOS-7: OUTPOST SIGMA',
+                planet: 'Helios-7',
+                biome: 'Desert Ruins',
+                difficulty: 'Medium',
+                duration: 600, // 10 minutes
+                startTime: Date.now(),
+                playerHealth: 100,
+                maxHealth: 100,
+                playerX: 100,
+                playerY: 100,
+                playerSpeed: 4,
+                ammo: 300,
+                maxAmmo: 300
+            };
+            
+            missionSystem.phase = 'landing';
+            missionSystem.phaseStartTime = Date.now();
+            missionSystem.objectives = [
+                { id: 1, title: 'Investigate crashed outpost', status: 'active', progress: 0, targetX: 450, targetY: 450 },
+                { id: 2, title: 'Collect alien artifact', status: 'pending', progress: 0, targetX: 450, targetY: 480 },
+                { id: 3, title: 'Extract from landing zone', status: 'pending', progress: 0, targetX: 100, targetY: 100 }
+            ];
+            
+            missionSystem.enemies = [];
+            missionSystem.currentWave = 0;
+            missionSystem.extractionActive = false;
+            missionSystem.extractionTimer = 60;
+        };
+        
         // Initialize starfield
         
         // ARMORY MODAL TABBED INTERFACE
@@ -3361,6 +3504,17 @@
             const enemySpecies = missionData.enemyType;
             const enemyCount = missionData.enemyCount;
             
+            // ========== SPECIAL CASE: HELIOS-7 OUTPOST SIGMA ==========
+            // For now, trigger Helios-7 mission instead of standard system
+            if (planet.name === 'HELIOS-7' || idx === 99) {
+                closeInteractionModal();
+                // Hide ship hub
+                document.getElementById('shipHubContainer').style.display = 'none';
+                // Start dropship cinematic
+                cinematicDropshipSequence.init();
+                return;
+            }
+            
             // TRACK ENEMY ENCOUNTERS
             if (gameState.encounterData[enemySpecies]) {
                 gameState.encounterData[enemySpecies].encounters += enemyCount;
@@ -4253,12 +4407,15 @@
                 // Fade to black, then start mission
                 this.active = false;
                 
+                // Remove cinematic canvas
+                if (this.canvas && this.canvas.parentElement) {
+                    this.canvas.remove();
+                }
+                
                 // Transition to actual gameplay
                 setTimeout(() => {
-                    this.canvas.remove();
-                    // Start the actual mission gameplay
                     startMission();
-                }, 1000);
+                }, 500);
             }
         };
         
@@ -4310,6 +4467,453 @@
                 cinematicDropshipSequence.complete();
             }
         });
+        
+        // ========== HELIOS-7 MISSION FUNCTIONS ==========
+        
+        function startMission() {
+            initializeHelios7Mission();
+            gameState.currentLocation = 'mission';
+            
+            // Hide menu, show mission canvas
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('shipHubContainer').style.display = 'none';
+            
+            // Create mission canvas
+            if (document.getElementById('missionCanvas')) {
+                document.getElementById('missionCanvas').remove();
+            }
+            
+            const missionCanvas = document.createElement('canvas');
+            missionCanvas.id = 'missionCanvas';
+            missionCanvas.width = window.innerWidth;
+            missionCanvas.height = window.innerHeight;
+            missionCanvas.style.display = 'block';
+            missionCanvas.style.position = 'fixed';
+            missionCanvas.style.top = '0';
+            missionCanvas.style.left = '0';
+            missionCanvas.style.zIndex = '99';
+            document.body.appendChild(missionCanvas);
+            
+            const ctx = missionCanvas.getContext('2d');
+            missionSystem.ctx = ctx;
+            missionSystem.canvas = missionCanvas;
+            
+            // Start game loop
+            gameLoop();
+        }
+        
+        function gameLoop() {
+            const canvas = missionSystem.canvas;
+            const ctx = missionSystem.ctx;
+            
+            if (!canvas) return;
+            
+            // Clear canvas
+            ctx.fillStyle = '#8b7355';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw desert background with dust effect
+            drawDesertEnvironment(ctx, canvas);
+            
+            // Update mission state
+            updateMissionState();
+            
+            // Handle player input
+            handlePlayerInput();
+            
+            // Update enemies
+            updateEnemies();
+            
+            // Draw player
+            drawPlayer(ctx);
+            
+            // Draw enemies
+            drawEnemies(ctx);
+            
+            // Draw HUD
+            drawMissionHUD(ctx, canvas);
+            
+            // Check mission completion
+            if (missionSystem.phase !== 'extraction' || (missionSystem.phase === 'extraction' && missionSystem.extractionTimer > 0)) {
+                requestAnimationFrame(gameLoop);
+            } else if (missionSystem.extractionTimer <= 0 && missionSystem.extractionActive) {
+                endMission(true);
+            }
+        }
+        
+        function drawDesertEnvironment(ctx, canvas) {
+            // Sand dunes
+            ctx.fillStyle = '#d4a574';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Rocky outcrops
+            ctx.fillStyle = '#8b7355';
+            ctx.beginPath();
+            ctx.ellipse(300, 200, 80, 40, Math.PI / 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.ellipse(600, 350, 100, 50, -Math.PI / 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Crashed outpost structure
+            ctx.fillStyle = '#666';
+            ctx.fillRect(420, 420, 100, 120);
+            ctx.fillStyle = '#444';
+            ctx.fillRect(435, 435, 25, 25);
+            ctx.fillRect(475, 435, 25, 25);
+            ctx.fillRect(435, 475, 25, 25);
+            ctx.fillRect(475, 475, 25, 25);
+            
+            // Dust storm effect (visual noise)
+            ctx.fillStyle = 'rgba(200, 180, 150, 0.15)';
+            for (let i = 0; i < 50; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                ctx.fillRect(x, y, 3, 3);
+            }
+        }
+        
+        function updateMissionState() {
+            const mission = missionSystem.currentMission;
+            const elapsed = (Date.now() - mission.startTime) / 1000;
+            
+            // Phase transitions
+            if (missionSystem.phase === 'landing' && elapsed > 2) {
+                missionSystem.phase = 'exploration';
+                spawnExplorationEnemies();
+            }
+            
+            if (missionSystem.phase === 'exploration') {
+                // Check if player reached objective 1
+                const obj1 = missionSystem.objectives[0];
+                const dist1 = Math.hypot(mission.playerX - obj1.targetX, mission.playerY - obj1.targetY);
+                if (dist1 < 50 && obj1.status === 'active') {
+                    obj1.status = 'complete';
+                    missionSystem.objectives[1].status = 'active';
+                    missionSystem.phase = 'artifact';
+                }
+            }
+            
+            if (missionSystem.phase === 'artifact') {
+                // Check if player interacted with artifact (at objective 2)
+                const obj2 = missionSystem.objectives[1];
+                const dist2 = Math.hypot(mission.playerX - obj2.targetX, mission.playerY - obj2.targetY);
+                if (dist2 < 30 && keys['e'] && obj2.status === 'active') {
+                    obj2.status = 'complete';
+                    missionSystem.objectives[2].status = 'active';
+                    // Artifact collected, move to extraction
+                }
+            }
+            
+            if (missionSystem.phase === 'extraction' && !missionSystem.extractionActive) {
+                // Check if player reached extraction point
+                const obj3 = missionSystem.objectives[2];
+                const dist3 = Math.hypot(mission.playerX - obj3.targetX, mission.playerY - obj3.targetY);
+                if (dist3 < 50 && keys['e'] && obj3.status === 'active') {
+                    missionSystem.extractionActive = true;
+                    missionSystem.beaconX = mission.playerX;
+                    missionSystem.beaconY = mission.playerY;
+                    missionSystem.phaseStartTime = Date.now();
+                    // Start wave system
+                }
+            }
+            
+            // Update extraction timer
+            if (missionSystem.extractionActive) {
+                const extractElapsed = (Date.now() - missionSystem.phaseStartTime) / 1000;
+                missionSystem.extractionTimer = 60 - extractElapsed;
+                
+                // Spawn waves based on time
+                extractionWaves.forEach(wave => {
+                    if (extractElapsed >= wave.timeStart && extractElapsed < wave.timeStart + 0.5) {
+                        spawnWave(wave);
+                    }
+                });
+                
+                // Check if extraction complete
+                if (missionSystem.extractionTimer <= 0) {
+                    endMission(true);
+                }
+            }
+            
+            // Check if player died
+            if (mission.playerHealth <= 0) {
+                endMission(false);
+            }
+        }
+        
+        function spawnExplorationEnemies() {
+            // Spawn initial enemies at exploration locations
+            missionSystem.enemySpawnLocations.forEach(loc => {
+                if (loc.zone === 'A') {
+                    for (let i = 0; i < 2; i++) {
+                        spawnEnemy('scavengerDrone', loc.x + Math.random() * 40 - 20, loc.y + Math.random() * 40 - 20);
+                    }
+                } else if (loc.zone === 'B') {
+                    spawnEnemy('frostStalker', loc.x, loc.y);
+                    for (let i = 0; i < 2; i++) {
+                        spawnEnemy('scavengerDrone', loc.x + Math.random() * 40 - 20, loc.y + Math.random() * 40 - 20);
+                    }
+                }
+            });
+        }
+        
+        function spawnWave(waveData) {
+            waveData.enemies.forEach(enemyConfig => {
+                for (let i = 0; i < enemyConfig.count; i++) {
+                    const angle = (Math.random() * Math.PI * 2);
+                    const distance = 100 + Math.random() * 50;
+                    const spawnX = missionSystem.beaconX + Math.cos(angle) * distance;
+                    const spawnY = missionSystem.beaconY + Math.sin(angle) * distance;
+                    spawnEnemy(enemyConfig.type, spawnX, spawnY);
+                }
+            });
+        }
+        
+        function spawnEnemy(type, x, y) {
+            const template = enemyTypes[type];
+            const enemy = {
+                type: type,
+                ...JSON.parse(JSON.stringify(template)),
+                x: x,
+                y: y,
+                vx: 0,
+                vy: 0,
+                state: 'idle',
+                targetX: null,
+                targetY: null,
+                patrolIndex: 0,
+                detectedTime: 0,
+                projectiles: []
+            };
+            missionSystem.enemies.push(enemy);
+        }
+        
+        function updateEnemies() {
+            const mission = missionSystem.currentMission;
+            const dt = 0.016; // 60 FPS
+            
+            missionSystem.enemies = missionSystem.enemies.filter(e => e.health > 0);
+            
+            missionSystem.enemies.forEach(enemy => {
+                const dx = mission.playerX - enemy.x;
+                const dy = mission.playerY - enemy.y;
+                const distToPlayer = Math.hypot(dx, dy);
+                
+                // State machine
+                if (distToPlayer < enemy.detectionRange) {
+                    enemy.state = 'aggro';
+                    enemy.targetX = mission.playerX;
+                    enemy.targetY = mission.playerY;
+                } else {
+                    if (enemy.state === 'aggro' && Date.now() - enemy.detectedTime > 3000) {
+                        enemy.state = 'idle';
+                    }
+                }
+                
+                // Movement
+                if (enemy.state === 'aggro' && enemy.targetX !== null) {
+                    const tdx = enemy.targetX - enemy.x;
+                    const tdy = enemy.targetY - enemy.y;
+                    const dist = Math.hypot(tdx, tdy);
+                    if (dist > 1) {
+                        enemy.vx = (tdx / dist) * enemy.speed;
+                        enemy.vy = (tdy / dist) * enemy.speed;
+                    }
+                }
+                
+                enemy.x += enemy.vx * dt;
+                enemy.y += enemy.vy * dt;
+                
+                // Boundary clamp
+                enemy.x = Math.max(0, Math.min(missionSystem.canvas.width, enemy.x));
+                enemy.y = Math.max(0, Math.min(missionSystem.canvas.height, enemy.y));
+                
+                // Attack logic
+                if (enemy.state === 'aggro' && distToPlayer < enemy.attackRange) {
+                    if (Date.now() - enemy.lastAttack > enemy.attackCooldown * 1000) {
+                        if (enemy.type === 'frostStalker') {
+                            // Fire projectile
+                            const pjdx = dx / distToPlayer;
+                            const pjdy = dy / distToPlayer;
+                            enemy.projectiles.push({
+                                x: enemy.x,
+                                y: enemy.y,
+                                vx: pjdx * enemy.projectileSpeed,
+                                vy: pjdy * enemy.projectileSpeed,
+                                life: 3
+                            });
+                        } else {
+                            // Melee attack
+                            mission.playerHealth -= enemy.damage;
+                        }
+                        enemy.lastAttack = Date.now();
+                    }
+                }
+                
+                // Update projectiles
+                enemy.projectiles = enemy.projectiles.filter(pj => pj.life > 0);
+                enemy.projectiles.forEach(pj => {
+                    pj.x += pj.vx * dt;
+                    pj.y += pj.vy * dt;
+                    pj.life -= dt;
+                    
+                    // Check collision with player
+                    const pdx = mission.playerX - pj.x;
+                    const pdy = mission.playerY - pj.y;
+                    if (Math.hypot(pdx, pdy) < 12) {
+                        mission.playerHealth -= enemy.damage;
+                        pj.life = 0;
+                    }
+                });
+            });
+        }
+        
+        function handlePlayerInput() {
+            const mission = missionSystem.currentMission;
+            let moveX = 0, moveY = 0;
+            
+            if (keys['w']) moveY -= mission.playerSpeed;
+            if (keys['s']) moveY += mission.playerSpeed;
+            if (keys['a']) moveX -= mission.playerSpeed;
+            if (keys['d']) moveX += mission.playerSpeed;
+            
+            mission.playerX += moveX;
+            mission.playerY += moveY;
+            
+            // Boundary clamp
+            mission.playerX = Math.max(0, Math.min(missionSystem.canvas.width, mission.playerX));
+            mission.playerY = Math.max(0, Math.min(missionSystem.canvas.height, mission.playerY));
+        }
+        
+        function drawPlayer(ctx) {
+            const mission = missionSystem.currentMission;
+            ctx.fillStyle = '#00ff88';
+            ctx.beginPath();
+            ctx.arc(mission.playerX, mission.playerY, 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Health bar above player
+            const healthPercent = mission.playerHealth / mission.maxHealth;
+            ctx.fillStyle = '#ff4444';
+            ctx.fillRect(mission.playerX - 20, mission.playerY - 25, 40, 4);
+            ctx.fillStyle = '#00ff88';
+            ctx.fillRect(mission.playerX - 20, mission.playerY - 25, 40 * healthPercent, 4);
+        }
+        
+        function drawEnemies(ctx) {
+            missionSystem.enemies.forEach(enemy => {
+                // Draw enemy
+                ctx.fillStyle = enemy.color;
+                ctx.beginPath();
+                ctx.arc(enemy.x, enemy.y, enemy.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Health bar
+                const healthPercent = enemy.health / enemy.maxHealth;
+                ctx.fillStyle = '#ff4444';
+                ctx.fillRect(enemy.x - 12, enemy.y - enemy.size - 8, 24, 2);
+                ctx.fillStyle = '#00ff88';
+                ctx.fillRect(enemy.x - 12, enemy.y - enemy.size - 8, 24 * healthPercent, 2);
+                
+                // Draw projectiles
+                enemy.projectiles.forEach(pj => {
+                    ctx.fillStyle = 'rgba(0, 212, 255, 0.8)';
+                    ctx.beginPath();
+                    ctx.arc(pj.x, pj.y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            });
+        }
+        
+        function drawMissionHUD(ctx, canvas) {
+            const mission = missionSystem.currentMission;
+            
+            // Objective display
+            ctx.fillStyle = '#00d4ff';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('OBJECTIVES', 20, 30);
+            
+            missionSystem.objectives.forEach((obj, idx) => {
+                const color = obj.status === 'active' ? '#00d4ff' : obj.status === 'complete' ? '#00ff88' : '#666';
+                ctx.fillStyle = color;
+                ctx.font = '12px Arial';
+                ctx.fillText(`${idx + 1}. ${obj.title}`, 20, 55 + idx * 20);
+            });
+            
+            // Health bar (HUD)
+            ctx.fillStyle = '#333';
+            ctx.fillRect(20, canvas.height - 50, 200, 20);
+            const healthPercent = mission.playerHealth / mission.maxHealth;
+            ctx.fillStyle = mission.playerHealth > 50 ? '#00ff88' : '#ffaa00';
+            ctx.fillRect(20, canvas.height - 50, 200 * healthPercent, 20);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText(`HEALTH: ${Math.ceil(mission.playerHealth)}/${mission.maxHealth}`, 30, canvas.height - 35);
+            
+            // Phase indicator
+            ctx.fillStyle = '#ffaa00';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText(`PHASE: ${missionSystem.phase.toUpperCase()}`, canvas.width - 300, 30);
+            
+            // Extraction timer
+            if (missionSystem.extractionActive) {
+                ctx.fillStyle = '#ff4444';
+                ctx.font = 'bold 24px Arial';
+                ctx.fillText(`EXTRACTION: ${Math.ceil(missionSystem.extractionTimer)}s`, canvas.width - 300, 70);
+            }
+            
+            // Enemy count
+            ctx.fillStyle = '#aaa';
+            ctx.font = '12px Arial';
+            ctx.fillText(`ENEMIES: ${missionSystem.enemies.length}`, canvas.width - 200, canvas.height - 30);
+            
+            // Beacon indicator when extraction active
+            if (missionSystem.extractionActive) {
+                ctx.fillStyle = 'rgba(255, 170, 0, 0.8)';
+                ctx.beginPath();
+                ctx.arc(missionSystem.beaconX, missionSystem.beaconY, 20, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
+                ctx.beginPath();
+                ctx.arc(missionSystem.beaconX, missionSystem.beaconY, 30, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function endMission(success) {
+            const canvas = document.getElementById('missionCanvas');
+            if (canvas) canvas.remove();
+            
+            // Show post-mission screen
+            const mission = missionSystem.currentMission;
+            const elapsed = (Date.now() - mission.startTime) / 1000;
+            const enemiesKilled = 50 - missionSystem.enemies.length; // Placeholder
+            
+            const postMissionScreen = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff;">
+                    <h1 style="font-size: 48px; color: ${success ? '#00ff88' : '#ff4444'}; margin-bottom: 20px;">${success ? 'MISSION SUCCESS' : 'MISSION FAILED'}</h1>
+                    <div style="font-size: 18px; margin: 10px; color: #aaa;">
+                        <p>Time Survived: ${Math.ceil(elapsed)}s / 600s</p>
+                        <p>Enemies Killed: ${enemiesKilled}</p>
+                        <p>Damage Taken: ${mission.maxHealth - mission.playerHealth} HP</p>
+                        <p style="margin-top: 20px; color: #00ff88;">Credits: +500</p>
+                        <p style="color: #00d4ff;">Materials: +25</p>
+                        ${success ? '<p style="color: #bb00ff;">Artifact Collected!</p>' : ''}
+                    </div>
+                    <button onclick="exitToMenu()" style="margin-top: 40px; padding: 12px 30px; font-size: 16px; background: #f97316; color: white; border: none; cursor: pointer; border-radius: 5px;">RETURN TO SHIP</button>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', postMissionScreen);
+            
+            // Return to ship after delay
+            setTimeout(() => {
+                document.querySelector('[style*="MISSION"]').parentElement.remove();
+                exitToMenu();
+            }, 8000);
+        }
     </script>
 </body>
 </html>
