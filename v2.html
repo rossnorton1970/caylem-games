@@ -4783,70 +4783,23 @@
             }
             
             render() {
-                // Clear canvas with desert color
-                this.ctx.fillStyle = '#c9a876';
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                // RENDERING PRIORITY:
+                // 1. Sky gradient (top to horizon)
+                this.drawSkyAndAtmosphere();
                 
-                // Draw heat haze effect (subtle)
-                this.ctx.globalAlpha = 0.05;
-                this.ctx.fillStyle = '#ff6600';
-                for (let i = 0; i < 3; i++) {
-                    this.ctx.fillRect(
-                        Math.sin(Date.now() / 1000 + i) * 10,
-                        Math.cos(Date.now() / 1000 + i) * 10,
-                        this.canvas.width,
-                        this.canvas.height
-                    );
-                }
-                this.ctx.globalAlpha = 1;
+                // 2. Distant elements (moon, stars, far structures)
+                this.drawDistantElements();
                 
-                // Draw dunes/rocks for visual variety
-                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-                for (let i = 0; i < 8; i++) {
-                    const x = (i % 4) * 200 + 50;
-                    const y = Math.floor(i / 4) * 300 + 50;
-                    this.ctx.fillRect(x, y, 100, 80);
-                }
+                // 3. Terrain (dunes, sand, dust)
+                this.drawTerrain();
                 
-                // Draw landing zone circle (spawn area)
-                this.ctx.strokeStyle = '#00ff88';
-                this.ctx.lineWidth = 2;
-                this.ctx.globalAlpha = 0.3;
-                this.ctx.beginPath();
-                this.ctx.arc(this.landingZone.x, this.landingZone.y, this.landingZone.radius, 0, Math.PI * 2);
-                this.ctx.stroke();
-                this.ctx.globalAlpha = 1;
+                // 4. Large structures (alien ruins, outpost)
+                this.drawStructures();
                 
-                // Draw crashed outpost
-                this.ctx.fillStyle = '#8b6914';
-                this.ctx.fillRect(this.outpost.x - this.outpost.width/2, this.outpost.y - this.outpost.height/2, 
-                                  this.outpost.width, this.outpost.height);
+                // 5. Environmental story items
+                this.drawEnvironmentalStory();
                 
-                // Outpost border (damaged aesthetic)
-                this.ctx.strokeStyle = '#ff6600';
-                this.ctx.lineWidth = 3;
-                this.ctx.strokeRect(this.outpost.x - this.outpost.width/2, this.outpost.y - this.outpost.height/2,
-                                    this.outpost.width, this.outpost.height);
-                
-                // Draw artifact (inside outpost)
-                if (!this.artifact.collected) {
-                    this.ctx.fillStyle = '#ffff00';
-                    this.ctx.globalAlpha = 0.8;
-                    this.ctx.beginPath();
-                    this.ctx.arc(this.artifact.x, this.artifact.y, this.artifact.size, 0, Math.PI * 2);
-                    this.ctx.fill();
-                    
-                    // Glow effect
-                    this.ctx.strokeStyle = '#ffff00';
-                    this.ctx.lineWidth = 2;
-                    this.ctx.globalAlpha = 0.4;
-                    this.ctx.beginPath();
-                    this.ctx.arc(this.artifact.x, this.artifact.y, this.artifact.size + 8, 0, Math.PI * 2);
-                    this.ctx.stroke();
-                    this.ctx.globalAlpha = 1;
-                }
-                
-                // Draw enemies
+                // 6. Enemies
                 for (const enemy of this.enemies) {
                     if (enemy.state === 'dead') continue;
                     
@@ -4871,13 +4824,13 @@
                                      (enemy.health / enemy.maxHealth) * (enemy.size * 4 + 2), 2);
                 }
                 
-                // Draw projectiles
+                // 7. Projectiles
                 this.ctx.fillStyle = '#00d4ff';
                 for (const proj of this.projectiles) {
                     this.ctx.fillRect(proj.x - proj.size/2, proj.y - proj.size/2, proj.size, proj.size);
                 }
                 
-                // Draw player
+                // 8. Player
                 this.ctx.fillStyle = '#00d4ff';
                 this.ctx.fillRect(this.player.x - this.player.size, this.player.y - this.player.size,
                                  this.player.size * 2, this.player.size * 2);
@@ -4895,6 +4848,469 @@
                 
                 // Draw HUD
                 this.renderHUD();
+            }
+            
+            drawSkyAndAtmosphere() {
+                // Sky gradient: upper dark blue to horizon orange-yellow
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                gradient.addColorStop(0, '#1a1a3a');
+                gradient.addColorStop(0.6, '#2d2d4a');
+                gradient.addColorStop(1, '#ffaa00');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Dust particles (semi-transparent orange dots, drifting slowly)
+                this.ctx.globalAlpha = 0.15;
+                this.ctx.fillStyle = '#ff8800';
+                for (let i = 0; i < 30; i++) {
+                    const x = (i * 73 + Date.now() / 50) % this.canvas.width;
+                    const y = (i * 47) % this.canvas.height;
+                    this.ctx.fillRect(x, y, 2, 2);
+                }
+                this.ctx.globalAlpha = 1;
+                
+                // Heat haze effect (subtle wave distortion overlay)
+                this.ctx.globalAlpha = 0.08;
+                this.ctx.fillStyle = '#ff6600';
+                for (let i = 0; i < 5; i++) {
+                    this.ctx.fillRect(
+                        Math.sin(Date.now() / 1000 + i) * 15,
+                        Math.cos(Date.now() / 1000 + i) * 15,
+                        this.canvas.width,
+                        this.canvas.height
+                    );
+                }
+                this.ctx.globalAlpha = 1;
+            }
+            
+            drawDistantElements() {
+                // Large moon (off to upper-right)
+                this.ctx.fillStyle = '#d3d3d3';
+                this.ctx.globalAlpha = 0.7;
+                this.ctx.beginPath();
+                this.ctx.arc(700, 80, 45, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Moon craters (for detail)
+                this.ctx.fillStyle = '#a9a9a9';
+                this.ctx.globalAlpha = 0.5;
+                this.ctx.beginPath();
+                this.ctx.arc(715, 70, 8, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.beginPath();
+                this.ctx.arc(690, 90, 6, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.globalAlpha = 1;
+                
+                // Distant stars (small white dots, sparse)
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.globalAlpha = 0.8;
+                const stars = [
+                    {x: 100, y: 40}, {x: 250, y: 60}, {x: 400, y: 30}, {x: 550, y: 70},
+                    {x: 150, y: 120}, {x: 650, y: 50}, {x: 780, y: 120}
+                ];
+                for (const star of stars) {
+                    this.ctx.fillRect(star.x, star.y, 1.5, 1.5);
+                }
+                this.ctx.globalAlpha = 1;
+            }
+            
+            drawTerrain() {
+                // Map zones (y-coordinates)
+                const playerY = this.player.y;
+                
+                // Landing Zone (y: 500-600): flat desert
+                if (playerY > 400) {
+                    this.drawLandingZone();
+                }
+                
+                // Dune Fields (y: 300-500): rolling hills
+                if (playerY > 200) {
+                    this.drawDuneFields();
+                }
+                
+                // Alien Ruins (y: 150-300): massive alien structure
+                if (playerY < 400) {
+                    this.drawAlienRuins();
+                }
+                
+                // Outpost Sigma (y: 0-150): crashed facility
+                if (playerY < 200) {
+                    this.drawOutpostSigma();
+                }
+            }
+            
+            drawLandingZone() {
+                // Flat beige/tan desert
+                this.ctx.fillStyle = '#d4a574';
+                this.ctx.fillRect(0, 500, this.canvas.width, 100);
+                
+                // Small dunes (sandy mounds)
+                this.ctx.fillStyle = '#c9995f';
+                this.drawDune(150, 530, 80, 40);
+                this.drawDune(400, 540, 100, 35);
+                this.drawDune(650, 535, 90, 38);
+                
+                // Landing marker (glowing circle with yellow outline)
+                this.ctx.strokeStyle = '#ffff00';
+                this.ctx.lineWidth = 3;
+                this.ctx.globalAlpha = 0.4;
+                this.ctx.beginPath();
+                this.ctx.arc(this.landingZone.x, this.landingZone.y, this.landingZone.radius, 0, Math.PI * 2);
+                this.ctx.stroke();
+                
+                // Inner glow
+                this.ctx.globalAlpha = 0.2;
+                this.ctx.fillStyle = '#ffff00';
+                this.ctx.beginPath();
+                this.ctx.arc(this.landingZone.x, this.landingZone.y, this.landingZone.radius - 5, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.globalAlpha = 1;
+            }
+            
+            drawDuneFields() {
+                // Rolling sand hills (wavy terrain effect)
+                this.ctx.fillStyle = '#c9a876';
+                this.ctx.fillRect(0, 300, this.canvas.width, 200);
+                
+                // Wavy dunes
+                this.ctx.fillStyle = '#b89968';
+                for (let x = 0; x < this.canvas.width; x += 150) {
+                    const waveHeight = Math.sin(x / 100 + Date.now() / 10000) * 20;
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(x, 380 + waveHeight, 100, 40, 0, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                
+                // Buried wreckage (half-submerged metal frame)
+                this.drawBuriedWreckage(250, 400);
+                this.drawBuriedWreckage(600, 420);
+                
+                // Small rocks/obstacles
+                this.ctx.fillStyle = '#8b8b7a';
+                this.drawRock(150, 360, 12);
+                this.drawRock(350, 350, 10);
+                this.drawRock(500, 380, 14);
+                this.drawRock(700, 370, 11);
+            }
+            
+            drawAlienRuins() {
+                // Background sand for ruins zone
+                this.ctx.fillStyle = '#d4a574';
+                this.ctx.fillRect(0, 150, this.canvas.width, 150);
+                
+                // Massive alien structure (center screen, 120x120px)
+                // Sharp geometric design (NOT human-made)
+                const cx = this.canvas.width / 2;
+                const cy = 220;
+                this.drawAlienStructure(cx, cy, 120);
+                
+                // Floating fragments (smaller shapes orbiting, slight bob animation)
+                this.drawFloatingFragments(cx, cy);
+                
+                // Crumbling pillars around the structure (12-16px tall)
+                this.drawPillar(cx - 120, cy - 80, 14);
+                this.drawPillar(cx + 120, cy - 80, 15);
+                this.drawPillar(cx - 80, cy + 100, 12);
+                this.drawPillar(cx + 80, cy + 100, 13);
+            }
+            
+            drawOutpostSigma() {
+                // Sand drifts around area
+                this.ctx.fillStyle = '#c9995f';
+                this.ctx.fillRect(0, 0, this.canvas.width, 150);
+                
+                // Crashed research facility (80x60px building, orange/brown, damaged)
+                const ox = this.canvas.width / 2;
+                const oy = 80;
+                
+                // Main building structure
+                this.ctx.fillStyle = '#8b6914';
+                this.ctx.fillRect(ox - 40, oy - 30, 80, 60);
+                
+                // Damaged aesthetic (cracks, burns)
+                this.ctx.strokeStyle = '#5a4209';
+                this.ctx.lineWidth = 2;
+                this.ctx.strokeRect(ox - 40, oy - 30, 80, 60);
+                
+                // Burn marks
+                this.ctx.globalAlpha = 0.4;
+                this.ctx.fillStyle = '#2a2a2a';
+                this.ctx.fillRect(ox - 30, oy - 25, 20, 30);
+                this.ctx.fillRect(ox + 15, oy - 20, 15, 35);
+                this.ctx.globalAlpha = 1;
+                
+                // Broken solar array (antenna-like structure, bent)
+                this.drawSolarArray(ox + 50, oy - 50);
+                
+                // Communications tower (tall vertical structure, partially collapsed)
+                this.drawCommsTower(ox - 60, oy - 40);
+                
+                // Sand drifts around building (darker tan patches)
+                this.ctx.fillStyle = 'rgba(160, 120, 60, 0.3)';
+                this.ctx.fillRect(ox - 70, oy + 25, 140, 20);
+                
+                // Emergency lights blinking (small red/blue circles)
+                this.ctx.fillStyle = Math.sin(Date.now() / 200) > 0 ? '#ff4444' : '#0044ff';
+                this.ctx.globalAlpha = 0.8;
+                this.ctx.beginPath();
+                this.ctx.arc(ox - 20, oy - 15, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.globalAlpha = 1;
+                
+                // Hastily-built barricades (rough walls)
+                this.drawBarricade(ox - 80, oy - 20, 30, 15);
+                this.drawBarricade(ox + 70, oy - 15, 25, 15);
+                
+                // Abandoned vehicle (wreckage shape)
+                this.drawAbandonedVehicle(ox, oy + 60);
+                
+                // Artifact inside building (glowing yellow object)
+                if (!this.artifact.collected) {
+                    this.ctx.fillStyle = '#ffff00';
+                    this.ctx.globalAlpha = 0.8;
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.artifact.x, this.artifact.y, this.artifact.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Glow effect
+                    this.ctx.strokeStyle = '#ffff00';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.globalAlpha = 0.4;
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.artifact.x, this.artifact.y, this.artifact.size + 8, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                    this.ctx.globalAlpha = 1;
+                }
+            }
+            
+            drawStructures() {
+                // All structure drawing is handled by zone functions
+            }
+            
+            drawEnvironmentalStory() {
+                // Dead survey drone wreckage (gray rectangle with red X marking)
+                this.drawDeadDrone(100, 520);
+                
+                // Research equipment scattered (small boxes/tools)
+                this.drawScatteredEquipment(650, 260);
+                this.drawScatteredEquipment(150, 280);
+                
+                // Scorch marks (black/dark orange streaks on ground)
+                this.ctx.globalAlpha = 0.25;
+                this.ctx.fillStyle = '#2a2a2a';
+                this.ctx.fillRect(200, 450, 150, 8);
+                this.ctx.fillRect(550, 480, 120, 6);
+                this.ctx.globalAlpha = 1;
+            }
+            
+            // Helper functions for structure rendering
+            
+            drawDune(x, y, width, height) {
+                this.ctx.beginPath();
+                this.ctx.ellipse(x, y, width, height, 0.3, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            
+            drawBuriedWreckage(x, y) {
+                // Half-submerged metal frame
+                this.ctx.fillStyle = '#666';
+                this.ctx.fillRect(x - 20, y, 40, 20);
+                this.ctx.fillStyle = '#444';
+                this.ctx.fillRect(x - 15, y + 5, 8, 8);
+                this.ctx.fillRect(x + 7, y + 5, 8, 8);
+            }
+            
+            drawRock(x, y, size) {
+                this.ctx.fillStyle = '#696969';
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, size, 0, Math.PI * 2);
+                this.ctx.fill();
+                // Shadow
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                this.ctx.fillRect(x - size, y + size - 2, size * 2, 3);
+            }
+            
+            drawAlienStructure(cx, cy, size) {
+                // Central diamond shape (sharp, alien geometry)
+                this.ctx.fillStyle = '#1a4d66';
+                this.ctx.beginPath();
+                this.ctx.moveTo(cx, cy - size/2);
+                this.ctx.lineTo(cx + size/2, cy);
+                this.ctx.lineTo(cx, cy + size/2);
+                this.ctx.lineTo(cx - size/2, cy);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Glowing blue energy lines running across structure
+                this.ctx.strokeStyle = '#00ffff';
+                this.ctx.lineWidth = 2;
+                this.ctx.globalAlpha = 0.8;
+                this.ctx.beginPath();
+                this.ctx.moveTo(cx - size/3, cy - size/3);
+                this.ctx.lineTo(cx + size/3, cy + size/3);
+                this.ctx.stroke();
+                this.ctx.beginPath();
+                this.ctx.moveTo(cx + size/3, cy - size/3);
+                this.ctx.lineTo(cx - size/3, cy + size/3);
+                this.ctx.stroke();
+                
+                // Outer glowing box (alien style)
+                this.ctx.strokeStyle = '#00ccff';
+                this.ctx.lineWidth = 3;
+                this.ctx.globalAlpha = 0.6;
+                this.ctx.strokeRect(cx - size/2.2, cy - size/2.2, size/1.1, size/1.1);
+                this.ctx.globalAlpha = 1;
+                
+                // Strange glowing symbols on surfaces (small cyan shapes)
+                this.drawAlienSymbols(cx, cy, size);
+            }
+            
+            drawAlienSymbols(cx, cy, size) {
+                this.ctx.fillStyle = '#00ffff';
+                this.ctx.globalAlpha = 0.7;
+                // Random-looking alien symbols
+                this.ctx.beginPath();
+                this.ctx.arc(cx - size/3, cy - size/4, 4, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.beginPath();
+                this.ctx.arc(cx + size/3.5, cy + size/3, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.beginPath();
+                this.ctx.arc(cx, cy + size/3.5, 3.5, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.globalAlpha = 1;
+            }
+            
+            drawFloatingFragments(cx, cy) {
+                const now = Date.now() / 1000;
+                const fragments = [
+                    {angle: 0, dist: 80, size: 15},
+                    {angle: Math.PI * 2 / 3, dist: 85, size: 12},
+                    {angle: Math.PI * 4 / 3, dist: 75, size: 14}
+                ];
+                
+                for (const frag of fragments) {
+                    const bobOffset = Math.sin(now + frag.angle) * 10;
+                    const fx = cx + Math.cos(frag.angle) * frag.dist;
+                    const fy = cy + Math.sin(frag.angle) * frag.dist + bobOffset;
+                    
+                    this.ctx.fillStyle = 'rgba(0, 200, 255, 0.6)';
+                    this.ctx.beginPath();
+                    this.ctx.arc(fx, fy, frag.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Glow
+                    this.ctx.strokeStyle = '#00ffff';
+                    this.ctx.lineWidth = 1.5;
+                    this.ctx.globalAlpha = 0.4;
+                    this.ctx.beginPath();
+                    this.ctx.arc(fx, fy, frag.size + 5, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                    this.ctx.globalAlpha = 1;
+                }
+            }
+            
+            drawPillar(x, y, height) {
+                this.ctx.fillStyle = '#4a4a4a';
+                this.ctx.fillRect(x - 5, y - height, 10, height);
+                // Cracked/crumbling top
+                this.ctx.fillStyle = '#3a3a3a';
+                this.ctx.fillRect(x - 6, y - height - 3, 12, 3);
+                this.ctx.fillRect(x - 4, y - height + 2, 3, 2);
+            }
+            
+            drawSolarArray(x, y) {
+                // Bent antenna-like structure
+                this.ctx.strokeStyle = '#8b7355';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+                this.ctx.lineTo(x + 20, y - 30); // Bent angle
+                this.ctx.lineTo(x + 35, y - 25);
+                this.ctx.stroke();
+                
+                // Solar panel element (tilted)
+                this.ctx.fillStyle = 'rgba(100, 100, 200, 0.5)';
+                this.ctx.save();
+                this.ctx.translate(x + 25, y - 20);
+                this.ctx.rotate(0.3);
+                this.ctx.fillRect(-15, -8, 30, 16);
+                this.ctx.restore();
+            }
+            
+            drawCommsTower(x, y) {
+                // Tall vertical structure, partially collapsed
+                this.ctx.strokeStyle = '#8b7355';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+                this.ctx.lineTo(x, y - 50); // Main tower
+                this.ctx.lineTo(x + 15, y - 35); // Collapsed section
+                this.ctx.stroke();
+                
+                // Antenna dish (partial)
+                this.ctx.fillStyle = 'rgba(200, 200, 200, 0.4)';
+                this.ctx.beginPath();
+                this.ctx.arc(x, y - 50, 10, 0, Math.PI);
+                this.ctx.fill();
+            }
+            
+            drawBarricade(x, y, width, height) {
+                // Rough diagonal wall segments
+                this.ctx.fillStyle = '#996633';
+                this.ctx.save();
+                this.ctx.translate(x, y);
+                this.ctx.rotate(0.3);
+                this.ctx.fillRect(0, 0, width, height);
+                this.ctx.restore();
+                
+                // Rough edges
+                this.ctx.fillStyle = '#664422';
+                this.ctx.fillRect(x + 3, y - 3, width - 6, 3);
+            }
+            
+            drawAbandonedVehicle(x, y) {
+                // Overturned vehicle shape
+                this.ctx.fillStyle = '#555555';
+                this.ctx.fillRect(x - 25, y, 50, 20);
+                
+                // Burnt/damaged edges
+                this.ctx.fillStyle = '#2a2a2a';
+                this.ctx.fillRect(x - 25, y, 50, 3);
+                this.ctx.fillRect(x - 25, y + 15, 50, 3);
+                
+                // Wheel
+                this.ctx.fillStyle = '#333';
+                this.ctx.beginPath();
+                this.ctx.arc(x - 15, y + 20, 8, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            
+            drawDeadDrone(x, y) {
+                // Gray rectangle with red X marking
+                this.ctx.fillStyle = '#808080';
+                this.ctx.fillRect(x - 15, y - 8, 30, 16);
+                
+                // Red X
+                this.ctx.strokeStyle = '#ff4444';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x - 12, y - 6);
+                this.ctx.lineTo(x + 12, y + 6);
+                this.ctx.stroke();
+                this.ctx.beginPath();
+                this.ctx.moveTo(x + 12, y - 6);
+                this.ctx.lineTo(x - 12, y + 6);
+                this.ctx.stroke();
+            }
+            
+            drawScatteredEquipment(x, y) {
+                // Small boxes/tools
+                this.ctx.fillStyle = '#8b7355';
+                this.ctx.fillRect(x, y, 8, 6);
+                this.ctx.fillRect(x + 12, y + 2, 6, 8);
+                this.ctx.fillRect(x - 8, y - 2, 7, 5);
             }
             
             renderHUD() {
