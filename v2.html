@@ -2693,13 +2693,18 @@
         
         // Start game
         function startGame() {
-            document.getElementById('mainMenu').style.display = 'none';
-            document.getElementById('shipHubContainer').style.display = 'block';
-            gameState.currentLocation = 'ship';
-            gameState.playerX = 450;
-            gameState.playerY = 390;
-            initializeEncounters();
-            initShipHub();
+            try {
+                document.getElementById('mainMenu').style.display = 'none';
+                document.getElementById('shipHubContainer').style.display = 'block';
+                gameState.currentLocation = 'ship';
+                gameState.playerX = 450;
+                gameState.playerY = 390;
+                if (typeof initializeEncounters === 'function') initializeEncounters();
+                if (typeof initShipHub === 'function') initShipHub();
+            } catch (e) {
+                console.error('startGame error:', e);
+                alert('Error starting game: ' + e.message);
+            }
         }
 
         // Initialize ship hub
@@ -3882,9 +3887,14 @@
         }
 
         function exitGame() {
-            if (confirm('Exit Planetfall: Extraction?')) {
-                alert('Thanks for playing!');
-                location.reload();
+            try {
+                if (confirm('Exit Planetfall: Extraction?')) {
+                    alert('Thanks for playing!');
+                    location.reload();
+                }
+            } catch (e) {
+                console.error('exitGame error:', e);
+                alert('Error: ' + e.message);
             }
         }
         
