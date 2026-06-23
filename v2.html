@@ -848,6 +848,61 @@
             opacity: 0.5;
         }
 
+        /* WEAPON TYPE BADGE */
+        .weapon-type-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+            margin: 4px 0;
+            text-transform: uppercase;
+        }
+
+        .weapon-type-badge.assault {
+            background: rgba(255, 136, 0, 0.2);
+            color: #ff8800;
+            border: 1px solid #ff8800;
+        }
+
+        .weapon-type-badge.special {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border: 1px solid #00d4ff;
+        }
+
+        .weapon-type-badge.heavy {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+            border: 1px solid #ff4444;
+        }
+
+        .weapon-type-badge.sidearm {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border: 1px solid #00d4ff;
+        }
+
+        .weapon-type-badge.experimental {
+            background: rgba(187, 0, 255, 0.2);
+            color: #bb00ff;
+            border: 1px solid #bb00ff;
+        }
+
+        .weapon-note {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+            margin-left: 4px;
+            background: rgba(187, 0, 255, 0.15);
+            color: #bb00ff;
+            border: 1px solid #bb00ff;
+        }
+
     </style>
 </head>
 <body>
@@ -1068,22 +1123,121 @@
 
         // WEAPON DATABASE
         const weaponDatabase = {
-            // PRIMARY WEAPONS
+            // PRIMARY WEAPONS - ASSAULT
             primary: {
                 assaultRifle: {
                     name: 'Assault Rifle',
                     category: 'primary',
+                    type: 'assault',
                     damage: 75,
                     fireRate: 8,
                     accuracy: 85,
                     reloadTime: 2.0,
+                    icon: '🎯',
+                    color: '#ff8800',
+                    description: 'Reliable starter weapon. Balanced for any situation.'
+                },
+                mAr9: {
+                    name: 'M-AR9 Rifle',
+                    category: 'primary',
+                    type: 'assault',
+                    damage: 75,
+                    fireRate: 8,
+                    accuracy: 90,
+                    reloadTime: 2.2,
+                    icon: '🎯',
+                    color: '#ff8800',
+                    description: 'Reliable starter weapon. Balanced for any situation.',
+                    locked: false
+                },
+                viperSmg: {
+                    name: 'Viper SMG',
+                    category: 'primary',
+                    type: 'assault',
+                    damage: 55,
+                    fireRate: 14,
+                    accuracy: 70,
+                    reloadTime: 1.3,
+                    icon: '⚡',
+                    color: '#ffaa00',
+                    description: 'Close-range killer. High ROF, lower accuracy.',
+                    locked: false
+                },
+                titanShotgun: {
+                    name: 'Titan Shotgun',
+                    category: 'primary',
+                    type: 'assault',
+                    damage: 115,
+                    fireRate: 2,
+                    accuracy: 50,
+                    reloadTime: 2.8,
+                    icon: '💥',
+                    color: '#ff4444',
+                    description: 'Devastating at close range. Slow, heavy hitter.',
+                    locked: false
+                },
+                // PRIMARY WEAPONS - SPECIAL
+                arcPulseRifle: {
+                    name: 'Arc Pulse Rifle',
+                    category: 'primary',
+                    type: 'special',
+                    damage: 85,
+                    fireRate: 6,
+                    accuracy: 85,
+                    reloadTime: 2.4,
+                    icon: '⚡',
+                    color: '#00d4ff',
+                    description: 'Energy weapon. Effective vs shields. Splash damage.',
+                    locked: false,
+                    note: 'Energy-based'
+                },
+                helixDmr: {
+                    name: 'Helix DMR',
+                    category: 'primary',
+                    type: 'special',
+                    damage: 95,
+                    fireRate: 3,
+                    accuracy: 98,
+                    reloadTime: 2.9,
+                    icon: '🎯',
+                    color: '#00d4ff',
+                    description: 'High-precision rifle. Headshots deal +50% damage.',
+                    locked: false,
+                    note: 'Sniper-style'
+                },
+                // PRIMARY WEAPONS - HEAVY
+                novaLmg: {
+                    name: 'Nova LMG',
+                    category: 'primary',
+                    type: 'heavy',
+                    damage: 70,
+                    fireRate: 11,
+                    accuracy: 75,
+                    reloadTime: 3.2,
                     icon: '🔫',
                     color: '#ff8800',
-                    description: 'Reliable all-rounder. Balanced damage and accuracy.'
+                    description: 'High ammo capacity. Suppression weapon for sustained fire.',
+                    locked: false,
+                    note: 'Suppression'
+                },
+                breacherLauncher: {
+                    name: 'Breacher Launcher',
+                    category: 'primary',
+                    type: 'heavy',
+                    damage: 110,
+                    fireRate: 2,
+                    accuracy: 60,
+                    reloadTime: 3.5,
+                    icon: '💣',
+                    color: '#ff4444',
+                    description: 'Explosive projectile launcher. Excellent vs groups.',
+                    locked: false,
+                    note: 'Explosive'
                 },
                 smg: {
                     name: 'SMG',
                     category: 'primary',
+                    type: 'assault',
                     damage: 55,
                     fireRate: 12,
                     accuracy: 75,
@@ -1095,6 +1249,7 @@
                 shotgun: {
                     name: 'Shotgun',
                     category: 'primary',
+                    type: 'assault',
                     damage: 95,
                     fireRate: 3,
                     accuracy: 60,
@@ -1106,6 +1261,7 @@
                 sniper: {
                     name: 'Sniper Rifle',
                     category: 'primary',
+                    type: 'special',
                     damage: 120,
                     fireRate: 1,
                     accuracy: 95,
@@ -1115,11 +1271,38 @@
                     description: 'Pinpoint accuracy. One shot, one kill.'
                 }
             },
-            // SECONDARY WEAPONS (PISTOL)
+            // SECONDARY WEAPONS - SIDEARMS
             secondary: {
+                pxPistol: {
+                    name: 'PX-12 Pistol',
+                    category: 'secondary',
+                    type: 'sidearm',
+                    damage: 50,
+                    fireRate: 7,
+                    accuracy: 85,
+                    reloadTime: 1.1,
+                    icon: '🔫',
+                    color: '#00d4ff',
+                    description: 'Reliable backup weapon. Balanced stats, quick draw.',
+                    locked: false
+                },
+                swiftAutoPistol: {
+                    name: 'Swift Auto-Pistol',
+                    category: 'secondary',
+                    type: 'sidearm',
+                    damage: 40,
+                    fireRate: 13,
+                    accuracy: 65,
+                    reloadTime: 1.0,
+                    icon: '⚡',
+                    color: '#ffaa00',
+                    description: 'Fast fire rate. Low damage. Emergency close-range tool.',
+                    locked: false
+                },
                 combatPistol: {
                     name: 'Combat Pistol',
                     category: 'secondary',
+                    type: 'sidearm',
                     damage: 45,
                     fireRate: 6,
                     accuracy: 80,
@@ -1131,6 +1314,7 @@
                 heavyPistol: {
                     name: 'Heavy Pistol',
                     category: 'secondary',
+                    type: 'sidearm',
                     damage: 65,
                     fireRate: 4,
                     accuracy: 75,
@@ -1138,6 +1322,24 @@
                     icon: '💣',
                     color: '#ff8800',
                     description: 'Powerful sidearm. Slower rate of fire.'
+                }
+            },
+            // EXPERIMENTAL WEAPONS (UNLOCKABLE)
+            experimental: {
+                protoPlasmaRifle: {
+                    name: 'Proto Plasma Rifle',
+                    category: 'experimental',
+                    type: 'experimental',
+                    damage: 100,
+                    fireRate: 5,
+                    accuracy: 80,
+                    reloadTime: 2.5,
+                    icon: '🟠',
+                    color: '#ff6600',
+                    description: 'Charged energy shots. Overheats if spammed. Unlockable via research.',
+                    locked: true,
+                    unlockedBy: 'plasmaResearch',
+                    rarity: 'Exotic'
                 }
             }
         };
@@ -1676,12 +1878,71 @@
                 // Build LEFT COLUMN: Categories
                 let leftColumn = '<div class="armory-column" style="overflow-y: auto; max-height: 65vh;">';
                 leftColumn += '<div class="armory-section-title">⚔ MILITARY WEAPONS</div>';
-                leftColumn += '<div class="armory-item-list">';
+                
+                // Organize primaries by type
+                const primarysByType = {
+                    assault: [],
+                    special: [],
+                    heavy: [],
+                    experimental: []
+                };
+                
                 allPrimaries.forEach(w => {
-                    const isSelected = currentLoadout.primary === w.key;
-                    leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('primary', '${w.key}')" style="border-color: ${w.color}; background: ${isSelected ? w.color + '30' : 'rgba(255, 136, 0, 0.1)'}; color: ${w.color};">${w.icon} ${w.name}</button>`;
+                    const weaponType = w.type || 'assault';
+                    if (primarysByType[weaponType]) {
+                        primarysByType[weaponType].push(w);
+                    }
                 });
-                leftColumn += '</div>';
+                
+                // Display ASSAULT weapons
+                if (primarysByType.assault.length > 0) {
+                    leftColumn += '<div style="color: #ff8800; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin: 8px 0 6px 0; padding-left: 4px; border-left: 2px solid #ff8800;">⚔ ASSAULT</div>';
+                    leftColumn += '<div class="armory-item-list" style="margin-bottom: 8px;">';
+                    primarysByType.assault.forEach(w => {
+                        const isSelected = currentLoadout.primary === w.key;
+                        leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('primary', '${w.key}')" style="border-color: ${w.color}; background: ${isSelected ? w.color + '30' : 'rgba(255, 136, 0, 0.1)'}; color: ${w.color};">${w.icon} ${w.name}</button>`;
+                    });
+                    leftColumn += '</div>';
+                }
+                
+                // Display SPECIAL weapons
+                if (primarysByType.special.length > 0) {
+                    leftColumn += '<div style="color: #00d4ff; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin: 8px 0 6px 0; padding-left: 4px; border-left: 2px solid #00d4ff;">⚡ SPECIAL</div>';
+                    leftColumn += '<div class="armory-item-list" style="margin-bottom: 8px;">';
+                    primarysByType.special.forEach(w => {
+                        const isSelected = currentLoadout.primary === w.key;
+                        leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('primary', '${w.key}')" style="border-color: ${w.color}; background: ${isSelected ? w.color + '30' : 'rgba(0, 212, 255, 0.1)'}; color: ${w.color};">${w.icon} ${w.name}</button>`;
+                    });
+                    leftColumn += '</div>';
+                }
+                
+                // Display HEAVY weapons
+                if (primarysByType.heavy.length > 0) {
+                    leftColumn += '<div style="color: #ff4444; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin: 8px 0 6px 0; padding-left: 4px; border-left: 2px solid #ff4444;">💣 HEAVY</div>';
+                    leftColumn += '<div class="armory-item-list" style="margin-bottom: 8px;">';
+                    primarysByType.heavy.forEach(w => {
+                        const isSelected = currentLoadout.primary === w.key;
+                        leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('primary', '${w.key}')" style="border-color: ${w.color}; background: ${isSelected ? w.color + '30' : 'rgba(255, 68, 68, 0.1)'}; color: ${w.color};">${w.icon} ${w.name}</button>`;
+                    });
+                    leftColumn += '</div>';
+                }
+                
+                // Display EXPERIMENTAL weapons
+                const allExperimental = Object.entries(weaponDatabase.experimental || {}).map(([key, weapon]) => ({key, ...weapon}));
+                if (allExperimental.length > 0) {
+                    leftColumn += '<div style="color: #bb00ff; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin: 8px 0 6px 0; padding-left: 4px; border-left: 2px solid #bb00ff;">🔮 EXPERIMENTAL</div>';
+                    leftColumn += '<div class="armory-item-list" style="margin-bottom: 8px;">';
+                    allExperimental.forEach(w => {
+                        const isSelected = currentLoadout.primary === w.key;
+                        const isLocked = w.locked || false;
+                        if (isLocked) {
+                            leftColumn += `<button class="armory-item-btn" onclick="" style="border-color: #666; background: rgba(100, 100, 100, 0.1); color: #666; cursor: not-allowed; opacity: 0.6;" title="Requires: ${w.unlockedBy}">🔒 ${w.name}</button>`;
+                        } else {
+                            leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('primary', '${w.key}')" style="border-color: ${w.color}; background: ${isSelected ? w.color + '30' : 'rgba(187, 0, 255, 0.1)'}; color: ${w.color};">${w.icon} ${w.name}</button>`;
+                        }
+                    });
+                    leftColumn += '</div>';
+                }
                 
                 leftColumn += '<div class="armory-section-title" style="border-color: #00d4ff; color: #00d4ff;">SIDEARMS</div>';
                 leftColumn += '<div class="armory-item-list">';
@@ -1772,6 +2033,15 @@
                 rightColumn += '<div class="armory-section-title">⚔ WEAPON STATS</div>';
                 rightColumn += '<div style="background: rgba(255, 136, 0, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #ff8800;">';
                 rightColumn += `<div class="armory-preview-name" style="color: #ff8800; margin-bottom: 12px;">${primaryWeapon.name}</div>`;
+                
+                // Add weapon type badge
+                const weaponType = primaryWeapon.type || 'assault';
+                rightColumn += `<div class="weapon-type-badge ${weaponType}">⚔ ${weaponType.toUpperCase()}</div>`;
+                
+                // Add special notes if present
+                if (primaryWeapon.note) {
+                    rightColumn += `<div class="weapon-note">${primaryWeapon.note}</div>`;
+                }
                 
                 // Damage bar
                 rightColumn += '<div class="armory-stat-bar">';
