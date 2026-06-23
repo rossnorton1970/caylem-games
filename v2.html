@@ -1677,6 +1677,8 @@
             
             switch(roomKey) {
                 case 'armory':
+                    document.getElementById('modalOverlay').classList.add('show');
+                    document.getElementById('interactionModal').classList.add('show');
                     showArmoryLoadoutUI();
                     return;
                 case 'engineering':
