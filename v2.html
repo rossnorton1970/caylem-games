@@ -583,22 +583,33 @@
             time: 0
         };
 
-        // Initialize cinematic space background
+        // Initialize mothership bridge interior view
         function initStarfield() {
             const canvas = document.getElementById('spaceCanvas');
             const ctx = canvas.getContext('2d');
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
 
-            // Generate 300+ stars with realistic depth
-            for (let i = 0; i < 300; i++) {
+            // Initialize main planet - positioned to be seen through window
+            const mainPlanetRadius = canvas.height * 0.55;
+            spaceState.mainPlanet = {
+                x: canvas.width * 0.58,
+                y: canvas.height * 0.42,
+                radius: mainPlanetRadius,
+                type: 3,
+                rotation: 0,
+                rotationSpeed: 0.00015
+            };
+
+            // Generate sparse stars in deep space (very minimal)
+            for (let i = 0; i < 80; i++) {
                 const depth = Math.random();
-                const size = Math.random() * 2 * depth;
-                const x = Math.random() * canvas.width;
+                const size = Math.random() * 1.5 * depth;
+                const x = Math.random() * canvas.width * 1.2 - canvas.width * 0.1;
                 const y = Math.random() * canvas.height;
                 const color = [255, 220, 200, 100, 150][Math.floor(Math.random() * 5)];
-                const brightness = 0.3 + Math.random() * 0.7;
-                const twinkleSpeed = 2 + Math.random() * 4;
+                const brightness = 0.2 + Math.random() * 0.5;
+                const twinkleSpeed = 1 + Math.random() * 2;
 
                 spaceState.stars.push({
                     x, y, size, depth, color, brightness, twinkleSpeed,
@@ -607,47 +618,17 @@
                 });
             }
 
-            // Generate nebulae clouds (3-4 large Perlin-based clouds)
-            for (let i = 0; i < 4; i++) {
+            // Generate very subtle nebula haze (far background)
+            for (let i = 0; i < 2; i++) {
                 spaceState.nebulae.push({
-                    x: Math.random() * canvas.width * 0.8 + canvas.width * 0.1,
-                    y: Math.random() * canvas.height * 0.6 + canvas.height * 0.05,
-                    radius: 80 + Math.random() * 150,
-                    colors: generateNebulaColors(),
+                    x: Math.random() * canvas.width * 0.6 + canvas.width * 0.2,
+                    y: Math.random() * canvas.height * 0.4 + canvas.height * 0.1,
+                    radius: 150 + Math.random() * 200,
+                    colors: ['rgba(50, 80, 120, 0.08)', 'rgba(80, 100, 140, 0.04)', 'rgba(60, 90, 130, 0.02)'],
                     seed: Math.random() * 10000,
-                    drift: Math.random() * 2 - 1
+                    drift: Math.random() * 0.5 - 0.25
                 });
             }
-
-            // Generate asteroid field (scattered, distant)
-            for (let i = 0; i < 40; i++) {
-                spaceState.asteroids.push({
-                    x: Math.random() * canvas.width * 1.2 - canvas.width * 0.1,
-                    y: Math.random() * canvas.height * 0.7,
-                    size: 2 + Math.random() * 6,
-                    rotation: Math.random() * Math.PI * 2,
-                    rotationSpeed: (Math.random() - 0.5) * 0.02,
-                    brightness: 0.4 + Math.random() * 0.6
-                });
-            }
-
-            // Create distance planets
-            spaceState.distancePlanets = [
-                { x: canvas.width * 0.2, y: canvas.height * 0.15, radius: 40, type: 2, rotation: 0, rotationSpeed: 0.0005 },
-                { x: canvas.width * 0.8, y: canvas.height * 0.18, radius: 50, type: 4, rotation: 0, rotationSpeed: 0.0008 },
-                { x: canvas.width * 0.75, y: canvas.height * 0.35, radius: 30, type: 5, rotation: 0, rotationSpeed: 0.0003 }
-            ];
-
-            // Initialize main planet in bottom-right (massive, partially off-screen)
-            const mainPlanetRadius = Math.max(canvas.width, canvas.height) * 0.42;
-            spaceState.mainPlanet = {
-                x: canvas.width * 0.75,
-                y: canvas.height * 1.0,
-                radius: mainPlanetRadius,
-                type: 3,
-                rotation: 0,
-                rotationSpeed: 0.0002
-            };
 
             // Render loop
             renderSpace();
@@ -861,7 +842,7 @@
             const imageData = ctx.createImageData(size, size);
             const data = imageData.data;
             
-            // Create Earth-like planet
+            // Create hyper-realistic Earth-like planet
             for (let py = 0; py < size; py++) {
                 for (let px = 0; px < size; px++) {
                     const dx = px - x;
@@ -874,32 +855,40 @@
                         const angle = Math.atan2(dy, dx);
                         const latRatio = dist / radius;
                         
-                        // Complex terrain generation
-                        const terrain = fractalNoise(px / 10, py / 10, 5, 0.7, 30, 400);
-                        const clouds = fractalNoise(px / 15, py / 15, 4, 0.6, 25, 500);
+                        // High-octave terrain generation for detail
+                        const terrain = fractalNoise(px / 10, py / 10, 6, 0.75, 30, 400);
+                        const detail = fractalNoise(px / 5, py / 5, 4, 0.6, 15, 401);
+                        const clouds = fractalNoise(px / 20, py / 20, 3, 0.5, 30, 500) * 0.4;
+                        const terrainFinal = terrain * 0.7 + detail * 0.3;
                         
                         let r, g, b;
                         
-                        if (terrain < 0.35) {
-                            // Deep ocean
-                            r = 10; g = 40; b = 80;
-                        } else if (terrain < 0.45) {
-                            // Shallow ocean
-                            r = 20; g = 80; b = 120;
-                        } else if (terrain < 0.50) {
-                            // Beach/sand
-                            r = 200; g = 180; b = 80;
-                        } else if (terrain < 0.70) {
-                            // Forest
-                            r = 20 + terrain * 60; g = 100 + terrain * 80; b = 20;
+                        if (terrainFinal < 0.32) {
+                            // Deep ocean - rich dark blue
+                            r = 8; g = 35; b = 75;
+                        } else if (terrainFinal < 0.43) {
+                            // Shallow ocean - bright blue
+                            r = 20; g = 90; b = 140;
+                        } else if (terrainFinal < 0.48) {
+                            // Beach/sand - golden
+                            r = 210; g = 190; b = 90;
+                        } else if (terrainFinal < 0.72) {
+                            // Forest/vegetation - rich green
+                            const greenness = (terrainFinal - 0.48) / 0.24;
+                            r = Math.floor(30 + greenness * 40);
+                            g = Math.floor(110 + greenness * 70);
+                            b = Math.floor(25 + greenness * 35);
                         } else {
-                            // Mountains
-                            r = 120 + terrain * 80; g = 100 + terrain * 60; b = 80 + terrain * 40;
+                            // Mountains - gray-brown
+                            const height = (terrainFinal - 0.72) / 0.28;
+                            r = Math.floor(130 + height * 80);
+                            g = Math.floor(110 + height * 70);
+                            b = Math.floor(90 + height * 50);
                         }
                         
-                        
-                        // Realistic lighting - sun from top-left
-                        const light = Math.max(0.35, normal * 0.65 + 0.35) * (0.8 + Math.cos(angle) * 0.15);
+                        // Very strong realistic lighting - sun from upper-left
+                        const lightDir = Math.cos(angle * 1.2) * 0.35 + 0.65;
+                        const light = Math.max(0.3, normal * 0.7 + 0.3) * lightDir;
                         r = Math.floor(r * light);
                         g = Math.floor(g * light);
                         b = Math.floor(b * light);
@@ -915,10 +904,11 @@
             
             ctx.putImageData(imageData, 0, 0);
             
-            // Atmospheric scattering
-            const atmo = ctx.createRadialGradient(x, y, radius * 0.85, x, y, radius * 1.35);
-            atmo.addColorStop(0, 'rgba(135, 206, 235, 0.25)');
-            atmo.addColorStop(0.5, 'rgba(100, 150, 200, 0.1)');
+            // Strong atmospheric scattering (blue atmosphere edge)
+            const atmo = ctx.createRadialGradient(x, y, radius * 0.8, x, y, radius * 1.5);
+            atmo.addColorStop(0, 'rgba(150, 210, 250, 0.3)');
+            atmo.addColorStop(0.4, 'rgba(120, 170, 220, 0.15)');
+            atmo.addColorStop(0.7, 'rgba(80, 140, 200, 0.05)');
             atmo.addColorStop(1, 'rgba(50, 100, 150, 0)');
             ctx.fillStyle = atmo;
             ctx.fillRect(0, 0, size, size);
@@ -1081,76 +1071,166 @@
             ctx.fillRect(0, 0, size, size);
         }
         
-        // Render the cinematic space scene
+        // Render the mothership bridge interior view
         function renderSpace() {
             const canvas = document.getElementById('spaceCanvas');
             const ctx = canvas.getContext('2d');
             
-            // Update camera and time
+            // Update time for subtle animations
             spaceState.time += 0.002;
-            spaceState.cameraX = Math.sin(spaceState.time * 0.3) * 20;
-            spaceState.cameraY = Math.cos(spaceState.time * 0.25) * 15;
             
-            // Clear with deep space black
+            // Clear with space black
             ctx.fillStyle = '#000814';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw nebulae (back layer)
+            // === EXTERIOR (Outside window) ===
+            // Draw very subtle nebula haze first (deep background)
             spaceState.nebulae.forEach(nebula => {
-                nebula.x += nebula.drift * 0.05;
+                nebula.x += nebula.drift * 0.02;
                 drawNebula(ctx, nebula);
             });
             
-            // Draw distance stars with twinkling
+            // Draw sparse, dim stars in space (barely visible)
             spaceState.stars.forEach(star => {
-                const twinkle = Math.sin(spaceState.time * star.twinkleSpeed) * 0.5 + 0.5;
-                const opacity = star.baseOpacity * (0.4 + twinkle * 0.6);
+                const twinkle = Math.sin(spaceState.time * star.twinkleSpeed * 0.5) * 0.5 + 0.5;
+                const opacity = star.baseOpacity * (0.15 + twinkle * 0.3);
                 drawStar(ctx, star, opacity);
             });
             
-            // Draw asteroids
-            spaceState.asteroids.forEach(asteroid => {
-                asteroid.rotation += asteroid.rotationSpeed;
-                drawAsteroid(ctx, asteroid);
-            });
-            
-            // Draw distance planets
-            spaceState.distancePlanets.forEach(planet => {
-                planet.rotation += planet.rotationSpeed;
-                drawDistancePlanet(ctx, planet);
-            });
-            
-            // Draw main planet (massive, foreground)
+            // Draw main planet (dominant focus)
             if (spaceState.mainPlanet) {
                 spaceState.mainPlanet.rotation += spaceState.mainPlanet.rotationSpeed;
-                drawMainPlanet(ctx, spaceState.mainPlanet);
+                drawMainPlanetLarge(ctx, spaceState.mainPlanet);
             }
             
-            // Occasionally spawn shooting stars
-            if (Math.random() < 0.002) {
+            // Subtle ship vibration effect
+            const vibrationX = Math.sin(spaceState.time * 2.5) * 0.3;
+            const vibrationY = Math.cos(spaceState.time * 3.1) * 0.2;
+            
+            // === INTERIOR (Mothership bridge foreground) ===
+            // Save context for transformations
+            ctx.save();
+            
+            // Apply subtle vibration
+            ctx.translate(vibrationX, vibrationY);
+            
+            // Draw dark observation deck background (left side)
+            const deckGradient = ctx.createLinearGradient(0, 0, canvas.width * 0.15, 0);
+            deckGradient.addColorStop(0, 'rgba(15, 20, 35, 0.9)');
+            deckGradient.addColorStop(1, 'rgba(20, 25, 40, 0.4)');
+            ctx.fillStyle = deckGradient;
+            ctx.fillRect(0, 0, canvas.width * 0.15, canvas.height);
+            
+            // Draw window frame/bezel (structural)
+            const frameThickness = canvas.width * 0.035;
+            ctx.fillStyle = 'rgba(50, 60, 80, 0.8)';
+            ctx.fillRect(canvas.width * 0.12, canvas.height * 0.08, frameThickness, canvas.height * 0.84);
+            ctx.fillRect(canvas.width * 0.12, canvas.height * 0.08, canvas.width * 0.76, frameThickness);
+            ctx.fillRect(canvas.width * 0.12 + canvas.width * 0.76, canvas.height * 0.08, frameThickness, canvas.height * 0.84);
+            ctx.fillRect(canvas.width * 0.12, canvas.height * 0.08 + canvas.height * 0.84, canvas.width * 0.76, frameThickness);
+            
+            // Draw subtle window glass reflections and shimmer
+            ctx.globalAlpha = 0.03;
+            ctx.strokeStyle = 'rgba(150, 200, 255, 0.8)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 8; i++) {
+                const y = canvas.height * (0.1 + i * 0.1);
+                ctx.beginPath();
+                ctx.moveTo(canvas.width * 0.14, y);
+                ctx.lineTo(canvas.width * 0.88, y);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1.0;
+            
+            // Draw observation deck controls (console elements on right)
+            drawConsoleElements(ctx, canvas);
+            
+            ctx.restore();
+            
+            // Rare distant spacecraft (very subtle, optional)
+            if (Math.random() < 0.0005) {
                 spaceState.shootingStars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height * 0.6,
-                    vx: -3 - Math.random() * 2,
-                    vy: Math.random() * 0.5 - 0.25,
+                    x: canvas.width * 0.4 + Math.random() * canvas.width * 0.3,
+                    y: canvas.height * 0.15 + Math.random() * canvas.height * 0.15,
+                    vx: -0.3 - Math.random() * 0.2,
+                    vy: 0,
                     life: 1.0,
-                    length: 30 + Math.random() * 30
+                    length: 20,
+                    isShip: true
                 });
             }
             
-            // Draw and update shooting stars
-            spaceState.shootingStars = spaceState.shootingStars.filter(star => {
-                star.x += star.vx;
-                star.y += star.vy;
-                star.life -= 0.01;
-                if (star.life > 0) {
-                    drawShootingStar(ctx, star);
+            // Draw and update distant ships
+            spaceState.shootingStars = spaceState.shootingStars.filter(ship => {
+                ship.x += ship.vx;
+                ship.y += ship.vy;
+                ship.life -= 0.002;
+                if (ship.life > 0) {
+                    if (ship.isShip) drawDistantShip(ctx, ship);
                     return true;
                 }
                 return false;
             });
             
             requestAnimationFrame(renderSpace);
+        }
+        
+        // Draw bridge console elements
+        function drawConsoleElements(ctx, canvas) {
+            // Right side control panel
+            const panelX = canvas.width * 0.88;
+            const panelWidth = canvas.width * 0.12;
+            
+            // Soft ambient cyan glow along console edges
+            ctx.fillStyle = 'rgba(0, 212, 255, 0.05)';
+            ctx.fillRect(panelX - 5, canvas.height * 0.1, panelWidth + 10, canvas.height * 0.8);
+            
+            // Glowing edge strips
+            ctx.fillStyle = 'rgba(0, 212, 255, 0.08)';
+            ctx.fillRect(panelX - 3, canvas.height * 0.1, 3, canvas.height * 0.8);
+            
+            // Vertical accent lines (status indicators)
+            ctx.strokeStyle = 'rgba(59, 130, 246, 0.15)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 6; i++) {
+                const y = canvas.height * (0.15 + i * 0.13);
+                ctx.beginPath();
+                ctx.moveTo(panelX, y);
+                ctx.lineTo(panelX + panelWidth - 5, y);
+                ctx.stroke();
+            }
+            
+            // Status lights (small dots)
+            ctx.fillStyle = 'rgba(0, 255, 136, 0.6)';
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                ctx.arc(panelX + 8, canvas.height * (0.2 + i * 0.15), 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // Draw distant spacecraft
+        function drawDistantShip(ctx, ship) {
+            ctx.save();
+            ctx.globalAlpha = ship.life;
+            
+            // Simple ship silhouette
+            ctx.fillStyle = 'rgba(100, 150, 200, 0.4)';
+            ctx.beginPath();
+            ctx.moveTo(ship.x + 8, ship.y - 4);
+            ctx.lineTo(ship.x - 3, ship.y - 2);
+            ctx.lineTo(ship.x - 3, ship.y + 2);
+            ctx.lineTo(ship.x + 8, ship.y + 4);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Thruster glow
+            ctx.fillStyle = 'rgba(100, 200, 255, 0.3)';
+            ctx.beginPath();
+            ctx.ellipse(ship.x - 5, ship.y, 4, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
         }
         
         function drawNebula(ctx, nebula) {
@@ -1241,22 +1321,32 @@
             drawPlanetAtPosition(ctx, x, y, r, planet.type, planet.rotation);
         }
         
-        function drawMainPlanet(ctx, planet) {
+        function drawMainPlanetLarge(ctx, planet) {
             const x = planet.x;
             const y = planet.y;
             const r = planet.radius;
             
-            // Draw massive main planet with highest detail
+            // Draw massive main planet with high detail
             drawPlanetAtPosition(ctx, x, y, r, planet.type, planet.rotation);
             
-            // Atmospheric halo
-            const halo = ctx.createRadialGradient(x, y, r * 0.95, x, y, r * 1.4);
-            halo.addColorStop(0, 'rgba(135, 206, 235, 0.15)');
-            halo.addColorStop(0.7, 'rgba(100, 150, 200, 0.05)');
+            // Strong atmospheric rim lighting (sun-side glow)
+            const rimLight = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.8, x, y, r * 1.5);
+            rimLight.addColorStop(0, 'rgba(255, 180, 100, 0.2)');
+            rimLight.addColorStop(0.5, 'rgba(200, 150, 120, 0.1)');
+            rimLight.addColorStop(1, 'rgba(100, 100, 150, 0)');
+            ctx.fillStyle = rimLight;
+            ctx.beginPath();
+            ctx.arc(x, y, r * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Subtle outer halo
+            const halo = ctx.createRadialGradient(x, y, r * 0.9, x, y, r * 1.8);
+            halo.addColorStop(0, 'rgba(135, 206, 235, 0.08)');
+            halo.addColorStop(0.5, 'rgba(100, 150, 200, 0.03)');
             halo.addColorStop(1, 'rgba(50, 100, 150, 0)');
             ctx.fillStyle = halo;
             ctx.beginPath();
-            ctx.arc(x, y, r * 1.4, 0, Math.PI * 2);
+            ctx.arc(x, y, r * 1.8, 0, Math.PI * 2);
             ctx.fill();
         }
         
