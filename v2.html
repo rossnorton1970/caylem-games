@@ -827,6 +827,15 @@
                 secondary: 'combatPistol',
                 armor: 'medium',
                 gadget: 'medkit'
+            },
+            weaponUpgrades: {
+                // Structure: weaponKey: [upgrade keys]
+                assaultRifle: [],
+                smg: [],
+                shotgun: [],
+                sniper: [],
+                combatPistol: [],
+                heavyPistol: []
             }
         };
         
@@ -906,7 +915,7 @@
             }
         };
         
-        // ARMOR DATABASE
+        // ARMOR DATABASE (WITH INHERENT PERKS)
         const armorDatabase = {
             light: {
                 name: 'Light Armor',
@@ -916,7 +925,13 @@
                 resistance: 15,
                 icon: '⚔',
                 color: '#00d4ff',
-                description: 'Maximum mobility. Minimal protection.'
+                description: 'Maximum mobility. Minimal protection.',
+                perk: {
+                    name: 'Swift',
+                    icon: '⚡',
+                    description: '+10% Sprint Speed',
+                    effect: 'Always active. Move faster during sprints.'
+                }
             },
             medium: {
                 name: 'Medium Armor',
@@ -926,7 +941,13 @@
                 resistance: 30,
                 icon: '🛡',
                 color: '#ffaa00',
-                description: 'Balanced protection and mobility.'
+                description: 'Balanced protection and mobility.',
+                perk: {
+                    name: 'Balanced',
+                    icon: '⚖',
+                    description: 'No Speed Penalty from Heavy Weapons',
+                    effect: 'Use heavy weapons without movement reduction.'
+                }
             },
             heavy: {
                 name: 'Heavy Armor',
@@ -936,43 +957,141 @@
                 resistance: 50,
                 icon: '⛓',
                 color: '#ff4444',
-                description: 'Maximum protection. Reduced speed.'
+                description: 'Maximum protection. Reduced speed.',
+                perk: {
+                    name: 'Guardian',
+                    icon: '🛡',
+                    description: '20% Damage Reduction When Standing Still',
+                    effect: 'Take 20% less damage while stationary.'
+                }
             }
         };
         
-        // GADGET DATABASE
+        // WEAPON UPGRADES DATABASE
+        const weaponUpgrades = {
+            damageBoost: {
+                name: 'Damage Boost',
+                cost: 200,
+                bonus: 'damage',
+                value: 0.15,
+                description: '+15% Weapon Damage',
+                icon: '💥'
+            },
+            extendedMagazine: {
+                name: 'Extended Magazine',
+                cost: 150,
+                bonus: 'ammo',
+                value: 0.30,
+                description: '+30% Ammo Capacity',
+                icon: '📦'
+            },
+            fastReload: {
+                name: 'Fast Reload',
+                cost: 180,
+                bonus: 'reload',
+                value: -0.25,
+                description: '-25% Reload Time',
+                icon: '⚡'
+            },
+            stability: {
+                name: 'Stability Control',
+                cost: 170,
+                bonus: 'recoil',
+                value: -0.20,
+                description: '-20% Recoil/Spread',
+                icon: '🎯'
+            },
+            lightweight: {
+                name: 'Lightweight Frame',
+                cost: 160,
+                bonus: 'fireRate',
+                value: 0.10,
+                description: '+10% Fire Rate',
+                icon: '💨'
+            },
+            penetration: {
+                name: 'Penetration Rounds',
+                cost: 250,
+                bonus: 'penetration',
+                value: 1,
+                description: 'Bullets Pierce Enemies',
+                icon: '→'
+            }
+        };
+
+        // GADGET DATABASE (EXPANDED TO 8)
         const gadgetDatabase = {
             grenade: {
                 name: 'Grenade',
-                type: 'grenade',
-                uses: 1,
+                type: 'consumable',
+                cooldown: 0,
                 description: 'Combat offensive. Area damage.',
                 icon: '💣',
-                color: '#ff4444'
+                color: '#ff4444',
+                category: 'Offensive'
             },
             medkit: {
                 name: 'Medkit',
-                type: 'medkit',
-                uses: 2,
+                type: 'consumable',
+                cooldown: 0,
                 description: 'Restore health mid-mission.',
                 icon: '⚕',
-                color: '#00ff88'
+                color: '#00ff88',
+                category: 'Defensive'
             },
             scanner: {
                 name: 'Scanner',
-                type: 'scanner',
-                uses: 3,
-                description: 'Reveal enemy positions.',
+                type: 'deployable',
+                cooldown: 8,
+                description: 'Reveal enemy positions nearby.',
                 icon: '📡',
-                color: '#00d4ff'
+                color: '#00d4ff',
+                category: 'Utility'
             },
             empDevice: {
                 name: 'EMP Device',
-                type: 'emp',
-                uses: 1,
+                type: 'consumable',
+                cooldown: 0,
                 description: 'Disable robots temporarily.',
                 icon: '⚡',
-                color: '#ffaa00'
+                color: '#ffaa00',
+                category: 'Offensive'
+            },
+            droneScout: {
+                name: 'Drone Scout',
+                type: 'deployable',
+                cooldown: 12,
+                description: 'Summon recon drone. Reveals positions & guides you.',
+                icon: '🛸',
+                color: '#bb00ff',
+                category: 'Utility'
+            },
+            shieldBubble: {
+                name: 'Shield Bubble',
+                type: 'deployable',
+                cooldown: 15,
+                description: 'Create temporary protective sphere for team.',
+                icon: '🔵',
+                color: '#00d4ff',
+                category: 'Defensive'
+            },
+            ammoCrate: {
+                name: 'Ammo Crate',
+                type: 'deployable',
+                cooldown: 10,
+                description: 'Drop ammo/supplies for team support.',
+                icon: '📦',
+                color: '#ffaa00',
+                category: 'Support'
+            },
+            turretDeploy: {
+                name: 'Turret Deploy',
+                type: 'deployable',
+                cooldown: 20,
+                description: 'Place automated turret for area coverage.',
+                icon: '🎯',
+                color: '#ff8800',
+                category: 'Offensive'
             }
         };
         
@@ -1298,15 +1417,14 @@
 
         // Initialize starfield
         
-        // ARMORY LOADOUT SYSTEM FUNCTIONS
+        // ARMORY LOADOUT SYSTEM FUNCTIONS - PHASE 2 (With Upgrades & Perks)
         function showArmoryLoadoutUI() {
             const modalContent = document.getElementById('modalContent');
-            let currentlyViewingCategory = 'primary';
             
-            // Build the initial UI
-            renderArmoryUI(currentlyViewingCategory);
+            // Build the UI
+            renderArmoryUI(modalContent);
             
-            function renderArmoryUI(viewingCategory) {
+            function renderArmoryUI(container) {
                 const currentLoadout = gameState.loadout;
                 const primaryWeapon = weaponDatabase.primary[currentLoadout.primary];
                 const secondaryWeapon = weaponDatabase.secondary[currentLoadout.secondary];
@@ -1434,12 +1552,71 @@
                 rightColumn += '</div>';
                 rightColumn += '</div>';
                 
-                // Gadget info
+                // WEAPON UPGRADES SECTION (NEW!)
                 rightColumn += '<div style="margin-bottom: 20px;">';
-                rightColumn += '<div class="armory-section-title" style="color: #bb00ff; border-color: #bb00ff;">⚡ GADGET</div>';
+                rightColumn += '<div class="armory-section-title" style="color: #bb00ff; border-color: #bb00ff;">⚙ WEAPON UPGRADES</div>';
+                const primaryUpgrades = gameState.weaponUpgrades[currentLoadout.primary] || [];
+                const availableUpgrades = Object.entries(weaponUpgrades).filter(([key]) => !primaryUpgrades.includes(key));
                 rightColumn += '<div style="background: rgba(187, 0, 255, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #bb00ff;">';
-                rightColumn += `<div class="armory-preview-name" style="color: #bb00ff;">${gadget.name}</div>`;
-                rightColumn += `<div style="font-size: 11px; color: #aaa; margin-top: 8px;">${gadget.description}</div>`;
+                rightColumn += `<div style="color: #bb00ff; font-size: 11px; font-weight: bold; margin-bottom: 10px;">ACTIVE UPGRADES (${primaryUpgrades.length}/3)</div>`;
+                
+                // Show active upgrade slots
+                for (let i = 0; i < 3; i++) {
+                    const upgradeKey = primaryUpgrades[i];
+                    if (upgradeKey) {
+                        const upgrade = weaponUpgrades[upgradeKey];
+                        rightColumn += `<div style="background: rgba(0, 255, 136, 0.15); padding: 6px; border-radius: 3px; margin-bottom: 6px; border-left: 2px solid #00ff88; display: flex; justify-content: space-between; align-items: center;">`;
+                        rightColumn += `<div><span style="color: #00ff88; font-weight: bold; font-size: 11px;">${upgrade.icon} ${upgrade.name}</span><div style="font-size: 9px; color: #888;">${upgrade.description}</div></div>`;
+                        rightColumn += `<button style="background: #ff4444; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; font-size: 10px; cursor: pointer; font-weight: bold;" onclick="removeWeaponUpgrade('${currentLoadout.primary}', '${upgradeKey}', 'primary')">✕</button>`;
+                        rightColumn += '</div>';
+                    } else {
+                        rightColumn += `<div style="background: rgba(100, 100, 100, 0.1); padding: 6px; border-radius: 3px; margin-bottom: 6px; color: #666; font-size: 11px; text-align: center;">Upgrade Slot ${i + 1}</div>`;
+                    }
+                }
+                
+                // Available upgrades to add
+                if (availableUpgrades.length > 0 && primaryUpgrades.length < 3) {
+                    rightColumn += `<div style="margin-top: 10px; border-top: 1px solid rgba(187, 0, 255, 0.3); padding-top: 10px;">`;
+                    rightColumn += `<div style="color: #ffaa00; font-size: 10px; font-weight: bold; margin-bottom: 8px;">AVAILABLE UPGRADES</div>`;
+                    availableUpgrades.slice(0, 3).forEach(([key, upgrade]) => {
+                        rightColumn += `<button style="display: block; width: 100%; background: rgba(255, 170, 0, 0.15); border: 1px solid #ffaa00; color: #fff; padding: 6px; border-radius: 3px; margin-bottom: 4px; cursor: pointer; font-size: 10px; text-align: left;" onclick="addWeaponUpgrade('${currentLoadout.primary}', '${key}', 'primary')"><span style="color: #ffaa00; font-weight: bold;">${upgrade.icon} ${upgrade.name}</span> <span style="color: #ffcc00;">(${upgrade.cost}c)</span></button>`;
+                    });
+                    rightColumn += '</div>';
+                }
+                rightColumn += '</div>';
+                rightColumn += '</div>';
+                
+                // Armor stats with PERK display (ENHANCED!)
+                rightColumn += '<div style="margin-bottom: 20px;">';
+                rightColumn += '<div class="armory-section-title" style="color: #ffaa00; border-color: #ffaa00;">🛡 ARMOR STATS & PERKS</div>';
+                rightColumn += '<div style="background: rgba(255, 170, 0, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #ffaa00;">';
+                rightColumn += `<div class="armory-preview-name" style="color: #ffaa00; margin-bottom: 10px;">${armor.name}</div>`;
+                rightColumn += `<div style="font-size: 11px; color: #aaa; margin-bottom: 10px;">${armor.description}</div>`;
+                rightColumn += `<div style="color: #00ff88; font-size: 12px; font-weight: bold; margin-top: 8px;">+${armor.health} Health</div>`;
+                rightColumn += `<div style="color: ${armor.speed >= 0 ? '#00ff88' : '#ff6666'}; font-size: 12px; font-weight: bold; margin-top: 4px;">${armor.speed >= 0 ? '+' : ''}${armor.speed}% Speed</div>`;
+                rightColumn += `<div style="color: #00d4ff; font-size: 12px; font-weight: bold; margin-top: 4px;">${armor.resistance}% Resistance</div>`;
+                
+                // INHERENT PERK
+                rightColumn += `<div style="background: rgba(187, 0, 255, 0.2); border-left: 3px solid #bb00ff; padding: 8px; margin-top: 12px; border-radius: 3px;">`;
+                rightColumn += `<div style="color: #bb00ff; font-size: 11px; font-weight: bold; margin-bottom: 4px;">✦ PERK: ${armor.perk.name}</div>`;
+                rightColumn += `<div style="color: #bb00ff; font-size: 12px; font-weight: bold;">${armor.perk.icon} ${armor.perk.description}</div>`;
+                rightColumn += `<div style="color: #aaa; font-size: 10px; margin-top: 4px; font-style: italic;">${armor.perk.effect}</div>`;
+                rightColumn += '</div>';
+                rightColumn += '</div>';
+                rightColumn += '</div>';
+                
+                // Gadget info (EXPANDED!)
+                rightColumn += '<div style="margin-bottom: 20px;">';
+                rightColumn += '<div class="armory-section-title" style="color: #bb00ff; border-color: #bb00ff;">⚡ GADGET SELECTION</div>';
+                rightColumn += '<div style="background: rgba(187, 0, 255, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #bb00ff;">';
+                rightColumn += `<div class="armory-preview-name" style="color: #bb00ff; margin-bottom: 8px;">${gadget.name}</div>`;
+                rightColumn += `<div style="font-size: 11px; color: #888; margin-bottom: 8px;">Category: <span style="color: #fff;">${gadget.category}</span></div>`;
+                rightColumn += `<div style="font-size: 11px; color: #aaa;">${gadget.description}</div>`;
+                if (gadget.cooldown > 0) {
+                    rightColumn += `<div style="margin-top: 6px; color: #ffaa00; font-size: 11px;">⏱ Cooldown: ${gadget.cooldown}s</div>`;
+                } else {
+                    rightColumn += `<div style="margin-top: 6px; color: #00ff88; font-size: 11px;">✓ Consumable Item</div>`;
+                }
                 rightColumn += '</div>';
                 rightColumn += '</div>';
                 
@@ -1477,6 +1654,46 @@
         function updateArmorySelection(category, key) {
             gameState.loadout[category] = key;
             showArmoryLoadoutUI();
+        }
+        
+        function addWeaponUpgrade(weaponKey, upgradeKey, weaponCategory) {
+            if (!gameState.weaponUpgrades[weaponKey]) {
+                gameState.weaponUpgrades[weaponKey] = [];
+            }
+            
+            const upgrades = gameState.weaponUpgrades[weaponKey];
+            if (upgrades.length >= 3) {
+                alert('Maximum 3 upgrades per weapon!');
+                return;
+            }
+            
+            if (upgrades.includes(upgradeKey)) {
+                alert('This upgrade is already installed!');
+                return;
+            }
+            
+            const upgrade = weaponUpgrades[upgradeKey];
+            if (gameState.credits >= upgrade.cost) {
+                gameState.credits -= upgrade.cost;
+                upgrades.push(upgradeKey);
+                showArmoryLoadoutUI();
+                showNotification(`✓ ${upgrade.name} installed! (-${upgrade.cost} credits)`);
+            } else {
+                alert(`Insufficient credits! Need ${upgrade.cost}, have ${gameState.credits}`);
+            }
+        }
+        
+        function removeWeaponUpgrade(weaponKey, upgradeKey, weaponCategory) {
+            if (!gameState.weaponUpgrades[weaponKey]) return;
+            
+            const upgrades = gameState.weaponUpgrades[weaponKey];
+            const idx = upgrades.indexOf(upgradeKey);
+            if (idx > -1) {
+                upgrades.splice(idx, 1);
+                showArmoryLoadoutUI();
+                const upgrade = weaponUpgrades[upgradeKey];
+                showNotification(`✓ ${upgrade.name} removed!`);
+            }
         }
         
         function saveLoadout() {
