@@ -569,9 +569,32 @@
         /* ARMORY LOADOUT SYSTEM */
         .armory-container {
             display: grid;
-            grid-template-columns: 250px 1fr 280px;
+            grid-template-columns: 280px 1fr 300px;
             gap: 30px;
             height: 100%;
+            background: linear-gradient(135deg, rgba(10, 14, 31, 0.8) 0%, rgba(15, 20, 40, 0.8) 100%);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 212, 255, 0.1);
+        }
+        
+        .armory-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 212, 255, 0.02) 2px,
+                    rgba(0, 212, 255, 0.02) 4px
+                );
+            pointer-events: none;
+            z-index: 0;
         }
 
         .armory-column {
@@ -623,12 +646,13 @@
         }
 
         .armory-preview-box {
-            background: rgba(20, 20, 50, 0.95);
+            background: linear-gradient(135deg, rgba(20, 20, 50, 0.98) 0%, rgba(30, 30, 70, 0.95) 100%);
             border: 2px solid #00d4ff;
             border-radius: 8px;
             padding: 20px;
             text-align: center;
             margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.15), inset 0 0 20px rgba(0, 212, 255, 0.05);
         }
 
         .armory-preview-title {
@@ -750,6 +774,80 @@
             transform: translateY(-2px);
         }
 
+        /* ALIEN GEAR STYLES */
+        .alien-item-btn {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid #00d4ff;
+            color: #00d4ff;
+            padding: 10px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .alien-item-btn:hover:not(.locked) {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .alien-item-btn.selected {
+            background: rgba(0, 212, 255, 0.3);
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .alien-item-btn.locked {
+            background: rgba(50, 50, 50, 0.5);
+            border-color: #444;
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .alien-lock-icon {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+        }
+
+        .alien-rarity-common { color: #fff; }
+        .alien-rarity-rare { color: #00d4ff; }
+        .alien-rarity-exotic { color: #bb00ff; }
+
+        .alien-glow {
+            text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+        }
+
+        .armor-upgrade-item {
+            background: rgba(0, 212, 255, 0.08);
+            border-left: 3px solid #00d4ff;
+            padding: 10px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .armor-upgrade-item:hover {
+            background: rgba(0, 212, 255, 0.15);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        }
+
+        .armor-upgrade-item.locked {
+            background: rgba(50, 50, 50, 0.1);
+            border-left-color: #444;
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
     </style>
 </head>
 <body>
@@ -811,6 +909,7 @@
             researchProgress: {},
             organizationTrust: 0,
             encounterData: {},
+            unlockedAlienGear: [],
             ship: {
                 hull: 100,
                 maxHull: 100,
@@ -839,6 +938,134 @@
             }
         };
         
+        // ALIEN WEAPONS & GEAR DATABASE (PHASE 3)
+        const alienGearDatabase = {
+            weapons: {
+                plasmaRifle: {
+                    name: 'Plasma Rifle',
+                    category: 'alien_weapon',
+                    damage: 95,
+                    fireRate: 7,
+                    accuracy: 80,
+                    reloadTime: 2.2,
+                    icon: '⚡',
+                    color: '#00d4ff',
+                    rarity: 'exotic',
+                    description: 'High damage energy weapon. Plasma-based projectiles.',
+                    unlockedBy: 'plasmaResearch',
+                    energyBased: true
+                },
+                energyPistol: {
+                    name: 'Energy Pistol',
+                    category: 'alien_weapon',
+                    damage: 65,
+                    fireRate: 9,
+                    accuracy: 82,
+                    reloadTime: 1.8,
+                    icon: '✦',
+                    color: '#00ff88',
+                    rarity: 'rare',
+                    description: 'Fast energy-based pistol. Consumes power cells.',
+                    unlockedBy: 'energyCoreResearch',
+                    energyBased: true
+                },
+                disruptor: {
+                    name: 'Disruptor',
+                    category: 'alien_weapon',
+                    damage: 70,
+                    fireRate: 5,
+                    accuracy: 75,
+                    reloadTime: 2.5,
+                    icon: '⚔',
+                    color: '#ffaa00',
+                    rarity: 'exotic',
+                    description: 'Disrupts enemy shields. Specialized vs shields.',
+                    unlockedBy: 'shieldDisruptionResearch',
+                    energyBased: true
+                }
+            },
+            armorUpgrades: {
+                adaptiveShield: {
+                    name: 'Adaptive Shield Matrix',
+                    type: 'armor_upgrade',
+                    icon: '🔵',
+                    color: '#00d4ff',
+                    rarity: 'rare',
+                    description: 'Adds +15% shield capacity',
+                    shieldBonus: 15,
+                    unlockedBy: 'adaptiveShieldResearch'
+                },
+                thermalReg: {
+                    name: 'Thermal Regulation',
+                    type: 'armor_upgrade',
+                    icon: '🌡',
+                    color: '#ff6600',
+                    rarity: 'rare',
+                    description: 'Cold/heat resistance upgrades',
+                    resistanceBonus: 20,
+                    unlockedBy: 'thermalTechResearch'
+                },
+                neuralSync: {
+                    name: 'Neural Sync',
+                    type: 'armor_upgrade',
+                    icon: '⚡',
+                    color: '#bb00ff',
+                    rarity: 'exotic',
+                    description: '+10% reaction speed & accuracy',
+                    speedBonus: 10,
+                    unlockedBy: 'neuralInterfaceResearch'
+                }
+            },
+            gadgets: {
+                shieldOverload: {
+                    name: 'Shield Overload',
+                    type: 'alien_gadget',
+                    icon: '🔵',
+                    color: '#00d4ff',
+                    rarity: 'exotic',
+                    category: 'Defensive',
+                    description: 'Create protective energy sphere',
+                    cooldown: 20,
+                    unlockedBy: 'energyBarrierResearch'
+                },
+                plasmaBurst: {
+                    name: 'Plasma Burst',
+                    type: 'alien_gadget',
+                    icon: '💥',
+                    color: '#ff6600',
+                    rarity: 'exotic',
+                    category: 'Offensive',
+                    description: 'Offensive energy blast wave',
+                    cooldown: 15,
+                    unlockedBy: 'plasmaControlResearch'
+                },
+                temporalDistortion: {
+                    name: 'Temporal Distortion',
+                    type: 'alien_gadget',
+                    icon: '⏱',
+                    color: '#bb00ff',
+                    rarity: 'exotic',
+                    category: 'Utility',
+                    description: 'Slow time briefly (5s slowdown)',
+                    cooldown: 25,
+                    unlockedBy: 'temporalTechResearch'
+                }
+            }
+        };
+        
+        // Research requirements for alien gear
+        const alienResearchMap = {
+            plasmaResearch: { name: 'Plasma Technology', desc: 'Unlocks Plasma Rifle', category: 'Weapon' },
+            energyCoreResearch: { name: 'Energy Core', desc: 'Unlocks Energy Pistol', category: 'Weapon' },
+            shieldDisruptionResearch: { name: 'Shield Disruption', desc: 'Unlocks Disruptor', category: 'Weapon' },
+            adaptiveShieldResearch: { name: 'Adaptive Shield', desc: 'Unlocks Shield Matrix upgrade', category: 'Armor' },
+            thermalTechResearch: { name: 'Thermal Tech', desc: 'Unlocks Thermal Regulation upgrade', category: 'Armor' },
+            neuralInterfaceResearch: { name: 'Neural Interface', desc: 'Unlocks Neural Sync upgrade', category: 'Armor' },
+            energyBarrierResearch: { name: 'Energy Barrier', desc: 'Unlocks Shield Overload gadget', category: 'Gadget' },
+            plasmaControlResearch: { name: 'Plasma Control', desc: 'Unlocks Plasma Burst gadget', category: 'Gadget' },
+            temporalTechResearch: { name: 'Temporal Tech', desc: 'Unlocks Temporal Distortion gadget', category: 'Gadget' }
+        };
+
         // WEAPON DATABASE
         const weaponDatabase = {
             // PRIMARY WEAPONS
@@ -1417,7 +1644,7 @@
 
         // Initialize starfield
         
-        // ARMORY LOADOUT SYSTEM FUNCTIONS - PHASE 2 (With Upgrades & Perks)
+        // ARMORY LOADOUT SYSTEM FUNCTIONS - PHASE 3 (With Alien Gear)
         function showArmoryLoadoutUI() {
             const modalContent = document.getElementById('modalContent');
             
@@ -1437,9 +1664,18 @@
                 const allArmors = Object.entries(armorDatabase).map(([key, a]) => ({key, ...a}));
                 const allGadgets = Object.entries(gadgetDatabase).map(([key, g]) => ({key, ...g}));
                 
+                // Alien weapons & gear (only show unlocked)
+                const allAlienWeapons = Object.entries(alienGearDatabase.weapons)
+                    .filter(([key]) => gameState.unlockedAlienGear.includes(key))
+                    .map(([key, weapon]) => ({key, ...weapon, isAlien: true}));
+                
+                const allAlienGadgets = Object.entries(alienGearDatabase.gadgets)
+                    .filter(([key]) => gameState.unlockedAlienGear.includes(key))
+                    .map(([key, gadget]) => ({key, ...gadget, isAlien: true}));
+                
                 // Build LEFT COLUMN: Categories
-                let leftColumn = '<div class="armory-column">';
-                leftColumn += '<div class="armory-section-title">PRIMARY</div>';
+                let leftColumn = '<div class="armory-column" style="overflow-y: auto; max-height: 65vh;">';
+                leftColumn += '<div class="armory-section-title">⚔ MILITARY WEAPONS</div>';
                 leftColumn += '<div class="armory-item-list">';
                 allPrimaries.forEach(w => {
                     const isSelected = currentLoadout.primary === w.key;
@@ -1447,13 +1683,27 @@
                 });
                 leftColumn += '</div>';
                 
-                leftColumn += '<div class="armory-section-title" style="border-color: #00d4ff; color: #00d4ff;">SECONDARY</div>';
+                leftColumn += '<div class="armory-section-title" style="border-color: #00d4ff; color: #00d4ff;">SIDEARMS</div>';
                 leftColumn += '<div class="armory-item-list">';
                 allSecondaries.forEach(w => {
                     const isSelected = currentLoadout.secondary === w.key;
                     leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('secondary', '${w.key}')" style="border-color: ${w.color}; background: ${isSelected ? w.color + '30' : 'rgba(0, 212, 255, 0.1)'}; color: ${w.color};">${w.icon} ${w.name}</button>`;
                 });
                 leftColumn += '</div>';
+                
+                // ALIEN WEAPONS SECTION
+                if (allAlienWeapons.length > 0) {
+                    leftColumn += '<div class="armory-section-title" style="border-color: #00d4ff; color: #00d4ff; margin-top: 15px;">⚡ ALIEN WEAPONS</div>';
+                    leftColumn += '<div class="armory-item-list">';
+                    allAlienWeapons.forEach(w => {
+                        const isSelected = currentLoadout.primary === w.key;
+                        const rarityClass = 'alien-rarity-' + w.rarity;
+                        leftColumn += `<button class="alien-item-btn ${isSelected ? 'selected' : ''} ${rarityClass}" onclick="updateArmorySelection('primary', '${w.key}')" style="background: ${isSelected ? 'rgba(0, 212, 255, 0.3)' : 'rgba(0, 212, 255, 0.08)'};">${w.icon} ${w.name} <span style="font-size: 10px;">(${w.rarity})</span></button>`;
+                    });
+                    leftColumn += '</div>';
+                } else {
+                    leftColumn += '<div style="background: rgba(100, 100, 100, 0.1); border-left: 2px solid #444; padding: 8px; margin: 10px 0; border-radius: 3px; font-size: 11px; color: #666;">🔒 Complete Research Lab missions to unlock Alien Weapons</div>';
+                }
                 
                 leftColumn += '<div class="armory-section-title" style="border-color: #ffaa00; color: #ffaa00;">ARMOR</div>';
                 leftColumn += '<div class="armory-item-list">';
@@ -1470,16 +1720,30 @@
                     leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('gadget', '${g.key}')" style="border-color: ${g.color}; background: ${isSelected ? g.color + '30' : 'rgba(187, 0, 255, 0.1)'}; color: ${g.color};">${g.icon} ${g.name}</button>`;
                 });
                 leftColumn += '</div>';
+                
+                // ALIEN GADGETS SECTION
+                if (allAlienGadgets.length > 0) {
+                    leftColumn += '<div class="armory-section-title" style="border-color: #00d4ff; color: #00d4ff; margin-top: 15px;">⚡ ALIEN GADGETS</div>';
+                    leftColumn += '<div class="armory-item-list">';
+                    allAlienGadgets.forEach(g => {
+                        const isSelected = currentLoadout.gadget === g.key;
+                        const rarityClass = 'alien-rarity-' + g.rarity;
+                        leftColumn += `<button class="alien-item-btn ${isSelected ? 'selected' : ''} ${rarityClass}" onclick="updateArmorySelection('gadget', '${g.key}')" style="background: ${isSelected ? 'rgba(0, 212, 255, 0.3)' : 'rgba(0, 212, 255, 0.08)'};">${g.icon} ${g.name} <span style="font-size: 10px;">(${g.rarity})</span></button>`;
+                    });
+                    leftColumn += '</div>';
+                }
                 leftColumn += '</div>';
                 
                 // Build MIDDLE COLUMN: Preview
                 let middleColumn = '<div class="armory-column" style="align-items: center;">';
                 middleColumn += '<div class="armory-preview-box">';
-                middleColumn += '<div class="armory-preview-title">⚔ Current Loadout</div>';
+                middleColumn += '<div class="armory-preview-title">⚔ CURRENT LOADOUT</div>';
+                const primaryIsAlien = gameState.unlockedAlienGear.includes(currentLoadout.primary);
+                const primaryGlowStyle = primaryIsAlien ? 'text-shadow: 0 0 20px rgba(0, 212, 255, 0.6); filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.4));' : '';
                 middleColumn += '<div style="margin: 20px 0; border-bottom: 1px solid #00d4ff; padding-bottom: 15px;">';
-                middleColumn += `<div class="armory-preview-item">${primaryWeapon.icon}</div>`;
-                middleColumn += `<div class="armory-preview-name">${primaryWeapon.name}</div>`;
-                middleColumn += '<div style="font-size: 11px; color: #888;">Primary Weapon</div>';
+                middleColumn += `<div class="armory-preview-item" style="${primaryGlowStyle}">${primaryWeapon.icon}</div>`;
+                middleColumn += `<div class="armory-preview-name" style="${primaryIsAlien ? 'color: #00d4ff;' : ''}">${primaryWeapon.name}</div>`;
+                middleColumn += `<div style="font-size: 11px; color: ${primaryIsAlien ? '#00d4ff' : '#888'};">${primaryIsAlien ? '👽 Alien Technology' : 'Primary Weapon'}</div>`;
                 middleColumn += '</div>';
                 
                 middleColumn += '<div style="margin: 15px 0; border-bottom: 1px solid #00d4ff; padding-bottom: 15px;">';
@@ -1605,6 +1869,26 @@
                 rightColumn += '</div>';
                 rightColumn += '</div>';
                 
+                // ALIEN ARMOR UPGRADES SECTION
+                const alienArmorUpgrades = Object.entries(alienGearDatabase.armorUpgrades)
+                    .filter(([key]) => gameState.unlockedAlienGear.includes(key))
+                    .map(([key, upgrade]) => ({key, ...upgrade}));
+                
+                if (alienArmorUpgrades.length > 0) {
+                    rightColumn += '<div style="margin-bottom: 20px;">';
+                    rightColumn += '<div class="armory-section-title" style="color: #00d4ff; border-color: #00d4ff;">⚡ ALIEN ARMOR UPGRADES</div>';
+                    rightColumn += '<div style="background: rgba(0, 212, 255, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #00d4ff;">';
+                    alienArmorUpgrades.forEach(upgrade => {
+                        rightColumn += `<div class="armor-upgrade-item">`;
+                        rightColumn += `<div style="color: #00d4ff; font-weight: bold; font-size: 11px;">${upgrade.icon} ${upgrade.name}</div>`;
+                        rightColumn += `<div style="color: #888; font-size: 10px; margin-top: 4px;">${upgrade.description}</div>`;
+                        rightColumn += `<div style="color: #00ff88; font-size: 10px; margin-top: 4px; font-weight: bold;">RARITY: ${upgrade.rarity.toUpperCase()}</div>`;
+                        rightColumn += `</div>`;
+                    });
+                    rightColumn += '</div>';
+                    rightColumn += '</div>';
+                }
+                
                 // Gadget info (EXPANDED!)
                 rightColumn += '<div style="margin-bottom: 20px;">';
                 rightColumn += '<div class="armory-section-title" style="color: #bb00ff; border-color: #bb00ff;">⚡ GADGET SELECTION</div>';
@@ -1639,7 +1923,8 @@
                 rightColumn += '</div>';
                 
                 modalContent.innerHTML = `
-                    <div class="interaction-modal-header">⚔ ARMORY — LOADOUT SYSTEM</div>
+                    <div class="interaction-modal-header">⚔ ARMORY — LOADOUT SYSTEM 🛰</div>
+                    <div style="color: #888; font-size: 12px; padding: 10px 0; border-bottom: 1px solid rgba(0, 212, 255, 0.2);">Military Equipment Storage | Alien Research Lab Integration</div>
                     <div class="interaction-modal-content" style="max-height: 65vh; overflow-y: auto;">
                         <div class="armory-container">
                             ${leftColumn}
@@ -2088,8 +2373,28 @@
                         </div>
                     ` : '';
                     
-                    // Completed research
+                    // Completed research with ALIEN GEAR UNLOCKS
+                    const alienGearUnlocks = gameState.unlockedAlienGear.length > 0 ? `
+                        <div style="background: rgba(0, 212, 255, 0.1); border-left: 4px solid #00d4ff; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
+                            <div style="color: #00d4ff; font-weight: bold; margin-bottom: 10px; font-size: 13px;">🛰 UNLOCKED ALIEN EQUIPMENT</div>
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+                                ${gameState.unlockedAlienGear.map(gearKey => {
+                                    let gear = alienGearDatabase.weapons[gearKey] || alienGearDatabase.armorUpgrades[gearKey] || alienGearDatabase.gadgets[gearKey];
+                                    if (!gear) return '';
+                                    return `
+                                        <div style="background: rgba(0, 212, 255, 0.08); padding: 8px; border-radius: 3px; border-left: 2px solid #00d4ff;">
+                                            <div style="color: #00d4ff; font-size: 11px; font-weight: bold;">${gear.icon} ${gear.name}</div>
+                                            <div style="color: #888; font-size: 10px; margin-top: 2px;">${gear.description}</div>
+                                            <div style="color: #bb00ff; font-size: 10px; margin-top: 4px; font-weight: bold;">RARITY: ${gear.rarity.toUpperCase()}</div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    ` : '';
+                    
                     const completedResearchUI = `
+                        ${alienGearUnlocks}
                         <div style="background: rgba(0, 255, 136, 0.1); border-left: 4px solid #00ff88; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
                             <div style="color: #00ff88; font-weight: bold; margin-bottom: 10px; font-size: 13px;">✓ UNLOCKED TECHNOLOGIES</div>
                             ${gameState.completedResearch.length === 0 ? `
@@ -2418,8 +2723,44 @@
             gameState.organizationTrust += 10;
             gameState.activeAnalysis = null;
             
+            // UNLOCK ALIEN GEAR BASED ON RESEARCH
+            unlockAlienGearFromResearch(techId);
+            
             showRoomUI('researchLab', rooms.researchLab);
             showNotification(`${artifact.name} analyzed! Tech unlocked: ${techSystem[techId].name}`);
+        }
+        
+        // Unlock alien gear when research is completed
+        function unlockAlienGearFromResearch(researchId) {
+            // Map research IDs to alien gear
+            const researchToGearMap = {
+                'plasmaResearch': 'plasmaRifle',
+                'energyCoreResearch': 'energyPistol',
+                'shieldDisruptionResearch': 'disruptor',
+                'adaptiveShieldResearch': 'adaptiveShield',
+                'thermalTechResearch': 'thermalReg',
+                'neuralInterfaceResearch': 'neuralSync',
+                'energyBarrierResearch': 'shieldOverload',
+                'plasmaControlResearch': 'plasmaBurst',
+                'temporalTechResearch': 'temporalDistortion'
+            };
+            
+            const gearKey = researchToGearMap[researchId];
+            if (gearKey && !gameState.unlockedAlienGear.includes(gearKey)) {
+                gameState.unlockedAlienGear.push(gearKey);
+                
+                // Find the gear name
+                let gearName = '';
+                if (alienGearDatabase.weapons[gearKey]) {
+                    gearName = alienGearDatabase.weapons[gearKey].name;
+                } else if (alienGearDatabase.armorUpgrades[gearKey]) {
+                    gearName = alienGearDatabase.armorUpgrades[gearKey].name;
+                } else if (alienGearDatabase.gadgets[gearKey]) {
+                    gearName = alienGearDatabase.gadgets[gearKey].name;
+                }
+                
+                showNotification(`🛰 ALIEN GEAR UNLOCKED: ${gearName}!`);
+            }
         }
 
         // Apply tech to ship
