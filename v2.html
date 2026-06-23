@@ -3308,8 +3308,8 @@
         }
         
         function drawHUDPlayerStatus(ctx, canvas) {
-            const x = 20;
-            const y = 20;
+            const x = canvas.width * 0.02;
+            const y = canvas.height * 0.03;
             const threatColor = getThreatColor(hudProtoState.threatCycle);
             const glowIntensity = getGlowIntensity(hudProtoState.threatCycle);
             
@@ -3346,8 +3346,8 @@
         }
         
         function drawHUDWeaponSystem(ctx, canvas) {
-            const x = 20;
-            const y = canvas.height - 80;
+            const x = canvas.width * 0.02;
+            const y = canvas.height * 0.85;
             
             ctx.font = 'bold 14px Arial';
             ctx.fillStyle = '#ffaa00';
@@ -3365,8 +3365,8 @@
         }
         
         function drawHUDGadgets(ctx, canvas) {
-            const x = canvas.width - 180;
-            const y = canvas.height - 100;
+            const x = canvas.width - (canvas.width * 0.20);
+            const y = canvas.height * 0.85;
             const gadgets = [
                 { num: 1, name: 'MEDKIT', status: 'ready', color: '#00ff88' },
                 { num: 2, name: 'SCAN DRONE', status: '8s', color: '#ffaa00' },
@@ -3405,9 +3405,9 @@
         }
         
         function drawHUDMinimap(ctx, canvas) {
-            const x = canvas.width - 120;
-            const y = 20;
-            const radius = 50;
+            const x = canvas.width - (canvas.width * 0.12);
+            const y = canvas.height * 0.12;
+            const radius = Math.min(40, canvas.width * 0.05);
             
             // Circular minimap frame
             ctx.strokeStyle = '#00d4ff';
