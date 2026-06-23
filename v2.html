@@ -3203,47 +3203,50 @@
         // ==================== HUD PROTOTYPE SYSTEM ====================
         
         function launchHUDDemo() {
-            // Create full-screen HUD canvas
+            // Create container
             const container = document.createElement('div');
             container.id = 'hudDemoContainer';
             container.style.cssText = `
                 position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
                 background: #000;
                 z-index: 200;
                 display: flex;
-                flex-direction: column;
+                justify-content: center;
+                align-items: center;
             `;
             
+            // Create canvas
             const canvas = document.createElement('canvas');
             canvas.id = 'hudCanvas';
+            canvas.width = 1280;
+            canvas.height = 720;
             canvas.style.cssText = `
-                flex: 1;
-                width: 100%;
-                height: 100%;
                 display: block;
+                border: 1px solid #333;
+                max-width: 100vw;
+                max-height: 100vh;
+                image-rendering: auto;
             `;
             
+            // Create controls overlay
             const controls = document.createElement('div');
             controls.style.cssText = `
                 position: fixed;
                 bottom: 30px;
                 left: 50%;
                 transform: translateX(-50%);
-                color: #888;
-                font-size: 14px;
-                text-align: center;
-                z-index: 201;
+                color: #666;
+                font-size: 13px;
                 font-family: Arial, sans-serif;
+                z-index: 201;
             `;
-            controls.innerHTML = `Press <span style="color: #00d4ff; font-weight: bold;">ESC</span> to close demo`;
+            controls.innerHTML = `Press <span style="color: #00d4ff;">ESC</span> to close`;
             
             container.appendChild(canvas);
-            container.appendChild(controls);
             document.body.appendChild(container);
+            document.body.appendChild(controls);
             
             // Initialize HUD state
             hudProtoState.canvas = canvas;
@@ -3251,11 +3254,6 @@
             hudProtoState.demoActive = true;
             hudProtoState.startTime = Date.now();
             hudProtoState.threatCycle = 'green';
-            hudProtoState.threatTimer = 0;
-            
-            // Set canvas size
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
             
             // Start rendering
             renderHUDDemo();
@@ -3308,8 +3306,8 @@
         }
         
         function drawHUDPlayerStatus(ctx, canvas) {
-            const x = canvas.width * 0.02;
-            const y = canvas.height * 0.03;
+            const x = 30;
+            const y = 30;
             const threatColor = getThreatColor(hudProtoState.threatCycle);
             const glowIntensity = getGlowIntensity(hudProtoState.threatCycle);
             
@@ -3346,8 +3344,8 @@
         }
         
         function drawHUDWeaponSystem(ctx, canvas) {
-            const x = canvas.width * 0.02;
-            const y = canvas.height * 0.85;
+            const x = 30;
+            const y = canvas.height - 120;
             
             ctx.font = 'bold 14px Arial';
             ctx.fillStyle = '#ffaa00';
@@ -3365,8 +3363,8 @@
         }
         
         function drawHUDGadgets(ctx, canvas) {
-            const x = canvas.width - (canvas.width * 0.20);
-            const y = canvas.height * 0.85;
+            const x = canvas.width - 280;
+            const y = canvas.height - 120;
             const gadgets = [
                 { num: 1, name: 'MEDKIT', status: 'ready', color: '#00ff88' },
                 { num: 2, name: 'SCAN DRONE', status: '8s', color: '#ffaa00' },
@@ -3405,9 +3403,9 @@
         }
         
         function drawHUDMinimap(ctx, canvas) {
-            const x = canvas.width - (canvas.width * 0.12);
-            const y = canvas.height * 0.12;
-            const radius = Math.min(40, canvas.width * 0.05);
+            const x = canvas.width - 120;
+            const y = 120;
+            const radius = 60;
             
             // Circular minimap frame
             ctx.strokeStyle = '#00d4ff';
