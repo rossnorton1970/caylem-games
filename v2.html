@@ -2563,9 +2563,9 @@
             gameState.loadoutReady = loadoutSummary;
             closeInteractionModal();
             
-            // Navigate to dropship
+            // Trigger CINEMATIC DROPSHIP DEPLOYMENT
             setTimeout(() => {
-                showRoomUI('dropship', rooms.dropship);
+                startCinematicDropship();
             }, 100);
         }
         
@@ -3547,6 +3547,751 @@
         }
 
         // Initialize on load
+        // ============================================
+        // CINEMATIC DROPSHIP DEPLOYMENT SEQUENCE
+        // ============================================
+        
+        const cinematicDropshipSequence = {
+            active: false,
+            canvas: null,
+            ctx: null,
+            currentStep: 0,
+            stepStartTime: 0,
+            totalSteps: 8,
+            particles: [],
+            camera: { x: 0, y: 0, z: 1 },
+            shakeIntensity: 0,
+            screenTint: { r: 0, g: 0, b: 0, a: 0 },
+            
+            // Step timings (in seconds)
+            stepDurations: [
+                6, // STEP 1: Enter Dropship Bay
+                8, // STEP 2: Launch Tube Entry
+                5, // STEP 3: Firing Sequence
+                7, // STEP 4: Space Transition
+                9, // STEP 5: Atmosphere Entry
+                7, // STEP 6: Final Descent
+                4, // STEP 7: Landing Impact
+                5  // STEP 8: Deployment
+            ],
+            
+            init() {
+                this.canvas = document.createElement('canvas');
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.canvas.style.position = 'fixed';
+                this.canvas.style.top = '0';
+                this.canvas.style.left = '0';
+                this.canvas.style.zIndex = '9999';
+                document.body.appendChild(this.canvas);
+                
+                this.ctx = this.canvas.getContext('2d');
+                this.active = true;
+                this.currentStep = 0;
+                this.stepStartTime = Date.now() / 1000;
+                this.particles = [];
+                
+                // Hide main menu
+                document.getElementById('mainMenu').style.display = 'none';
+                
+                // Preload sounds (optional - create silence fallback)
+                this.setupAudio();
+                
+                // Start cinematic loop
+                this.animate();
+            },
+            
+            setupAudio() {
+                // Audio cues for each step
+                this.audioQueues = {
+                    step1: { playing: false },
+                    step2: { playing: false },
+                    step3: { playing: false },
+                    step4: { playing: false },
+                    step5: { playing: false },
+                    step7: { playing: false }
+                };
+            },
+            
+            playSoundCue(stepNum) {
+                // Use Web Audio API or simple beeps
+                // This is a placeholder for actual sound design
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const now = audioContext.currentTime;
+                    
+                    const frequencies = {
+                        1: 200,  // Low rumble for hangar
+                        2: 600,  // Door slam
+                        3: 1200, // Engine roar
+                        4: 800,  // Space transition
+                        5: 1400, // Atmospheric friction
+                        7: 1600  // Impact crash
+                    };
+                    
+                    if (frequencies[stepNum]) {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        
+                        osc.frequency.value = frequencies[stepNum];
+                        gain.gain.setValueAtTime(0.1, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                        
+                        osc.start(now);
+                        osc.stop(now + 0.5);
+                    }
+                } catch (e) {
+                    // Silent fallback
+                }
+            },
+            
+            addParticle(x, y, vx, vy, life, color = '#fff', size = 2) {
+                this.particles.push({ x, y, vx, vy, life, maxLife: life, color, size });
+            },
+            
+            updateParticles(dt) {
+                this.particles = this.particles.filter(p => p.life > 0);
+                this.particles.forEach(p => {
+                    p.x += p.vx * dt;
+                    p.y += p.vy * dt;
+                    p.life -= dt;
+                });
+            },
+            
+            drawParticles() {
+                this.particles.forEach(p => {
+                    const alpha = p.life / p.maxLife;
+                    this.ctx.fillStyle = p.color.replace(')', `, ${alpha * 0.8})`);
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+            },
+            
+            screenShake(intensity) {
+                this.shakeIntensity = Math.min(intensity, 20);
+            },
+            
+            applyScreenEffects() {
+                // Motion blur for high-speed sections
+                if (this.currentStep === 2 || this.currentStep === 4) {
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                }
+                
+                // Screen shake
+                if (this.shakeIntensity > 0) {
+                    const offsetX = (Math.random() - 0.5) * this.shakeIntensity * 2;
+                    const offsetY = (Math.random() - 0.5) * this.shakeIntensity * 2;
+                    this.ctx.translate(offsetX, offsetY);
+                    this.shakeIntensity *= 0.92;
+                }
+                
+                // Screen tint
+                if (this.screenTint.a > 0) {
+                    this.ctx.fillStyle = `rgba(${this.screenTint.r}, ${this.screenTint.g}, ${this.screenTint.b}, ${this.screenTint.a})`;
+                    this.ctx.fillRect(-this.canvas.width, -this.canvas.height, this.canvas.width * 3, this.canvas.height * 3);
+                }
+            },
+            
+            drawStep1() {
+                // STEP 1: ENTER DROPSHIP BAY (5-8 seconds)
+                const progress = this.getStepProgress();
+                
+                // Dark metal hangar interior
+                const gradient = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
+                gradient.addColorStop(0, '#0a0a15');
+                gradient.addColorStop(0.5, '#151525');
+                gradient.addColorStop(1, '#0a0a15');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Animated floor lights forming path (cyan glow)
+                this.ctx.strokeStyle = '#00d4ff';
+                this.ctx.lineWidth = 3;
+                this.ctx.globalAlpha = 0.5 + Math.sin(progress * Math.PI * 3) * 0.3;
+                
+                const pathSpacing = 60;
+                for (let i = 0; i < 15; i++) {
+                    const activatePoint = i / 15;
+                    if (progress > activatePoint) {
+                        const y = 100 + i * 40;
+                        const x = this.canvas.width / 2;
+                        const intensity = Math.min((progress - activatePoint) * 5, 1);
+                        this.ctx.fillStyle = `rgba(0, 212, 255, ${intensity * 0.4})`;
+                        this.ctx.fillRect(x - 30 * intensity, y - 10, 60 * intensity, 20);
+                    }
+                }
+                
+                // Vertical launch tubes in background
+                this.ctx.globalAlpha = 0.3;
+                this.ctx.fillStyle = '#1a1a2e';
+                for (let i = 0; i < 6; i++) {
+                    const x = 100 + i * (this.canvas.width / 6);
+                    this.ctx.fillRect(x, 50, 40, 300);
+                    this.ctx.strokeStyle = '#00d4ff';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.strokeRect(x, 50, 40, 300);
+                }
+                
+                // Camera pan effect
+                const panOffset = progress * 50;
+                
+                // HUD: Text overlays
+                this.ctx.globalAlpha = 1;
+                this.ctx.fillStyle = '#00d4ff';
+                this.ctx.font = 'bold 28px Arial';
+                this.ctx.fillText('DROPSHIP BAY', 50, 60);
+                
+                this.ctx.font = '16px Arial';
+                this.ctx.fillStyle = '#aaa';
+                this.ctx.fillText('PROCEED TO LAUNCH POD', 50, 100);
+                
+                // Mechanical door sliding sound cue at end
+                if (progress > 0.9 && !this.audioQueues.step1.playing) {
+                    this.playSoundCue(1);
+                    this.audioQueues.step1.playing = true;
+                }
+            },
+            
+            drawStep2() {
+                // STEP 2: LAUNCH TUBE ENTRY (6-10 seconds)
+                const progress = this.getStepProgress();
+                
+                // Inside tight vertical launch pod - metal walls
+                const gradient = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
+                gradient.addColorStop(0, '#0d0d1a');
+                gradient.addColorStop(0.5, '#1a1a2e');
+                gradient.addColorStop(1, '#0d0d1a');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Glowing orange/cyan lines on walls
+                this.ctx.strokeStyle = '#ff8800';
+                this.ctx.lineWidth = 4;
+                for (let i = 0; i < 8; i++) {
+                    const x = (i * this.canvas.width / 8);
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, 0);
+                    this.ctx.lineTo(x + 20 * Math.sin(progress * 10), this.canvas.height);
+                    this.ctx.stroke();
+                }
+                
+                // Pulsing red warning indicators
+                this.ctx.fillStyle = progress % 0.5 < 0.25 ? '#ff4444' : '#aa0000';
+                for (let i = 0; i < 4; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.arc(100 + i * 200, 100, 15, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                
+                // Window showing external view
+                this.ctx.strokeStyle = '#00d4ff';
+                this.ctx.lineWidth = 3;
+                this.ctx.strokeRect(this.canvas.width / 2 - 80, this.canvas.height / 2 - 100, 160, 200);
+                
+                // Countdown timer HUD
+                const countdown = Math.max(0, 3 - progress * 3);
+                this.ctx.fillStyle = '#00d4ff';
+                this.ctx.font = 'bold 48px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('LAUNCH IN...', this.canvas.width / 2, 80);
+                this.ctx.font = 'bold 64px Arial';
+                this.ctx.fillText(countdown.toFixed(1), this.canvas.width / 2, 200);
+                this.ctx.textAlign = 'left';
+                
+                // Door closing animation
+                if (progress > 0.7) {
+                    const doorProgress = (progress - 0.7) / 0.3;
+                    this.ctx.fillStyle = 'rgba(50, 50, 80, 0.8)';
+                    this.ctx.fillRect(this.canvas.width / 2 - 200, 0, 400, this.canvas.height * doorProgress);
+                    this.ctx.fillRect(this.canvas.width / 2 - 200, this.canvas.height * (1 - doorProgress), 400, this.canvas.height * doorProgress);
+                    
+                    if (doorProgress > 0.5 && !this.audioQueues.step2.playing) {
+                        this.playSoundCue(2);
+                        this.audioQueues.step2.playing = true;
+                        this.screenShake(15);
+                    }
+                }
+                
+                // Pressure seal effects
+                if (progress > 0.75) {
+                    const sealProgress = (progress - 0.75) / 0.25;
+                    this.ctx.strokeStyle = `rgba(0, 212, 255, ${sealProgress * 0.5})`;
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.canvas.width / 2, this.canvas.height / 2, 100 + sealProgress * 100, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                }
+            },
+            
+            drawStep3() {
+                // STEP 3: FIRING SEQUENCE (4-6 seconds)
+                const progress = this.getStepProgress();
+                
+                // Pod interior with motion blur
+                this.ctx.fillStyle = '#0a0e1f';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Intense motion blur (tube streaking past)
+                this.ctx.strokeStyle = 'rgba(255, 150, 0, 0.3)';
+                this.ctx.lineWidth = Math.random() * 4 + 2;
+                for (let i = 0; i < 20; i++) {
+                    const x1 = Math.random() * this.canvas.width;
+                    const y1 = Math.random() * this.canvas.height;
+                    const length = 100 + progress * 200;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x1, y1);
+                    this.ctx.lineTo(x1 - length, y1 + (Math.random() - 0.5) * 50);
+                    this.ctx.stroke();
+                }
+                
+                // Red warning lights intensifying
+                this.ctx.fillStyle = `rgba(255, 68, 68, ${0.4 + progress * 0.6})`;
+                this.ctx.globalAlpha = Math.sin(progress * Math.PI * 10) * 0.5 + 0.5;
+                for (let i = 0; i < 8; i++) {
+                    this.ctx.fillRect(Math.random() * this.canvas.width, Math.random() * this.canvas.height, 20, 20);
+                }
+                this.ctx.globalAlpha = 1;
+                
+                // Speed indicator
+                const speed = Math.min(progress * 100, 100);
+                this.ctx.fillStyle = '#00d4ff';
+                this.ctx.font = 'bold 32px Arial';
+                this.ctx.textAlign = 'right';
+                this.ctx.fillText(`SPEED: ${speed.toFixed(0)} m/s`, this.canvas.width - 50, 80);
+                this.ctx.textAlign = 'left';
+                
+                // Explosive sound and shake
+                if (progress > 0.1 && !this.audioQueues.step3.playing) {
+                    this.playSoundCue(3);
+                    this.audioQueues.step3.playing = true;
+                }
+                
+                this.screenShake(20 + progress * 10);
+                
+                // Extreme camera shake
+                this.ctx.translate(
+                    (Math.random() - 0.5) * 30,
+                    (Math.random() - 0.5) * 30
+                );
+            },
+            
+            drawStep4() {
+                // STEP 4: SPACE TRANSITION (6-8 seconds)
+                const progress = this.getStepProgress();
+                
+                // Black space with stars
+                this.ctx.fillStyle = '#000000';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Star field
+                this.ctx.fillStyle = '#ffffff';
+                for (let i = 0; i < 200; i++) {
+                    const x = (i * 731) % this.canvas.width;
+                    const y = (i * 233) % this.canvas.height;
+                    const size = (i % 10) / 10;
+                    this.ctx.fillRect(x, y, size, size);
+                }
+                
+                // Planet in distance (zoom out effect)
+                const planetSize = Math.max(100, 400 - progress * 150);
+                const planetX = this.canvas.width - 200 - progress * 100;
+                const planetY = this.canvas.height / 2;
+                
+                // Planet gradient
+                const planetGradient = this.ctx.createRadialGradient(planetX, planetY, 0, planetX, planetY, planetSize);
+                planetGradient.addColorStop(0, '#ff8844');
+                planetGradient.addColorStop(0.6, '#884400');
+                planetGradient.addColorStop(1, '#000000');
+                this.ctx.fillStyle = planetGradient;
+                this.ctx.beginPath();
+                this.ctx.arc(planetX, planetY, planetSize, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Mothership (large structure)
+                const shipX = 100 + progress * 50;
+                this.ctx.fillStyle = '#333333';
+                this.ctx.fillRect(shipX - 60, this.canvas.height / 2 - 100, 120, 200);
+                this.ctx.fillRect(shipX - 100, this.canvas.height / 2 - 20, 200, 40);
+                
+                // Launching pods
+                const podCount = Math.floor(progress * 6);
+                for (let i = 0; i < podCount; i++) {
+                    const delay = i * 0.15;
+                    if (progress > delay) {
+                        const podProgress = (progress - delay) / 0.5;
+                        const pX = shipX + 50 + podProgress * 200;
+                        const pY = this.canvas.height / 2 - 50 + i * 35;
+                        this.ctx.fillStyle = '#00d4ff';
+                        this.ctx.fillRect(pX, pY, 20, 15);
+                    }
+                }
+                
+                // HUD: Trajectory display
+                this.ctx.strokeStyle = '#00d4ff';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.arc(this.canvas.width / 2, this.canvas.height / 2, 80, 0, Math.PI * 2);
+                this.ctx.stroke();
+                
+                this.ctx.fillStyle = '#00d4ff';
+                this.ctx.font = '16px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('EXITING MOTHERSHIP', this.canvas.width / 2, 60);
+                
+                // Sound and effects
+                if (progress > 0.2 && !this.audioQueues.step4.playing) {
+                    this.playSoundCue(4);
+                    this.audioQueues.step4.playing = true;
+                }
+            },
+            
+            drawStep5() {
+                // STEP 5: ATMOSPHERE ENTRY (8-10 seconds)
+                const progress = this.getStepProgress();
+                
+                // Space to atmosphere transition
+                const atmosphereBlend = Math.min(progress / 0.4, 1);
+                
+                // Background: planet surface becoming visible
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                gradient.addColorStop(0, `rgba(0, 0, 0, ${1 - atmosphereBlend * 0.5})`);
+                gradient.addColorStop(0.3, `rgba(100, 150, 200, ${atmosphereBlend * 0.3})`);
+                gradient.addColorStop(1, `rgba(200, 150, 100, ${atmosphereBlend * 0.8})`);
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Atmospheric glow effect (red/orange heating)
+                this.ctx.fillStyle = `rgba(255, 100, 0, ${Math.min(progress * 0.5, 0.4)})`;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Fire trails and particle effects
+                const trailCount = Math.floor(progress * 30);
+                for (let i = 0; i < trailCount; i++) {
+                    const angle = (i / trailCount) * Math.PI * 2;
+                    const distance = 150 + i * 5;
+                    const x = this.canvas.width / 2 + Math.cos(angle) * distance;
+                    const y = this.canvas.height / 2 + Math.sin(angle) * distance - progress * 50;
+                    
+                    this.ctx.fillStyle = `rgba(255, ${150 - i * 3}, 0, ${0.6 - progress * 0.2})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, 3 + Math.sin(progress * 20 + i) * 2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                
+                // Pod glow (increasing intensity)
+                const glowIntensity = Math.min(progress, 1);
+                const glowGradient = this.ctx.createRadialGradient(
+                    this.canvas.width / 2, this.canvas.height / 2, 0,
+                    this.canvas.width / 2, this.canvas.height / 2, 200
+                );
+                glowGradient.addColorStop(0, `rgba(255, 150, 0, ${glowIntensity * 0.6})`);
+                glowGradient.addColorStop(1, `rgba(255, 100, 0, 0)`);
+                this.ctx.fillStyle = glowGradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Turbulence camera shake
+                this.screenShake(5 + progress * 10);
+                
+                // Atmosphere entry warning HUD
+                this.ctx.fillStyle = '#ff6600';
+                this.ctx.font = 'bold 24px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('⚠ ENTERING ATMOSPHERE ⚠', this.canvas.width / 2, 80);
+                
+                // Temperature warning
+                const temp = Math.min(progress * 2000, 2000);
+                this.ctx.fillStyle = '#ff8800';
+                this.ctx.font = '18px Arial';
+                this.ctx.fillText(`TEMP: ${temp.toFixed(0)}°K`, this.canvas.width / 2, 130);
+                
+                // Sound
+                if (progress > 0.1 && !this.audioQueues.step5.playing) {
+                    this.playSoundCue(5);
+                    this.audioQueues.step5.playing = true;
+                }
+            },
+            
+            drawStep6() {
+                // STEP 6: FINAL DESCENT (6-8 seconds)
+                const progress = this.getStepProgress();
+                
+                // Terrain rising to meet pod
+                this.ctx.fillStyle = 'rgba(150, 120, 80, 0.8)';
+                const horizonY = this.canvas.height - progress * (this.canvas.height - 200);
+                this.ctx.fillRect(0, horizonY, this.canvas.width, this.canvas.height - horizonY);
+                
+                // Sky gradient
+                const skyGradient = this.ctx.createLinearGradient(0, 0, 0, horizonY);
+                skyGradient.addColorStop(0, '#000033');
+                skyGradient.addColorStop(0.5, '#665533');
+                skyGradient.addColorStop(1, '#aa8855');
+                this.ctx.fillStyle = skyGradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, horizonY);
+                
+                // Clouds streaking past
+                this.ctx.fillStyle = `rgba(255, 255, 255, ${0.3 - progress * 0.2})`;
+                for (let i = 0; i < 5; i++) {
+                    const cloudY = 200 + i * 80 + progress * 100;
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(this.canvas.width / 2, cloudY, 200, 30, 0, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                
+                // Landing zone marker
+                this.ctx.strokeStyle = '#00ff88';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.arc(this.canvas.width / 2, this.canvas.height - 150, 100, 0, Math.PI * 2);
+                this.ctx.stroke();
+                
+                // Crosshair
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.canvas.width / 2 - 30, this.canvas.height - 150);
+                this.ctx.lineTo(this.canvas.width / 2 + 30, this.canvas.height - 150);
+                this.ctx.moveTo(this.canvas.width / 2, this.canvas.height - 150 - 30);
+                this.ctx.lineTo(this.canvas.width / 2, this.canvas.height - 150 + 30);
+                this.ctx.stroke();
+                
+                // Altitude counter
+                const altitude = Math.max(0, 5000 - progress * 7000);
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.font = 'bold 28px Arial';
+                this.ctx.textAlign = 'right';
+                this.ctx.fillText(`ALT: ${altitude.toFixed(0)}m`, this.canvas.width - 50, 80);
+                this.ctx.textAlign = 'left';
+                
+                this.ctx.fillStyle = '#ffaa00';
+                this.ctx.font = '18px Arial';
+                this.ctx.fillText('FINAL DESCENT', 50, 80);
+            },
+            
+            drawStep7() {
+                // STEP 7: LANDING IMPACT (3-4 seconds)
+                const progress = this.getStepProgress();
+                
+                // Ground with impact
+                this.ctx.fillStyle = '#663300';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Dust explosion outward (particles)
+                const explosionSize = progress * 400;
+                this.ctx.fillStyle = `rgba(200, 180, 150, ${(1 - progress) * 0.7})`;
+                this.ctx.beginPath();
+                this.ctx.arc(this.canvas.width / 2, this.canvas.height / 2, explosionSize, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Shockwave rings
+                for (let ring = 0; ring < 3; ring++) {
+                    const ringProgress = progress - ring * 0.2;
+                    if (ringProgress > 0 && ringProgress < 1) {
+                        this.ctx.strokeStyle = `rgba(255, 200, 100, ${(1 - ringProgress) * 0.5})`;
+                        this.ctx.lineWidth = 3;
+                        this.ctx.beginPath();
+                        this.ctx.arc(this.canvas.width / 2, this.canvas.height / 2, ringProgress * 300, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    }
+                }
+                
+                // White flash
+                this.ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, 1 - progress * 3)})`;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Impact text
+                this.ctx.fillStyle = '#ff4444';
+                this.ctx.font = 'bold 64px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.globalAlpha = Math.min(1, (1 - progress) * 2);
+                this.ctx.fillText('IMPACT!', this.canvas.width / 2, this.canvas.height / 2);
+                this.ctx.globalAlpha = 1;
+                
+                // Massive screen shake
+                this.screenShake(30);
+                
+                // Sound
+                if (progress > 0.05 && !this.audioQueues.step7.playing) {
+                    this.playSoundCue(7);
+                    this.audioQueues.step7.playing = true;
+                }
+            },
+            
+            drawStep8() {
+                // STEP 8: DEPLOYMENT (4-6 seconds)
+                const progress = this.getStepProgress();
+                
+                // Pod interior transitioning to landscape
+                const transitionBlend = Math.min(progress / 0.5, 1);
+                
+                // Interior metal (fading)
+                this.ctx.fillStyle = `rgba(30, 35, 70, ${1 - transitionBlend * 0.7})`;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Landscape outside (increasing)
+                const groundGradient = this.ctx.createLinearGradient(0, this.canvas.height / 2, 0, this.canvas.height);
+                groundGradient.addColorStop(0, `rgba(150, 120, 80, ${transitionBlend * 0.8})`);
+                groundGradient.addColorStop(1, `rgba(100, 80, 60, ${transitionBlend})`);
+                this.ctx.fillStyle = groundGradient;
+                this.ctx.fillRect(0, this.canvas.height / 2, this.canvas.width, this.canvas.height / 2);
+                
+                // Sky (distant horizon)
+                this.ctx.fillStyle = `rgba(50, 80, 120, ${transitionBlend * 0.6})`;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height / 2);
+                
+                // Door hydraulic opening
+                const doorOpen = Math.min(progress / 0.4, 1);
+                const doorHeight = this.canvas.height * (1 - doorOpen);
+                this.ctx.fillStyle = '#333333';
+                this.ctx.fillRect(0, 0, this.canvas.width / 2, doorHeight);
+                this.ctx.fillRect(this.canvas.width / 2, this.canvas.height - doorHeight, this.canvas.width / 2, doorHeight);
+                
+                // Player weapon visible (partial view - hands/gun)
+                this.ctx.fillStyle = '#666666';
+                this.ctx.fillRect(this.canvas.width - 100, this.canvas.height - 150, 100, 150);
+                this.ctx.fillStyle = '#444444';
+                this.ctx.fillRect(this.canvas.width - 90, this.canvas.height - 100, 30, 80);
+                
+                // HUD FADE IN
+                this.ctx.globalAlpha = Math.min(progress / 0.3, 1);
+                
+                // Mission timer (top left)
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.font = 'bold 18px Arial';
+                this.ctx.fillText('MISSION TIMER: 15:00', 30, 50);
+                
+                // Objective (top center)
+                this.ctx.fillStyle = '#00d4ff';
+                this.ctx.font = 'bold 16px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('EXTRACT ARTIFACT - DEFEND POSITION', this.canvas.width / 2, 50);
+                this.ctx.textAlign = 'left';
+                
+                // Health/Ammo (bottom right)
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.font = '14px Arial';
+                this.ctx.textAlign = 'right';
+                this.ctx.fillText('HEALTH: 100%', this.canvas.width - 30, this.canvas.height - 80);
+                this.ctx.fillText('AMMO: 150/300', this.canvas.width - 30, this.canvas.height - 50);
+                this.ctx.textAlign = 'left';
+                
+                // Enemy indicators (if enemies nearby)
+                this.ctx.globalAlpha = 1;
+                this.ctx.fillStyle = '#ff4444';
+                this.ctx.font = '12px Arial';
+                this.ctx.fillText('⚠ ENEMIES DETECTED', 30, 80);
+                
+                // Radio message
+                this.ctx.globalAlpha = Math.min((progress - 0.3) / 0.3, 1);
+                this.ctx.fillStyle = '#ffaa00';
+                this.ctx.font = '14px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('"Squad deployed. Mission begins."', this.canvas.width / 2, this.canvas.height / 2);
+                this.ctx.globalAlpha = 1;
+            },
+            
+            getStepProgress() {
+                const now = Date.now() / 1000;
+                const elapsed = now - this.stepStartTime;
+                const stepDuration = this.stepDurations[this.currentStep];
+                
+                if (elapsed >= stepDuration) {
+                    // Move to next step
+                    if (this.currentStep < this.totalSteps - 1) {
+                        this.currentStep++;
+                        this.stepStartTime = now;
+                        return 0;
+                    } else {
+                        // Sequence complete
+                        this.complete();
+                        return 1;
+                    }
+                }
+                
+                return elapsed / stepDuration;
+            },
+            
+            animate() {
+                if (!this.active) return;
+                
+                // Clear canvas
+                this.ctx.fillStyle = '#000000';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Save canvas state for transforms
+                this.ctx.save();
+                
+                // Draw current step
+                switch (this.currentStep) {
+                    case 0: this.drawStep1(); break;
+                    case 1: this.drawStep2(); break;
+                    case 2: this.drawStep3(); break;
+                    case 3: this.drawStep4(); break;
+                    case 4: this.drawStep5(); break;
+                    case 5: this.drawStep6(); break;
+                    case 6: this.drawStep7(); break;
+                    case 7: this.drawStep8(); break;
+                }
+                
+                // Apply screen effects
+                this.applyScreenEffects();
+                
+                // Restore canvas state
+                this.ctx.restore();
+                
+                // Update particles
+                const dt = 1 / 60;
+                this.updateParticles(dt);
+                
+                // Continue animation
+                requestAnimationFrame(() => this.animate());
+            },
+            
+            complete() {
+                // Fade to black, then start mission
+                this.active = false;
+                
+                // Transition to actual gameplay
+                setTimeout(() => {
+                    this.canvas.remove();
+                    // Start the actual mission gameplay
+                    startMission();
+                }, 1000);
+            }
+        };
+        
+        // Function to initiate cinematic
+        function startCinematicDropship() {
+            cinematicDropshipSequence.init();
+        }
+        
+        // Hook into deployment button to trigger cinematic
+        function deployWithCinematic() {
+            startCinematicDropship();
+        }
+        
+        // Start the actual mission after cinematic completes
+        function startMission() {
+            // Hide ship hub and modals
+            document.getElementById('shipHubContainer').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'none';
+            
+            // Fade in mission UI and begin gameplay
+            gameState.currentLocation = 'mission';
+            
+            // For now, show a simple mission started message
+            // In full implementation, this would initialize the actual mission gameplay
+            alert('🎮 MISSION STARTED!\n\nYour objective: Extract the artifact and survive.\n\nControls: WASD to move, Mouse to aim, Click to shoot');
+            
+            // Return to ship hub for now (placeholder)
+            setTimeout(() => {
+                document.getElementById('shipHubContainer').style.display = 'block';
+                gameState.currentLocation = 'ship';
+            }, 2000);
+        }
+
         window.addEventListener('load', () => {
             // Menu ready
         });
@@ -3556,6 +4301,13 @@
             if (gameState.currentLocation === 'ship' && shipCanvas) {
                 shipCanvas.width = window.innerWidth;
                 shipCanvas.height = window.innerHeight;
+            }
+        });
+        
+        // ESC key to skip cinematic
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && cinematicDropshipSequence.active) {
+                cinematicDropshipSequence.complete();
             }
         });
     </script>
