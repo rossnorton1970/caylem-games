@@ -4331,18 +4331,584 @@
             document.getElementById('shipHubContainer').style.display = 'none';
             document.getElementById('mainMenu').style.display = 'none';
             
-            // Fade in mission UI and begin gameplay
+            // Initialize mission state
             gameState.currentLocation = 'mission';
+            gameState.missionActive = true;
+            gameState.missionObjectives = {
+                explored: false,
+                artifactFound: false,
+                extracted: false
+            };
+            gameState.currentMission = {
+                name: 'HELIOS-7 Extraction',
+                enemiesKilled: 0,
+                timeStarted: Date.now(),
+                healthRemaining: 100
+            };
             
-            // For now, show a simple mission started message
-            // In full implementation, this would initialize the actual mission gameplay
-            alert('🎮 MISSION STARTED!\n\nYour objective: Extract the artifact and survive.\n\nControls: WASD to move, Mouse to aim, Click to shoot');
+            // Initialize mission engine
+            const missionEngine = new MissionEngine();
+            missionEngine.run();
+        }
+        
+        // Mission Engine - Handles desert, player, enemies, combat, artifact, extraction
+        class MissionEngine {
+            constructor() {
+                this.canvas = null;
+                this.ctx = null;
+                this.animationId = null;
+                this.running = false;
+                
+                // Player state
+                this.player = {
+                    x: 400,
+                    y: 500,
+                    width: 16,
+                    height: 16,
+                    health: 100,
+                    maxHealth: 100,
+                    ammo: 60,
+                    angle: 0,
+                    speed: 4,
+                    size: 8
+                };
+                
+                // Projectiles
+                this.projectiles = [];
+                this.lastPlayerShot = 0;
+                this.playerFireRate = 200; // ms between shots
+                
+                // Enemies
+                this.enemies = [];
+                this.maxEnemies = 4;
+                this.spawnEnemies();
+                
+                // Artifact
+                this.artifact = {
+                    x: 400 + (Math.random() - 0.5) * 60,
+                    y: 250 + (Math.random() - 0.5) * 60,
+                    collected: false,
+                    size: 12
+                };
+                
+                // Outpost
+                this.outpost = {
+                    x: 400,
+                    y: 250,
+                    width: 80,
+                    height: 80
+                };
+                
+                // Landing zone (spawn point)
+                this.landingZone = {
+                    x: 400,
+                    y: 500,
+                    radius: 40
+                };
+                
+                // Camera
+                this.camera = { x: 0, y: 0 };
+            }
             
-            // Return to ship hub for now (placeholder)
-            setTimeout(() => {
+            spawnEnemies() {
+                this.enemies = [];
+                const spawnZones = [
+                    { x: 100, y: 100 },
+                    { x: 700, y: 100 },
+                    { x: 100, y: 450 },
+                    { x: 700, y: 450 }
+                ];
+                
+                for (let i = 0; i < this.maxEnemies && i < spawnZones.length; i++) {
+                    const zone = spawnZones[i];
+                    this.enemies.push({
+                        x: zone.x + (Math.random() - 0.5) * 50,
+                        y: zone.y + (Math.random() - 0.5) * 50,
+                        health: 30,
+                        maxHealth: 30,
+                        size: 10,
+                        speed: 1.5,
+                        angle: Math.random() * Math.PI * 2,
+                        patrolAngle: Math.random() * Math.PI * 2,
+                        lastShot: 0,
+                        shootCooldown: 2000,
+                        state: 'patrol' // patrol, chase, dead
+                    });
+                }
+            }
+            
+            run() {
+                this.canvas = document.getElementById('spaceCanvas');
+                if (!this.canvas) {
+                    console.error('Canvas not found!');
+                    return;
+                }
+                
+                this.ctx = this.canvas.getContext('2d');
+                this.canvas.width = 800;
+                this.canvas.height = 600;
+                this.canvas.style.display = 'block';
+                
+                this.running = true;
+                this.setupInputHandlers();
+                this.gameLoop();
+            }
+            
+            setupInputHandlers() {
+                // Mouse move for aiming
+                this.canvas.addEventListener('mousemove', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+                    this.player.angle = Math.atan2(mouseY - this.player.y, mouseX - this.player.x);
+                });
+                
+                // Mouse click to shoot
+                this.canvas.addEventListener('click', () => this.playerShoot());
+                this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+            }
+            
+            gameLoop() {
+                if (!this.running) return;
+                
+                // Update
+                this.updatePlayerMovement();
+                this.updateEnemies();
+                this.updateProjectiles();
+                this.updateCamera();
+                
+                // Check collisions
+                this.checkArtifactPickup();
+                this.checkProjectileHits();
+                this.checkPlayerHit();
+                
+                // Render
+                this.render();
+                
+                // Check mission end conditions
+                this.checkMissionState();
+                
+                this.animationId = requestAnimationFrame(() => this.gameLoop());
+            }
+            
+            updatePlayerMovement() {
+                let newX = this.player.x;
+                let newY = this.player.y;
+                
+                const moveSpeed = this.player.speed;
+                if (keys['w']) newY -= moveSpeed;
+                if (keys['s']) newY += moveSpeed;
+                if (keys['a']) newX -= moveSpeed;
+                if (keys['d']) newX += moveSpeed;
+                
+                // Boundary check (play area 800x600)
+                newX = Math.max(this.player.size, Math.min(800 - this.player.size, newX));
+                newY = Math.max(this.player.size, Math.min(600 - this.player.size, newY));
+                
+                // Collision with outpost walls
+                if (!this.checkOutpostCollision(newX, newY)) {
+                    this.player.x = newX;
+                    this.player.y = newY;
+                }
+            }
+            
+            checkOutpostCollision(x, y) {
+                const ox = this.outpost.x;
+                const oy = this.outpost.y;
+                const ow = this.outpost.width;
+                const oh = this.outpost.height;
+                const pr = this.player.size;
+                
+                // Check if player would collide with outpost walls
+                if (x + pr > ox && x - pr < ox + ow &&
+                    y + pr > oy && y - pr < oy + oh) {
+                    return true; // Collision
+                }
+                return false;
+            }
+            
+            updateEnemies() {
+                for (const enemy of this.enemies) {
+                    if (enemy.state === 'dead') continue;
+                    
+                    const dx = this.player.x - enemy.x;
+                    const dy = this.player.y - enemy.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Chase if player is within 100 units
+                    if (distance < 100) {
+                        enemy.state = 'chase';
+                        enemy.angle = Math.atan2(dy, dx);
+                        enemy.x += Math.cos(enemy.angle) * enemy.speed;
+                        enemy.y += Math.sin(enemy.angle) * enemy.speed;
+                        
+                        // Shoot if in range
+                        if (distance < 50 && Date.now() - enemy.lastShot > enemy.shootCooldown) {
+                            this.enemyShoot(enemy);
+                            enemy.lastShot = Date.now();
+                        }
+                    } else {
+                        // Patrol
+                        enemy.state = 'patrol';
+                        enemy.patrolAngle += (Math.random() - 0.5) * 0.2;
+                        enemy.x += Math.cos(enemy.patrolAngle) * 0.5;
+                        enemy.y += Math.sin(enemy.patrolAngle) * 0.5;
+                    }
+                    
+                    // Boundary check
+                    enemy.x = Math.max(enemy.size, Math.min(800 - enemy.size, enemy.x));
+                    enemy.y = Math.max(enemy.size, Math.min(600 - enemy.size, enemy.y));
+                }
+            }
+            
+            playerShoot() {
+                const now = Date.now();
+                if (now - this.lastPlayerShot < this.playerFireRate) return;
+                if (this.player.ammo <= 0) return;
+                
+                this.projectiles.push({
+                    x: this.player.x,
+                    y: this.player.y,
+                    vx: Math.cos(this.player.angle) * 5,
+                    vy: Math.sin(this.player.angle) * 5,
+                    size: 5,
+                    owner: 'player',
+                    damage: 20
+                });
+                
+                this.player.ammo--;
+                this.lastPlayerShot = now;
+            }
+            
+            enemyShoot(enemy) {
+                const dx = this.player.x - enemy.x;
+                const dy = this.player.y - enemy.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist === 0) return;
+                
+                this.projectiles.push({
+                    x: enemy.x,
+                    y: enemy.y,
+                    vx: (dx / dist) * 4,
+                    vy: (dy / dist) * 4,
+                    size: 5,
+                    owner: 'enemy',
+                    damage: 10
+                });
+            }
+            
+            updateProjectiles() {
+                for (let i = this.projectiles.length - 1; i >= 0; i--) {
+                    const proj = this.projectiles[i];
+                    proj.x += proj.vx;
+                    proj.y += proj.vy;
+                    
+                    // Remove if out of bounds
+                    if (proj.x < 0 || proj.x > 800 || proj.y < 0 || proj.y > 600) {
+                        this.projectiles.splice(i, 1);
+                    }
+                }
+            }
+            
+            checkProjectileHits() {
+                for (let i = this.projectiles.length - 1; i >= 0; i--) {
+                    const proj = this.projectiles[i];
+                    
+                    if (proj.owner === 'player') {
+                        // Check hits on enemies
+                        for (const enemy of this.enemies) {
+                            if (enemy.state === 'dead') continue;
+                            
+                            const dx = proj.x - enemy.x;
+                            const dy = proj.y - enemy.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (dist < enemy.size + proj.size) {
+                                enemy.health -= proj.damage;
+                                if (enemy.health <= 0) {
+                                    enemy.state = 'dead';
+                                    gameState.currentMission.enemiesKilled++;
+                                    gameState.credits += (5 + Math.random() * 5); // Drop credits
+                                }
+                                this.projectiles.splice(i, 1);
+                                return;
+                            }
+                        }
+                    } else if (proj.owner === 'enemy') {
+                        // Check hits on player
+                        const dx = proj.x - this.player.x;
+                        const dy = proj.y - this.player.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (dist < this.player.size + proj.size) {
+                            this.player.health -= proj.damage;
+                            gameState.currentMission.healthRemaining = this.player.health;
+                            this.projectiles.splice(i, 1);
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            checkPlayerHit() {
+                if (this.player.health <= 0) {
+                    this.missionFailed('SOLDIER ELIMINATED');
+                }
+            }
+            
+            checkArtifactPickup() {
+                if (this.artifact.collected) return;
+                
+                const dx = this.player.x - this.artifact.x;
+                const dy = this.player.y - this.artifact.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < this.player.size + this.artifact.size) {
+                    this.artifact.collected = true;
+                    gameState.missionObjectives.artifactFound = true;
+                }
+            }
+            
+            checkMissionState() {
+                // If artifact collected and player reaches LZ
+                if (gameState.missionObjectives.artifactFound && !gameState.missionObjectives.extracted) {
+                    const dx = this.player.x - this.landingZone.x;
+                    const dy = this.player.y - this.landingZone.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < this.landingZone.radius + this.player.size) {
+                        this.triggerExtraction();
+                    }
+                }
+            }
+            
+            triggerExtraction() {
+                gameState.missionObjectives.extracted = true;
+                this.running = false;
+                cancelAnimationFrame(this.animationId);
+                
+                // Fade to black and show result
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.font = 'bold 32px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('EXTRACTION IN PROGRESS...', this.canvas.width / 2, this.canvas.height / 2 - 40);
+                
+                this.ctx.font = '18px Arial';
+                this.ctx.fillText('3... 2... 1...', this.canvas.width / 2, this.canvas.height / 2 + 40);
+                
+                setTimeout(() => this.missionComplete(), 3000);
+            }
+            
+            missionComplete() {
+                // Calculate rewards
+                const reward = {
+                    credits: 200,
+                    materials: 5,
+                    enemiesDefeated: gameState.currentMission.enemiesKilled
+                };
+                
+                gameState.lastMissionReward = reward;
+                gameState.credits += reward.credits;
+                gameState.materials += reward.materials;
+                
+                // Mark mission as complete
+                gameState.missionActive = false;
+                this.canvas.style.display = 'none';
+                
+                // Return to ship hub
                 document.getElementById('shipHubContainer').style.display = 'block';
                 gameState.currentLocation = 'ship';
-            }, 2000);
+                
+                // Show completion message
+                alert(`✅ MISSION COMPLETE!\n\nEnemies Defeated: ${reward.enemiesDefeated}\nReward: ${reward.credits} credits + ${reward.materials} materials`);
+            }
+            
+            missionFailed(reason) {
+                this.running = false;
+                cancelAnimationFrame(this.animationId);
+                
+                gameState.missionActive = false;
+                this.canvas.style.display = 'none';
+                document.getElementById('shipHubContainer').style.display = 'block';
+                gameState.currentLocation = 'ship';
+                
+                alert(`❌ MISSION FAILED\n\n${reason}`);
+            }
+            
+            updateCamera() {
+                // Follow player
+                this.camera.x = this.player.x - this.canvas.width / 2;
+                this.camera.y = this.player.y - this.canvas.height / 2;
+                
+                // Clamp to map bounds
+                this.camera.x = Math.max(0, Math.min(this.camera.x, 800 - this.canvas.width));
+                this.camera.y = Math.max(0, Math.min(this.camera.y, 600 - this.canvas.height));
+            }
+            
+            render() {
+                // Clear canvas with desert color
+                this.ctx.fillStyle = '#c9a876';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw heat haze effect (subtle)
+                this.ctx.globalAlpha = 0.05;
+                this.ctx.fillStyle = '#ff6600';
+                for (let i = 0; i < 3; i++) {
+                    this.ctx.fillRect(
+                        Math.sin(Date.now() / 1000 + i) * 10,
+                        Math.cos(Date.now() / 1000 + i) * 10,
+                        this.canvas.width,
+                        this.canvas.height
+                    );
+                }
+                this.ctx.globalAlpha = 1;
+                
+                // Draw dunes/rocks for visual variety
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                for (let i = 0; i < 8; i++) {
+                    const x = (i % 4) * 200 + 50;
+                    const y = Math.floor(i / 4) * 300 + 50;
+                    this.ctx.fillRect(x, y, 100, 80);
+                }
+                
+                // Draw landing zone circle (spawn area)
+                this.ctx.strokeStyle = '#00ff88';
+                this.ctx.lineWidth = 2;
+                this.ctx.globalAlpha = 0.3;
+                this.ctx.beginPath();
+                this.ctx.arc(this.landingZone.x, this.landingZone.y, this.landingZone.radius, 0, Math.PI * 2);
+                this.ctx.stroke();
+                this.ctx.globalAlpha = 1;
+                
+                // Draw crashed outpost
+                this.ctx.fillStyle = '#8b6914';
+                this.ctx.fillRect(this.outpost.x - this.outpost.width/2, this.outpost.y - this.outpost.height/2, 
+                                  this.outpost.width, this.outpost.height);
+                
+                // Outpost border (damaged aesthetic)
+                this.ctx.strokeStyle = '#ff6600';
+                this.ctx.lineWidth = 3;
+                this.ctx.strokeRect(this.outpost.x - this.outpost.width/2, this.outpost.y - this.outpost.height/2,
+                                    this.outpost.width, this.outpost.height);
+                
+                // Draw artifact (inside outpost)
+                if (!this.artifact.collected) {
+                    this.ctx.fillStyle = '#ffff00';
+                    this.ctx.globalAlpha = 0.8;
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.artifact.x, this.artifact.y, this.artifact.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Glow effect
+                    this.ctx.strokeStyle = '#ffff00';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.globalAlpha = 0.4;
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.artifact.x, this.artifact.y, this.artifact.size + 8, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                    this.ctx.globalAlpha = 1;
+                }
+                
+                // Draw enemies
+                for (const enemy of this.enemies) {
+                    if (enemy.state === 'dead') continue;
+                    
+                    // Enemy body
+                    this.ctx.fillStyle = '#ff6600';
+                    this.ctx.fillRect(enemy.x - enemy.size, enemy.y - enemy.size, 
+                                     enemy.size * 2, enemy.size * 2);
+                    
+                    // Enemy direction
+                    this.ctx.fillStyle = '#ffaa00';
+                    this.ctx.fillRect(
+                        enemy.x + Math.cos(enemy.angle) * enemy.size - 1,
+                        enemy.y + Math.sin(enemy.angle) * enemy.size - 1,
+                        2, 2
+                    );
+                    
+                    // Health bar
+                    this.ctx.fillStyle = '#333';
+                    this.ctx.fillRect(enemy.x - enemy.size - 2, enemy.y - enemy.size - 8, enemy.size * 4 + 4, 4);
+                    this.ctx.fillStyle = enemy.health > 15 ? '#00ff88' : '#ff4444';
+                    this.ctx.fillRect(enemy.x - enemy.size - 1, enemy.y - enemy.size - 7, 
+                                     (enemy.health / enemy.maxHealth) * (enemy.size * 4 + 2), 2);
+                }
+                
+                // Draw projectiles
+                this.ctx.fillStyle = '#00d4ff';
+                for (const proj of this.projectiles) {
+                    this.ctx.fillRect(proj.x - proj.size/2, proj.y - proj.size/2, proj.size, proj.size);
+                }
+                
+                // Draw player
+                this.ctx.fillStyle = '#00d4ff';
+                this.ctx.fillRect(this.player.x - this.player.size, this.player.y - this.player.size,
+                                 this.player.size * 2, this.player.size * 2);
+                
+                // Player aiming indicator
+                this.ctx.strokeStyle = '#00d4ff';
+                this.ctx.lineWidth = 1;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.player.x, this.player.y);
+                this.ctx.lineTo(
+                    this.player.x + Math.cos(this.player.angle) * 30,
+                    this.player.y + Math.sin(this.player.angle) * 30
+                );
+                this.ctx.stroke();
+                
+                // Draw HUD
+                this.renderHUD();
+            }
+            
+            renderHUD() {
+                // Player health bar (top-left)
+                this.ctx.fillStyle = '#333';
+                this.ctx.fillRect(20, 20, 200, 20);
+                
+                const healthPercent = Math.max(0, this.player.health / this.player.maxHealth);
+                this.ctx.fillStyle = healthPercent > 0.3 ? '#00ff88' : '#ff4444';
+                this.ctx.fillRect(22, 22, 196 * healthPercent, 16);
+                
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.font = '12px Arial';
+                this.ctx.fillText('HEALTH: ' + Math.max(0, Math.round(this.player.health)), 30, 33);
+                
+                // Ammo counter (top-right)
+                this.ctx.fillStyle = '#ffaa00';
+                this.ctx.font = 'bold 14px Arial';
+                this.ctx.textAlign = 'right';
+                this.ctx.fillText('AMMO: ' + this.player.ammo, this.canvas.width - 30, 35);
+                this.ctx.textAlign = 'left';
+                
+                // Objectives display (top-center)
+                this.ctx.fillStyle = '#00d4ff';
+                this.ctx.font = 'bold 14px Arial';
+                this.ctx.textAlign = 'center';
+                const objText = !gameState.missionObjectives.artifactFound ? '[  ] Find Artifact' :
+                               !gameState.missionObjectives.extracted ? '[✓] Find Artifact | [ ] Return to LZ' :
+                               '[✓] MISSION COMPLETE';
+                this.ctx.fillText(objText, this.canvas.width / 2, 35);
+                this.ctx.textAlign = 'left';
+                
+                // Enemy count
+                const livingEnemies = this.enemies.filter(e => e.state !== 'dead').length;
+                this.ctx.fillStyle = livingEnemies > 0 ? '#ff4444' : '#00ff88';
+                this.ctx.font = '12px Arial';
+                this.ctx.fillText('ENEMIES: ' + livingEnemies, 30, 60);
+                
+                // Artifact collected indicator
+                if (gameState.missionObjectives.artifactFound) {
+                    this.ctx.fillStyle = '#ffff00';
+                    this.ctx.font = 'bold 16px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('★ ARTIFACT COLLECTED ★', this.canvas.width / 2, 70);
+                    this.ctx.textAlign = 'left';
+                }
+            }
         }
 
         window.addEventListener('load', () => {
