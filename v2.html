@@ -678,6 +678,48 @@
             initPlanets();
         }
         
+        // Simple Perlin-like noise function for realistic surfaces
+        function noise(x, y, seed = 0) {
+            const n = Math.sin(x * 12.9898 + y * 78.233 + seed) * 43758.5453;
+            return n - Math.floor(n);
+        }
+        
+        function perlinNoise(x, y, scale = 10, seed = 0) {
+            const xi = Math.floor(x / scale);
+            const yi = Math.floor(y / scale);
+            const xf = (x / scale) - xi;
+            const yf = (y / scale) - yi;
+            
+            // Smoothstep interpolation
+            const u = xf * xf * (3.0 - 2.0 * xf);
+            const v = yf * yf * (3.0 - 2.0 * yf);
+            
+            const n00 = noise(xi, yi, seed);
+            const n10 = noise(xi + 1, yi, seed);
+            const n01 = noise(xi, yi + 1, seed);
+            const n11 = noise(xi + 1, yi + 1, seed);
+            
+            const nx0 = n00 * (1.0 - u) + n10 * u;
+            const nx1 = n01 * (1.0 - u) + n11 * u;
+            return nx0 * (1.0 - v) + nx1 * v;
+        }
+        
+        function fractalNoise(x, y, octaves = 4, persistence = 0.5, scale = 20, seed = 0) {
+            let value = 0;
+            let amplitude = 1;
+            let frequency = 1;
+            let maxValue = 0;
+            
+            for (let i = 0; i < octaves; i++) {
+                value += perlinNoise(x * frequency, y * frequency, scale, seed + i) * amplitude;
+                maxValue += amplitude;
+                amplitude *= persistence;
+                frequency *= 2;
+            }
+            
+            return value / maxValue;
+        }
+        
         // Draw realistic planets with Canvas
         function drawPlanet(canvas, type) {
             const ctx = canvas.getContext('2d');
@@ -687,224 +729,387 @@
             ctx.clearRect(0, 0, size, size);
             
             if (type === 1) {
-                // Lava planet (orange/red)
+                // Lava planet
                 drawLavaPlanet(ctx, radius, size);
             } else if (type === 2) {
-                // Ice planet (blue/white)
+                // Ice planet
                 drawIcePlanet(ctx, radius, size);
             } else if (type === 3) {
-                // Forest planet (green/blue)
+                // Forest planet (Earth-like)
                 drawForestPlanet(ctx, radius, size);
             } else if (type === 4) {
-                // Gas giant (purple)
+                // Gas giant (Jupiter)
                 drawGasGiant(ctx, radius, size);
             } else if (type === 5) {
-                // Pink planet with rings
+                // Ringed planet (Saturn)
                 drawRingedPlanet(ctx, radius, size);
             }
         }
         
         function drawLavaPlanet(ctx, radius, size) {
             const x = size / 2, y = size / 2;
+            const imageData = ctx.createImageData(size, size);
+            const data = imageData.data;
             
-            // Main surface
-            const grad = ctx.createRadialGradient(x * 0.7, y * 0.6, 0, x, y, radius);
-            grad.addColorStop(0, '#ff6b35');
-            grad.addColorStop(0.5, '#d84315');
-            grad.addColorStop(1, '#8b0000');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Lava cracks
-            ctx.strokeStyle = '#ffaa00';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < 8; i++) {
-                const angle = (Math.PI * 2 * i) / 8;
-                ctx.beginPath();
-                ctx.moveTo(x, y);
-                ctx.lineTo(x + Math.cos(angle) * radius * 0.7, y + Math.sin(angle) * radius * 0.7);
-                ctx.stroke();
+            // Create detailed lava surface with noise
+            for (let py = 0; py < size; py++) {
+                for (let px = 0; px < size; px++) {
+                    const dx = px - x;
+                    const dy = py - y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist <= radius) {
+                        // 3D sphere effect
+                        const z = Math.sqrt(radius * radius - dist * dist);
+                        const normal = z / radius;
+                        const angle = Math.atan2(dy, dx);
+                        
+                        // Multi-octave noise for lava surface
+                        const n1 = fractalNoise(px / 5, py / 5, 4, 0.6, 20, 0);
+                        const n2 = fractalNoise(px / 10, py / 10, 3, 0.5, 15, 100);
+                        const heat = n1 * 0.7 + n2 * 0.3;
+                        
+                        // Lava color based on height/temperature
+                        let r, g, b;
+                        if (heat > 0.7) {
+                            // Bright lava
+                            r = Math.floor(255);
+                            g = Math.floor(200 + heat * 55);
+                            b = Math.floor(50);
+                        } else if (heat > 0.4) {
+                            // Medium lava
+                            r = Math.floor(255 - (0.7 - heat) * 100);
+                            g = Math.floor(100);
+                            b = Math.floor(30);
+                        } else {
+                            // Cooled lava
+                            r = Math.floor(150 - heat * 50);
+                            g = Math.floor(50);
+                            b = Math.floor(20);
+                        }
+                        
+                        // Lighting from top-left
+                        const light = Math.max(0.4, (normal * 0.7 + 0.3) * (0.6 + Math.sin(angle) * 0.2));
+                        r = Math.floor(r * light);
+                        g = Math.floor(g * light);
+                        b = Math.floor(b * light);
+                        
+                        const idx = (py * size + px) * 4;
+                        data[idx] = r;
+                        data[idx + 1] = g;
+                        data[idx + 2] = b;
+                        data[idx + 3] = 255;
+                    }
+                }
             }
             
-            // Glow/atmosphere
-            ctx.fillStyle = 'rgba(255, 170, 0, 0.2)';
-            ctx.beginPath();
-            ctx.arc(x, y, radius * 1.15, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.putImageData(imageData, 0, 0);
             
-            // Lighting
-            const lightGrad = ctx.createRadialGradient(x * 0.6, y * 0.5, 0, x, y, radius * 2);
-            lightGrad.addColorStop(0, 'rgba(255, 255, 200, 0.15)');
-            lightGrad.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
-            ctx.fillStyle = lightGrad;
+            // Atmospheric glow
+            const atmo = ctx.createRadialGradient(x, y, radius * 0.95, x, y, radius * 1.25);
+            atmo.addColorStop(0, 'rgba(255, 120, 0, 0.3)');
+            atmo.addColorStop(1, 'rgba(255, 60, 0, 0)');
+            ctx.fillStyle = atmo;
             ctx.fillRect(0, 0, size, size);
         }
         
         function drawIcePlanet(ctx, radius, size) {
             const x = size / 2, y = size / 2;
+            const imageData = ctx.createImageData(size, size);
+            const data = imageData.data;
             
-            // Main surface
-            const grad = ctx.createRadialGradient(x * 0.7, y * 0.6, 0, x, y, radius);
-            grad.addColorStop(0, '#e3f2fd');
-            grad.addColorStop(0.4, '#81d4fa');
-            grad.addColorStop(1, '#0277bd');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Ice patches
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            for (let i = 0; i < 6; i++) {
-                const px = x + Math.cos(i) * radius * 0.5;
-                const py = y + Math.sin(i) * radius * 0.5;
-                ctx.beginPath();
-                ctx.arc(px, py, radius * 0.15, 0, Math.PI * 2);
-                ctx.fill();
+            for (let py = 0; py < size; py++) {
+                for (let px = 0; px < size; px++) {
+                    const dx = px - x;
+                    const dy = py - y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist <= radius) {
+                        const z = Math.sqrt(radius * radius - dist * dist);
+                        const normal = z / radius;
+                        const angle = Math.atan2(dy, dx);
+                        const latitude = Math.acos(Math.sqrt(1 - (dist / radius) ** 2));
+                        
+                        // Multi-octave noise for ice/water
+                        const n1 = fractalNoise(px / 8, py / 8, 4, 0.65, 25, 200);
+                        const n2 = fractalNoise(px / 20, py / 20, 3, 0.5, 40, 300);
+                        const detail = n1 * 0.6 + n2 * 0.4;
+                        
+                        // Ice caps and water
+                        let r, g, b;
+                        if (Math.abs(latitude - Math.PI / 2) < 0.4) {
+                            // Ice caps
+                            const ice = 0.8 + detail * 0.2;
+                            r = Math.floor(240 * ice);
+                            g = Math.floor(248 * ice);
+                            b = Math.floor(255 * ice);
+                        } else if (detail > 0.6) {
+                            // Water
+                            r = Math.floor(20 + detail * 40);
+                            g = Math.floor(120 + detail * 60);
+                            b = Math.floor(200 + detail * 40);
+                        } else {
+                            // Ice patches on ocean
+                            r = Math.floor(180 + detail * 40);
+                            g = Math.floor(220 + detail * 30);
+                            b = Math.floor(240);
+                        }
+                        
+                        // Realistic lighting
+                        const light = Math.max(0.3, normal * 0.8 + 0.2) * (0.7 + Math.cos(angle) * 0.2);
+                        r = Math.floor(r * light);
+                        g = Math.floor(g * light);
+                        b = Math.floor(b * light);
+                        
+                        const idx = (py * size + px) * 4;
+                        data[idx] = r;
+                        data[idx + 1] = g;
+                        data[idx + 2] = b;
+                        data[idx + 3] = 255;
+                    }
+                }
             }
             
-            // Atmosphere glow
-            const atmosphereGrad = ctx.createRadialGradient(x, y, radius * 0.9, x, y, radius * 1.2);
-            atmosphereGrad.addColorStop(0, 'rgba(129, 212, 250, 0.3)');
-            atmosphereGrad.addColorStop(1, 'rgba(2, 119, 189, 0.1)');
-            ctx.fillStyle = atmosphereGrad;
-            ctx.beginPath();
-            ctx.arc(x, y, radius * 1.15, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.putImageData(imageData, 0, 0);
+            
+            // Atmospheric haze
+            const atmo = ctx.createRadialGradient(x, y, radius * 0.9, x, y, radius * 1.3);
+            atmo.addColorStop(0, 'rgba(200, 230, 255, 0.2)');
+            atmo.addColorStop(1, 'rgba(100, 180, 255, 0)');
+            ctx.fillStyle = atmo;
+            ctx.fillRect(0, 0, size, size);
         }
         
         function drawForestPlanet(ctx, radius, size) {
             const x = size / 2, y = size / 2;
+            const imageData = ctx.createImageData(size, size);
+            const data = imageData.data;
             
-            // Ocean base
-            const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
-            grad.addColorStop(0, '#1e88e5');
-            grad.addColorStop(0.6, '#0d47a1');
-            grad.addColorStop(1, '#051c4d');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Continents (forest)
-            ctx.fillStyle = '#1b5e20';
-            for (let i = 0; i < 5; i++) {
-                const cx = x + Math.cos(i * 1.2) * radius * 0.5;
-                const cy = y + Math.sin(i * 1.2) * radius * 0.5;
-                ctx.beginPath();
-                ctx.arc(cx, cy, radius * 0.25, 0, Math.PI * 2);
-                ctx.fill();
+            // Create Earth-like planet
+            for (let py = 0; py < size; py++) {
+                for (let px = 0; px < size; px++) {
+                    const dx = px - x;
+                    const dy = py - y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist <= radius) {
+                        const z = Math.sqrt(radius * radius - dist * dist);
+                        const normal = z / radius;
+                        const angle = Math.atan2(dy, dx);
+                        const latRatio = dist / radius;
+                        
+                        // Complex terrain generation
+                        const terrain = fractalNoise(px / 10, py / 10, 5, 0.7, 30, 400);
+                        const clouds = fractalNoise(px / 15, py / 15, 4, 0.6, 25, 500);
+                        
+                        let r, g, b;
+                        
+                        if (terrain < 0.35) {
+                            // Deep ocean
+                            r = 10; g = 40; b = 80;
+                        } else if (terrain < 0.45) {
+                            // Shallow ocean
+                            r = 20; g = 80; b = 120;
+                        } else if (terrain < 0.50) {
+                            // Beach/sand
+                            r = 200; g = 180; b = 80;
+                        } else if (terrain < 0.70) {
+                            // Forest
+                            r = 20 + terrain * 60; g = 100 + terrain * 80; b = 20;
+                        } else {
+                            // Mountains
+                            r = 120 + terrain * 80; g = 100 + terrain * 60; b = 80 + terrain * 40;
+                        }
+                        
+                        // Cloud coverage
+                        if (clouds > 0.7) {
+                            const cloudBlend = (clouds - 0.7) * 3.33;
+                            r = Math.floor(r * (1 - cloudBlend * 0.4) + 240 * cloudBlend * 0.5);
+                            g = Math.floor(g * (1 - cloudBlend * 0.4) + 245 * cloudBlend * 0.5);
+                            b = Math.floor(b * (1 - cloudBlend * 0.4) + 250 * cloudBlend * 0.5);
+                        }
+                        
+                        // Realistic lighting - sun from top-left
+                        const light = Math.max(0.35, normal * 0.65 + 0.35) * (0.8 + Math.cos(angle) * 0.15);
+                        r = Math.floor(r * light);
+                        g = Math.floor(g * light);
+                        b = Math.floor(b * light);
+                        
+                        const idx = (py * size + px) * 4;
+                        data[idx] = r;
+                        data[idx + 1] = g;
+                        data[idx + 2] = b;
+                        data[idx + 3] = 255;
+                    }
+                }
             }
             
-            // Cloud patterns
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-            for (let i = 0; i < 8; i++) {
-                const angle = (Math.PI * 2 * i) / 8;
-                const cx = x + Math.cos(angle) * radius * 0.3;
-                const cy = y + Math.sin(angle) * radius * 0.3;
-                ctx.beginPath();
-                ctx.arc(cx, cy, radius * 0.1, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            ctx.putImageData(imageData, 0, 0);
             
-            // Atmosphere
-            const atmo = ctx.createRadialGradient(x, y, radius, x, y, radius * 1.2);
-            atmo.addColorStop(0, 'rgba(30, 136, 229, 0.2)');
-            atmo.addColorStop(1, 'rgba(5, 28, 77, 0.1)');
+            // Atmospheric scattering
+            const atmo = ctx.createRadialGradient(x, y, radius * 0.85, x, y, radius * 1.35);
+            atmo.addColorStop(0, 'rgba(135, 206, 235, 0.25)');
+            atmo.addColorStop(0.5, 'rgba(100, 150, 200, 0.1)');
+            atmo.addColorStop(1, 'rgba(50, 100, 150, 0)');
             ctx.fillStyle = atmo;
-            ctx.beginPath();
-            ctx.arc(x, y, radius * 1.15, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.fillRect(0, 0, size, size);
         }
         
         function drawGasGiant(ctx, radius, size) {
             const x = size / 2, y = size / 2;
+            const imageData = ctx.createImageData(size, size);
+            const data = imageData.data;
             
-            // Striped surface
-            const grad = ctx.createRadialGradient(x * 0.8, y * 0.6, 0, x, y, radius);
-            grad.addColorStop(0, '#b39ddb');
-            grad.addColorStop(0.5, '#7e57c2');
-            grad.addColorStop(1, '#4527a0');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Cloud bands
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-            ctx.lineWidth = 4;
-            for (let i = 0; i < 6; i++) {
-                const by = y - radius * 0.8 + i * (radius * 1.6 / 6);
-                ctx.beginPath();
-                ctx.arc(x, by, radius * 0.8, 0, Math.PI);
-                ctx.stroke();
+            for (let py = 0; py < size; py++) {
+                for (let px = 0; px < size; px++) {
+                    const dx = px - x;
+                    const dy = py - y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist <= radius) {
+                        const z = Math.sqrt(radius * radius - dist * dist);
+                        const normal = z / radius;
+                        const yRatio = (py - y) / radius;
+                        
+                        // Atmospheric bands
+                        const bandPattern = Math.sin(yRatio * Math.PI * 4) * 0.5 + 0.5;
+                        const cloudNoise = fractalNoise(px / 12, py / 6, 4, 0.65, 20, 600);
+                        const stormNoise = fractalNoise(px / 20, py / 25, 3, 0.55, 30, 700);
+                        
+                        let r, g, b;
+                        
+                        // Base color with band variation
+                        if (bandPattern > 0.7) {
+                            // Light bands
+                            r = Math.floor(200 + cloudNoise * 30);
+                            g = Math.floor(180 + cloudNoise * 30);
+                            b = Math.floor(220 + cloudNoise * 20);
+                        } else if (bandPattern > 0.4) {
+                            // Medium bands
+                            r = Math.floor(140 + cloudNoise * 40);
+                            g = Math.floor(100 + cloudNoise * 50);
+                            b = Math.floor(180 + cloudNoise * 30);
+                        } else {
+                            // Dark bands
+                            r = Math.floor(80 + cloudNoise * 50);
+                            g = Math.floor(50 + cloudNoise * 40);
+                            b = Math.floor(140 + cloudNoise * 40);
+                        }
+                        
+                        // Great Red Spot
+                        const spotDist = Math.sqrt((px - (x + 150)) ** 2 + (py - (y + 100)) ** 2);
+                        if (spotDist < 80) {
+                            const spotIntensity = Math.max(0, 1 - spotDist / 80);
+                            r = Math.floor(r * 0.6 + 200 * spotIntensity);
+                            g = Math.floor(g * 0.6 + 80 * spotIntensity);
+                            b = Math.floor(b * 0.6 + 50 * spotIntensity);
+                        }
+                        
+                        // Lighting
+                        const light = Math.max(0.3, normal * 0.7 + 0.3);
+                        r = Math.floor(r * light);
+                        g = Math.floor(g * light);
+                        b = Math.floor(b * light);
+                        
+                        const idx = (py * size + px) * 4;
+                        data[idx] = r;
+                        data[idx + 1] = g;
+                        data[idx + 2] = b;
+                        data[idx + 3] = 255;
+                    }
+                }
             }
             
-            // Great spot
-            ctx.fillStyle = 'rgba(168, 85, 247, 0.4)';
-            ctx.beginPath();
-            ctx.arc(x + radius * 0.3, y + radius * 0.2, radius * 0.2, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.putImageData(imageData, 0, 0);
             
-            // Glow
-            const glow = ctx.createRadialGradient(x, y, radius, x, y, radius * 1.2);
-            glow.addColorStop(0, 'rgba(180, 157, 219, 0.25)');
-            glow.addColorStop(1, 'rgba(69, 39, 160, 0.1)');
-            ctx.fillStyle = glow;
-            ctx.beginPath();
-            ctx.arc(x, y, radius * 1.15, 0, Math.PI * 2);
-            ctx.fill();
+            // Atmospheric glow
+            const atmo = ctx.createRadialGradient(x, y, radius, x, y, radius * 1.3);
+            atmo.addColorStop(0, 'rgba(200, 180, 230, 0.2)');
+            atmo.addColorStop(1, 'rgba(100, 80, 180, 0)');
+            ctx.fillStyle = atmo;
+            ctx.fillRect(0, 0, size, size);
         }
         
         function drawRingedPlanet(ctx, radius, size) {
             const x = size / 2, y = size / 2;
+            const imageData = ctx.createImageData(size, size);
+            const data = imageData.data;
             
-            // Rings (behind)
-            ctx.strokeStyle = 'rgba(236, 72, 153, 0.3)';
-            ctx.lineWidth = 15;
-            ctx.beginPath();
-            ctx.ellipse(x, y, radius * 1.4, radius * 0.5, Math.PI / 6, 0, Math.PI * 2);
-            ctx.stroke();
-            
-            // Planet surface
-            const grad = ctx.createRadialGradient(x * 0.7, y * 0.6, 0, x, y, radius);
-            grad.addColorStop(0, '#f48fb1');
-            grad.addColorStop(0.5, '#ec407a');
-            grad.addColorStop(1, '#c2185b');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Surface detail
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-            for (let i = 0; i < 10; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const dist = Math.random() * radius * 0.7;
-                const cx = x + Math.cos(angle) * dist;
-                const cy = y + Math.sin(angle) * dist;
-                ctx.beginPath();
-                ctx.arc(cx, cy, Math.random() * radius * 0.1 + 2, 0, Math.PI * 2);
-                ctx.fill();
+            // Draw planet surface with clouds
+            for (let py = 0; py < size; py++) {
+                for (let px = 0; px < size; px++) {
+                    const dx = px - x;
+                    const dy = py - y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist <= radius) {
+                        const z = Math.sqrt(radius * radius - dist * dist);
+                        const normal = z / radius;
+                        
+                        // Layered clouds
+                        const cloudBase = fractalNoise(px / 10, py / 12, 4, 0.65, 25, 800);
+                        const cloudDetail = fractalNoise(px / 5, py / 5, 3, 0.5, 15, 850);
+                        const cloudCoverage = cloudBase * 0.7 + cloudDetail * 0.3;
+                        
+                        let r, g, b;
+                        
+                        if (cloudCoverage > 0.7) {
+                            // Bright clouds
+                            r = Math.floor(240 - cloudCoverage * 40);
+                            g = Math.floor(200 - cloudCoverage * 30);
+                            b = Math.floor(220 - cloudCoverage * 20);
+                        } else if (cloudCoverage > 0.4) {
+                            // Medium clouds
+                            r = Math.floor(220 + cloudCoverage * 15);
+                            g = Math.floor(160 + cloudCoverage * 20);
+                            b = Math.floor(200);
+                        } else {
+                            // Clear atmosphere
+                            r = Math.floor(180 + (1 - cloudCoverage) * 40);
+                            g = Math.floor(120 + (1 - cloudCoverage) * 50);
+                            b = Math.floor(200);
+                        }
+                        
+                        // Realistic lighting - sun from upper left
+                        const light = Math.max(0.35, normal * 0.65 + 0.35);
+                        r = Math.floor(r * light);
+                        g = Math.floor(g * light);
+                        b = Math.floor(b * light);
+                        
+                        const idx = (py * size + px) * 4;
+                        data[idx] = r;
+                        data[idx + 1] = g;
+                        data[idx + 2] = b;
+                        data[idx + 3] = 255;
+                    }
+                }
             }
             
-            // Rings (front)
-            ctx.strokeStyle = 'rgba(236, 72, 153, 0.5)';
-            ctx.lineWidth = 15;
-            ctx.beginPath();
-            ctx.ellipse(x, y, radius * 1.4, radius * 0.5, Math.PI / 6, 0, Math.PI * 2);
-            ctx.stroke();
+            ctx.putImageData(imageData, 0, 0);
             
-            // Atmosphere
-            const atmo = ctx.createRadialGradient(x, y, radius, x, y, radius * 1.2);
-            atmo.addColorStop(0, 'rgba(236, 72, 153, 0.15)');
-            atmo.addColorStop(1, 'rgba(193, 24, 91, 0.05)');
+            // Draw detailed rings (behind planet)
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(Math.PI / 5);
+            
+            // Ring bands with shadows
+            for (let ringSize = radius * 1.6; ringSize > radius * 0.9; ringSize -= 15) {
+                const opacity = Math.max(0.1, (ringSize - radius * 0.9) / (radius * 0.7)) * 0.5;
+                ctx.strokeStyle = `rgba(220, 150, 200, ${opacity})`;
+                ctx.lineWidth = 8;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, ringSize, ringSize * 0.3, 0, 0, Math.PI);
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+            
+            // Atmospheric glow
+            const atmo = ctx.createRadialGradient(x, y, radius * 0.9, x, y, radius * 1.25);
+            atmo.addColorStop(0, 'rgba(220, 150, 180, 0.2)');
+            atmo.addColorStop(1, 'rgba(150, 100, 150, 0)');
             ctx.fillStyle = atmo;
-            ctx.beginPath();
-            ctx.arc(x, y, radius * 1.15, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.fillRect(0, 0, size, size);
         }
         
         // Initialize floating planets with parallax
