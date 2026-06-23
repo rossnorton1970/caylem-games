@@ -2591,12 +2591,13 @@
                 gadgetDatabase[gameState.loadout.gadget].name;
             
             gameState.loadoutReady = loadoutSummary;
+            gameState.loadoutEquipped = true;
+            
+            // Just close armory, return to ship hub
             closeInteractionModal();
             
-            // Trigger CINEMATIC DROPSHIP DEPLOYMENT
-            setTimeout(() => {
-                startCinematicDropship();
-            }, 100);
+            // Show message
+            alert('✅ Loadout equipped!\n\nWalk to the DROPSHIP room and press E to launch.');
         }
         
         // Start game
@@ -3066,11 +3067,28 @@
                     `;
                     break;
                 case 'dropship':
+                    const loadoutStatus = gameState.loadoutEquipped ? 
+                        `<div style="background: rgba(0, 255, 136, 0.15); border-left: 4px solid #00ff88; padding: 12px; border-radius: 3px; margin-bottom: 15px; color: #00ff88;">✓ Loadout equipped and ready</div>` :
+                        `<div style="background: rgba(255, 100, 100, 0.15); border-left: 4px solid #ff6464; padding: 12px; border-radius: 3px; margin-bottom: 15px; color: #ff6464;">⚠ You must equip a loadout in the Armory first!</div>`;
+                    
                     modalContent.innerHTML = `
-                        <div class="interaction-modal-header">🚀 DROPSHIP</div>
+                        <div class="interaction-modal-header">🚀 DROPSHIP BAY — LAUNCH TUBES</div>
                         <div class="interaction-modal-content">
-                            <p>Deployment platform ready for launch!</p>
-                            <p style="margin-top: 15px; font-size: 12px; color: #666;">Select a mission from the Control Room to launch.</p>
+                            ${loadoutStatus}
+                            <p style="color: #aaa; font-size: 13px; margin-bottom: 20px;">Select a launch tube to begin deployment:</p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div style="background: #1a2a4a; border: 2px solid #0088ff; padding: 15px; border-radius: 5px; text-align: center; cursor: pointer;" onclick="launchFromDropship()">
+                                    <div style="font-size: 24px; margin-bottom: 8px;">🔫</div>
+                                    <div style="color: #0088ff; font-weight: bold; font-size: 14px;">TUBE 1</div>
+                                    <div style="color: #666; font-size: 11px; margin-top: 5px;">Standard Insertion</div>
+                                </div>
+                                <div style="background: #1a2a4a; border: 2px solid #0088ff; padding: 15px; border-radius: 5px; text-align: center; cursor: pointer;" onclick="launchFromDropship()">
+                                    <div style="font-size: 24px; margin-bottom: 8px;">⚡</div>
+                                    <div style="color: #0088ff; font-weight: bold; font-size: 14px;">TUBE 2</div>
+                                    <div style="color: #666; font-size: 11px; margin-top: 5px;">Rapid Deployment</div>
+                                </div>
+                            </div>
+                            <p style="color: #666; font-size: 12px; margin-top: 20px;">Once launched, press ESC to skip the cinematic.</p>
                         </div>
                     `;
                     break;
@@ -4294,6 +4312,11 @@
         
         // Function to initiate cinematic
         function startCinematicDropship() {
+            cinematicDropshipSequence.init();
+        }
+        
+        function launchFromDropship() {
+            // Called when player enters launch tube in Dropship room
             cinematicDropshipSequence.init();
         }
         
