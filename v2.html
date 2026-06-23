@@ -75,12 +75,11 @@
             overflow: hidden;
         }
 
-        /* Main foreground planet - massive and close */
+        /* Main foreground planet - massive and close, bottom-left */
         #mainPlanet {
             position: absolute;
-            bottom: -30%;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: -25%;
+            left: -15%;
             width: 150vw;
             height: 150vw;
             max-width: 2000px;
@@ -114,11 +113,15 @@
 
         @keyframes float {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(10deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
         }
 
         .menu-planet-item {
-            animation: float 8s ease-in-out infinite;
+            animation: float 25s ease-in-out infinite;
+        }
+        
+        #mainPlanet {
+            animation: float 30s ease-in-out infinite;
         }
 
         .menu-content {
@@ -1152,9 +1155,6 @@
             drawPlanet(mainCanvas, 3); // Earth-like planet
             mainPlanetDiv.appendChild(mainCanvas);
             
-            // Add subtle floating animation to main planet
-            mainPlanetDiv.style.animation = 'float 12s ease-in-out infinite';
-            
             // Create distance planets (tiny, far away)
             const planetsContainer = document.getElementById('planetsContainer');
             const distancePlanets = [
@@ -1188,7 +1188,7 @@
                 const y = (e.clientY / window.innerHeight) - 0.5;
                 
                 planets.forEach((planet, index) => {
-                    const depth = 3; // Subtle parallax
+                    const depth = 1.5; // Very subtle parallax
                     const offsetX = x * depth;
                     const offsetY = y * depth;
                     planet.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
