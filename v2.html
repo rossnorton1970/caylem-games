@@ -418,6 +418,11 @@
             credits: 500,
             materials: 2,
             lastMissionReward: null,
+            artifacts: [],
+            activeAnalysis: null,
+            completedResearch: [],
+            researchProgress: {},
+            organizationTrust: 0,
             ship: {
                 hull: 100,
                 maxHull: 100,
@@ -425,7 +430,71 @@
                 maxShield: 100,
                 weaponLevel: 1,
                 shieldLevel: 1,
-                researches: {}
+                engineLevel: 1,
+                researches: {},
+                appliedTechs: []
+            }
+        };
+
+        // Artifact definitions
+        const artifactTypes = {
+            WeaponCore: {
+                names: ['Crystalline Energy Core', 'Plasma Catalyst', 'Quantum Emitter', 'Kinetic Destabilizer'],
+                rarity: ['common', 'rare', 'exotic'],
+                techUnlock: 'advWeapons',
+                bonusType: 'weaponDamage'
+            },
+            ShieldMatrix: {
+                names: ['Adaptive Shield Matrix', 'Resonance Lattice', 'Harmonic Barrier', 'Force Weaver'],
+                rarity: ['common', 'rare', 'exotic'],
+                techUnlock: 'shieldTech',
+                bonusType: 'shieldAbsorption'
+            },
+            EnergyCell: {
+                names: ['Exotic Propulsion System', 'Thrust Amplifier', 'Engine Booster', 'Velocity Matrix'],
+                rarity: ['common', 'rare'],
+                techUnlock: 'engineOptimization',
+                bonusType: 'engineSpeed'
+            },
+            DataCore: {
+                names: ['Biological Data', 'Enemy Weakness Analysis', 'Strategic Databank', 'Intelligence Core'],
+                rarity: ['rare', 'exotic'],
+                techUnlock: 'advAnalytics',
+                bonusType: 'rewardBonus'
+            }
+        };
+
+        // Tech system
+        const techSystem = {
+            advWeapons: {
+                name: 'Advanced Weapon Systems',
+                desc: 'Unlocked by Weapon Cores. Increases weapon damage by 20%.',
+                bonus: { weaponDamage: 20 },
+                requirement: 'WeaponCore'
+            },
+            shieldTech: {
+                name: 'Shield Technology',
+                desc: 'Unlocked by Shield Matrices. Increases shield absorption by 15%.',
+                bonus: { shieldAbsorption: 15 },
+                requirement: 'ShieldMatrix'
+            },
+            engineOptimization: {
+                name: 'Engine Optimization',
+                desc: 'Unlocked by Energy Cells. Increases engine speed.',
+                bonus: { engineSpeed: 10 },
+                requirement: 'EnergyCell'
+            },
+            advAnalytics: {
+                name: 'Advanced Analytics',
+                desc: 'Unlocked by Data Cores. Increases mission rewards by 25%.',
+                bonus: { rewardBonus: 25 },
+                requirement: 'DataCore'
+            },
+            hullReinforcement: {
+                name: 'Hull Reinforcement',
+                desc: 'Research in lab. Reduces repair costs by 20%.',
+                bonus: { repairCostReduction: 20 },
+                requirement: 'research'
             }
         };
 
@@ -754,9 +823,28 @@
                     `;
                     break;
                 case 'engineering':
+                    const appliedTechsDisplay = gameState.ship.appliedTechs.length > 0 ? `
+                        <div style="background: rgba(0, 255, 136, 0.1); border-left: 4px solid #00ff88; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
+                            <div style="color: #00ff88; font-weight: bold; margin-bottom: 10px; font-size: 13px;">✓ ACTIVE TECHNOLOGIES (${gameState.ship.appliedTechs.length})</div>
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+                                ${gameState.ship.appliedTechs.map(techId => {
+                                    const tech = techSystem[techId];
+                                    return `
+                                        <div style="background: rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 3px; border-left: 2px solid #00ff88;">
+                                            <div style="color: #00ff88; font-size: 11px; font-weight: bold;">✓ ${tech.name}</div>
+                                            <div style="color: #888; font-size: 10px; margin-top: 2px;">${tech.desc}</div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    ` : '';
+                    
                     modalContent.innerHTML = `
                         <div class="interaction-modal-header">⚙ ENGINEERING</div>
                         <div class="interaction-modal-content">
+                            ${appliedTechsDisplay}
+                            
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                                 <div style="background: rgba(255, 136, 0, 0.1); border-left: 4px solid #ff8800; padding: 12px; border-radius: 5px;">
                                     <div style="color: #ff8800; font-weight: bold; margin-bottom: 5px;">HULL INTEGRITY</div>
@@ -823,42 +911,99 @@
                     `;
                     break;
                 case 'researchLab':
-                    const techs = [
-                        { id: 'advWeapons', name: 'Advanced Weapons', cost: 5, desc: 'Unlocks weapon upgrades' },
-                        { id: 'shieldTech', name: 'Shield Technology', cost: 3, desc: 'Unlocks shield upgrades' },
-                        { id: 'hullReinforcement', name: 'Hull Reinforcement', cost: 4, desc: 'Reduces repair costs by 20%' },
-                        { id: 'energyEfficiency', name: 'Energy Efficiency', cost: 6, desc: 'Increases max shield strength' },
-                        { id: 'armorPlating', name: 'Advanced Armor', cost: 8, desc: 'Increases max hull integrity' },
-                        { id: 'weaponOptimization', name: 'Weapon Optimization', cost: 7, desc: 'Increases weapon damage further' }
-                    ];
+                    // Update active analysis progress
+                    if (gameState.activeAnalysis) {
+                        const elapsed = Date.now() - gameState.activeAnalysis.startTime;
+                        gameState.activeAnalysis.progress = Math.min(100, (elapsed / gameState.activeAnalysis.duration) * 100);
+                        if (gameState.activeAnalysis.progress >= 100) {
+                            completeAnalysis();
+                            return;
+                        }
+                    }
+                    
+                    const hqStats = `
+                        <div style="background: rgba(0, 255, 136, 0.1); border-left: 4px solid #00ff88; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
+                            <div style="color: #00ff88; font-weight: bold; margin-bottom: 10px; font-size: 13px;">📊 HQ REPORTING</div>
+                            <div style="color: #aaa; font-size: 12px; line-height: 1.6;">
+                                <div>Research Completed: <span style="color: #fff; font-weight: bold;">${gameState.completedResearch.length} / 4</span></div>
+                                <div>Technologies Integrated: <span style="color: #fff; font-weight: bold;">${gameState.ship.appliedTechs.length}</span></div>
+                                <div>Organization Trust: <span style="color: #ffcc00; font-weight: bold;">${gameState.organizationTrust}%</span></div>
+                                <div style="margin-top: 8px; color: #888; font-size: 11px;">Mission progress: ${Math.round(gameState.organizationTrust / 2)}% trusted</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Artifact inventory
+                    const artifactInventory = `
+                        <div style="background: rgba(187, 0, 255, 0.1); border-left: 4px solid #bb00ff; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
+                            <div style="color: #bb00ff; font-weight: bold; margin-bottom: 10px; font-size: 13px;">🔮 ARTIFACT INVENTORY (${gameState.artifacts.length})</div>
+                            ${gameState.artifacts.length === 0 ? `
+                                <div style="color: #666; font-size: 12px;">No artifacts yet. Complete missions to recover ancient tech.</div>
+                            ` : `
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 8px; max-height: 150px; overflow-y: auto;">
+                                    ${gameState.artifacts.map((artifact, idx) => `
+                                        <div style="background: rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 3px; border-left: 3px solid ${artifact.rarity === 'exotic' ? '#ff00ff' : artifact.rarity === 'rare' ? '#ffaa00' : '#00d4ff'};">
+                                            <div style="color: #fff; font-size: 11px; font-weight: bold;">${artifact.name}</div>
+                                            <div style="color: #888; font-size: 10px; margin: 2px 0;">Type: ${artifact.type} | Rarity: ${artifact.rarity}</div>
+                                            <div style="color: #aaa; font-size: 10px; margin: 2px 0; font-style: italic;">${artifact.lore}</div>
+                                            <button class="planet-btn" style="background: #bb00ff; font-size: 10px; padding: 4px; margin-top: 4px; width: 100%;" onclick="analyzeArtifact(${artifact.id})">ANALYZE</button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `}
+                        </div>
+                    `;
+                    
+                    // Active analysis
+                    const analysisUI = gameState.activeAnalysis ? `
+                        <div style="background: rgba(255, 165, 0, 0.1); border-left: 4px solid #ff8800; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
+                            <div style="color: #ff8800; font-weight: bold; margin-bottom: 10px; font-size: 13px;">⚗️ ANALYSIS IN PROGRESS</div>
+                            <div style="color: #aaa; font-size: 12px; margin-bottom: 8px;">${gameState.activeAnalysis.artifact.name}</div>
+                            <div style="background: #333; width: 100%; height: 10px; border-radius: 2px; overflow: hidden; margin-bottom: 8px;">
+                                <div style="background: linear-gradient(90deg, #ff8800, #ffaa00); width: ${gameState.activeAnalysis.progress}%; height: 100%; transition: width 0.2s;"></div>
+                            </div>
+                            <div style="color: #888; font-size: 11px;">${Math.round(gameState.activeAnalysis.progress)}% complete</div>
+                        </div>
+                    ` : '';
+                    
+                    // Completed research
+                    const completedResearchUI = `
+                        <div style="background: rgba(0, 255, 136, 0.1); border-left: 4px solid #00ff88; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
+                            <div style="color: #00ff88; font-weight: bold; margin-bottom: 10px; font-size: 13px;">✓ UNLOCKED TECHNOLOGIES</div>
+                            ${gameState.completedResearch.length === 0 ? `
+                                <div style="color: #666; font-size: 12px;">Analyze artifacts to unlock techs.</div>
+                            ` : `
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+                                    ${gameState.completedResearch.map(techId => {
+                                        const tech = techSystem[techId];
+                                        const isApplied = gameState.ship.appliedTechs.includes(techId);
+                                        return `
+                                            <div style="background: rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 3px;">
+                                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                                    <div>
+                                                        <div style="color: #fff; font-size: 11px; font-weight: bold;">${tech.name}</div>
+                                                        <div style="color: #888; font-size: 10px; margin-top: 2px;">${tech.desc}</div>
+                                                    </div>
+                                                    <div style="margin-left: 10px;">
+                                                        ${isApplied ? `<div style="color: #00ff88; font-size: 10px; font-weight: bold;">APPLIED ✓</div>` : ''}
+                                                    </div>
+                                                </div>
+                                                ${!isApplied ? `<button class="planet-btn" style="background: #00ff88; color: #000; font-size: 10px; padding: 4px; margin-top: 4px; width: 100%;" onclick="applyTech('${techId}')">APPLY TO SHIP</button>` : ''}
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            `}
+                        </div>
+                    `;
                     
                     modalContent.innerHTML = `
                         <div class="interaction-modal-header">🔬 RESEARCH LAB</div>
                         <div class="interaction-modal-content" style="font-size: 13px;">
-                            <div style="background: rgba(187, 0, 255, 0.1); border-left: 4px solid #bb00ff; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
-                                <div style="color: #bb00ff; font-weight: bold; margin-bottom: 5px;">RESEARCH MATERIALS</div>
-                                <div style="color: #ffcc00; font-weight: bold; font-size: 16px;">${gameState.materials} units available</div>
-                            </div>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
-                                ${techs.map((tech, idx) => {
-                                    const isResearched = gameState.ship.researches[tech.id];
-                                    return `
-                                        <div style="background: ${isResearched ? 'rgba(0, 255, 136, 0.1)' : 'rgba(100, 100, 100, 0.1)'}; border-left: 4px solid ${isResearched ? '#00ff88' : '#666'}; padding: 12px; border-radius: 5px;">
-                                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 5px;">
-                                                <div style="flex: 1;">
-                                                    <div style="color: ${isResearched ? '#00ff88' : '#aaa'}; font-weight: bold;">${isResearched ? '✓ ' : ''}${tech.name}</div>
-                                                    <div style="color: #666; font-size: 12px; margin-top: 3px;">${tech.desc}</div>
-                                                </div>
-                                                <div style="margin-left: 15px; text-align: right;">
-                                                    ${isResearched ? `<div style="color: #00ff88; font-weight: bold; font-size: 12px;">RESEARCHED</div>` : `<div style="color: #bb00ff; font-weight: bold;">${tech.cost} 📊</div>`}
-                                                </div>
-                                            </div>
-                                            ${!isResearched ? `<button class="planet-btn" style="background: ${gameState.materials >= tech.cost ? '#bb00ff' : '#333'}; color: ${gameState.materials >= tech.cost ? '#fff' : '#666'}; font-size: 11px; padding: 6px; cursor: ${gameState.materials >= tech.cost ? 'pointer' : 'not-allowed'};" onclick="researchTech('${tech.id}', ${tech.cost})" ${gameState.materials >= tech.cost ? '' : 'disabled'}>RESEARCH</button>` : ''}
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
+                            ${hqStats}
+                            ${artifactInventory}
+                            ${analysisUI}
+                            ${completedResearchUI}
                         </div>
                     `;
                     break;
@@ -1020,25 +1165,129 @@
             showRoomUI('controlRoom', rooms.controlRoom);
         }
 
+        // Generate random artifact
+        function generateArtifact() {
+            const types = Object.keys(artifactTypes);
+            const type = types[Math.floor(Math.random() * types.length)];
+            const artifactDef = artifactTypes[type];
+            const rarity = artifactDef.rarity[Math.floor(Math.random() * artifactDef.rarity.length)];
+            const name = artifactDef.names[Math.floor(Math.random() * artifactDef.names.length)];
+            
+            const researchValue = rarity === 'exotic' ? 30 : rarity === 'rare' ? 15 : 5;
+            const loreSnippets = {
+                WeaponCore: ['Radiates harmonic energy patterns.', 'Faintly glows with unknown power.', 'Ancient alien weapon technology.'],
+                ShieldMatrix: ['Shimmers with defensive potential.', 'Adapts to environmental forces.', 'Engineered by an advanced civilization.'],
+                EnergyCell: ['Pulses with boundless energy.', 'Propels faster than physics allows.', 'Source of immense kinetic potential.'],
+                DataCore: ['Contains vast computational archives.', 'Holds strategic enemy intelligence.', 'Biological patterns encoded within.']
+            };
+            const lore = loreSnippets[type][Math.floor(Math.random() * loreSnippets[type].length)];
+            
+            return {
+                id: Date.now() + Math.random(),
+                name: name,
+                type: type,
+                rarity: rarity,
+                researchValue: researchValue,
+                lore: lore,
+                unlocksRarity: rarity === 'exotic' ? 'legendary' : rarity
+            };
+        }
+
+        // Analyze artifact
+        function analyzeArtifact(artifactId) {
+            const artifact = gameState.artifacts.find(a => a.id === artifactId);
+            if (!artifact) return;
+            
+            gameState.activeAnalysis = {
+                artifact: artifact,
+                startTime: Date.now(),
+                duration: artifact.rarity === 'exotic' ? 10000 : artifact.rarity === 'rare' ? 6000 : 3000,
+                progress: 0
+            };
+            
+            showRoomUI('researchLab', rooms.researchLab);
+        }
+
+        // Complete artifact analysis
+        function completeAnalysis() {
+            if (!gameState.activeAnalysis) return;
+            
+            const artifact = gameState.activeAnalysis.artifact;
+            const techId = artifactTypes[artifact.type].techUnlock;
+            
+            gameState.completedResearch.push(techId);
+            gameState.organizationTrust += 10;
+            gameState.activeAnalysis = null;
+            
+            showRoomUI('researchLab', rooms.researchLab);
+            showNotification(`${artifact.name} analyzed! Tech unlocked: ${techSystem[techId].name}`);
+        }
+
+        // Apply tech to ship
+        function applyTech(techId, target) {
+            const tech = techSystem[techId];
+            if (!gameState.completedResearch.includes(techId)) return;
+            if (gameState.ship.appliedTechs.includes(techId)) {
+                alert('This tech is already applied!');
+                return;
+            }
+            
+            gameState.ship.appliedTechs.push(techId);
+            
+            // Apply bonuses
+            if (tech.bonus.weaponDamage) {
+                gameState.ship.weaponLevel += Math.round(tech.bonus.weaponDamage / 10);
+            }
+            if (tech.bonus.shieldAbsorption) {
+                gameState.ship.maxShield += tech.bonus.shieldAbsorption;
+                gameState.ship.shield = gameState.ship.maxShield;
+            }
+            if (tech.bonus.engineSpeed) {
+                gameState.ship.engineLevel += 1;
+                gameState.playerSpeed += 0.5;
+            }
+            
+            showRoomUI('engineering', rooms.engineering);
+            showNotification(`Applied: ${tech.name} - bonuses active!`);
+        }
+
         // Deploy to mission
         function deployToMission(idx) {
             const planet = planets[idx];
             
-            // Simulate mission completion with random reward
+            // Calculate base reward with analytics bonus
+            let baseCredits = Math.floor(Math.random() * (planet.rewardMax - planet.rewardMin + 1)) + planet.rewardMin;
+            let baseMaterials = Math.floor(Math.random() * 4) + 1;
+            
+            // Apply Advanced Analytics bonus if researched
+            if (gameState.completedResearch.includes('advAnalytics')) {
+                baseCredits = Math.floor(baseCredits * 1.25);
+            }
+            
             const reward = {
-                credits: Math.floor(Math.random() * (planet.rewardMax - planet.rewardMin + 1)) + planet.rewardMin,
-                materials: Math.floor(Math.random() * 4) + 1
+                credits: baseCredits,
+                materials: baseMaterials,
+                artifacts: []
             };
+            
+            // Generate 1-3 random artifacts
+            const artifactCount = Math.floor(Math.random() * 3) + 1;
+            for (let i = 0; i < artifactCount; i++) {
+                reward.artifacts.push(generateArtifact());
+            }
             
             // Update game state
             gameState.lastMissionReward = reward;
             gameState.credits += reward.credits;
-            gameState.materials += reward.materials;
+            gameState.materials += baseMaterials;
+            gameState.artifacts.push(...reward.artifacts);
+            gameState.organizationTrust += 5;
             
             closeInteractionModal();
             
-            // Show mission complete screen briefly
-            alert(`MISSION COMPLETE: ${planet.name}\n\nREWARDS EARNED:\n+${reward.credits} Credits\n+${reward.materials} Materials\n\nReturning to ship...`);
+            // Show mission complete screen with artifact details
+            let artifactList = reward.artifacts.map(a => `• ${a.name} (${a.rarity})`).join('\n');
+            alert(`MISSION COMPLETE: ${planet.name}\n\nREWARDS EARNED:\n+${reward.credits} Credits\n+${reward.materials} Materials\n\nARTIFACTS RECOVERED:\n${artifactList}\n\nVisit Research Lab to analyze!`);
         }
 
         function exitToMenu() {
