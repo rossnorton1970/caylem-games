@@ -1181,7 +1181,74 @@
     <!-- SHIP HUB -->
     <div id="shipHubContainer">
         <canvas id="shipHubCanvas"></canvas>
-        <div id="missionContainer" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999;"></div>
+        <!-- MISSION CONTAINER (HTML-BASED) -->
+        <div id="missionContainer" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999;">
+            <div id="missionWorld" style="position: relative; width: 100%; height: 100%; overflow: hidden; background: linear-gradient(180deg, #87ceeb 0%, #e0c59f 50%, #8b7355 100%);">
+                <!-- ZONE LAYERS (Background) -->
+                <div id="landingZone" style="position: absolute; bottom: 0; left: 0; right: 0; height: 30%; background: linear-gradient(180deg, #d4a574 0%, #c9a876 100%); border-top: 3px solid #a68860;"></div>
+                <div id="duneFields" style="position: absolute; bottom: 30%; left: 0; right: 0; height: 25%; background: repeating-linear-gradient(45deg, #d4a574, #d4a574 20px, #c9a876 20px, #c9a876 40px); opacity: 0.9;"></div>
+                <div id="alienRuins" style="position: absolute; bottom: 55%; left: 0; right: 0; height: 25%; background: linear-gradient(180deg, rgba(100,150,200,0.3) 0%, rgba(100,100,150,0.4) 100%); border: 2px dashed rgba(0,212,255,0.3);"></div>
+                <div id="outpostZone" style="position: absolute; top: 0; left: 0; right: 0; height: 20%; background: linear-gradient(180deg, rgba(100,100,100,0.3) 0%, rgba(150,120,80,0.2) 100%);"></div>
+                
+                <!-- ENVIRONMENTAL OBJECTS -->
+                <div id="alienRuinsStructure" style="position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); width: 120px; height: 120px; z-index: 10;">
+                    <div style="width: 100%; height: 100%; border: 3px solid rgba(0,212,255,0.6); transform: rotate(45deg); box-shadow: 0 0 30px rgba(0,212,255,0.3); background: rgba(0,212,255,0.1);"></div>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(0deg); width: 60px; height: 60px; border: 2px solid rgba(0,255,136,0.5); box-shadow: 0 0 20px rgba(0,255,136,0.2);"></div>
+                </div>
+                
+                <div id="outpostStructure" style="position: absolute; right: 15%; top: 8%; width: 100px; height: 80px; background: linear-gradient(90deg, #8b7355 0%, #a0826d 100%); border: 3px solid #6b5345; box-shadow: 0 0 20px rgba(0,0,0,0.4); z-index: 15;">
+                    <div style="position: absolute; top: 10%; left: 20%; width: 8px; height: 60px; background: #555; box-shadow: 0 0 10px rgba(255,200,0,0.3);"></div>
+                    <div style="position: absolute; top: 10%; right: 20%; width: 8px; height: 60px; background: #555;"></div>
+                </div>
+                
+                <div id="droneWreckage" style="position: absolute; left: 10%; bottom: 32%; width: 40px; height: 30px; background: linear-gradient(135deg, #555 0%, #333 100%); border: 2px solid #222; opacity: 0.7;"></div>
+                
+                <!-- PLAYER -->
+                <div id="player" style="position: absolute; left: 50%; bottom: 5%; transform: translate(-50%, 0); width: 24px; height: 24px; background: cyan; border: 2px solid #00ffff; box-shadow: 0 0 10px cyan; z-index: 50;">
+                    <div id="playerDirection" style="position: absolute; top: 50%; right: -10px; transform: translateY(-50%); width: 10px; height: 2px; background: #00ffff;"></div>
+                </div>
+                
+                <!-- ARTIFACT -->
+                <div id="artifact" style="position: absolute; right: 15%; top: 15%; width: 20px; height: 20px; background: #ffff00; border: 2px solid #ffcc00; border-radius: 50%; box-shadow: 0 0 20px #ffff00, 0 0 40px #ffcc00; z-index: 20; animation: artifactPulse 1.5s infinite;"></div>
+                
+                <!-- ENEMIES (Added dynamically) -->
+                <div id="enemiesContainer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 30; pointer-events: none;"></div>
+                
+                <!-- PROJECTILES (Added dynamically) -->
+                <div id="projectilesContainer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 25; pointer-events: none;"></div>
+            </div>
+            
+            <!-- HUD OVERLAY -->
+            <div id="missionHUD" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100;">
+                <div style="position: fixed; top: 20px; left: 20px; background: rgba(0,0,0,0.8); border: 2px solid #00d4ff; border-radius: 5px; padding: 15px; min-width: 200px; font-size: 12px; font-family: monospace; color: #00d4ff;">
+                    <div style="margin-bottom: 8px;"><strong>HP:</strong> <span id="hudHP">100</span> / 100</div>
+                    <div style="margin-bottom: 8px;"><strong>AMMO:</strong> <span id="hudAmmo">30</span> / 180</div>
+                    <div style="margin-bottom: 8px;"><strong>THREAT:</strong> <span id="threatLevel" style="color: #00ff88;">🟢 STABLE</span></div>
+                    <div style="margin-top: 12px; border-top: 1px solid #00d4ff; padding-top: 8px;">
+                        <div style="color: #fff;">OBJECTIVE:</div>
+                        <div id="objectiveText" style="color: #ffcc00; margin-top: 4px;">Recover Artifact</div>
+                    </div>
+                </div>
+                
+                <div id="statusMessage" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); border: 2px solid #ffcc00; border-radius: 5px; padding: 12px 24px; font-size: 14px; color: #ffcc00; text-align: center; display: none; pointer-events: auto; z-index: 101;">
+                    <!-- Messages go here -->
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            @keyframes artifactPulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.2); }
+            }
+            @keyframes enemyBlink {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.7; }
+            }
+            @keyframes projectileTrail {
+                to { opacity: 0; }
+            }
+        </style>
         <canvas id="spaceCanvas" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;"></canvas>
         <div class="ship-ui-layer">
             <div class="ship-header">🚀 MOTHERSHIP HUB</div>
@@ -4675,64 +4742,425 @@
             missionEngine.run();
         }
         
-        // Mission Engine - Handles desert, player, enemies, combat, artifact, extraction
+// HTML-Based Mission Engine - Desert world with player, drones, combat, artifact
         class MissionEngine {
             constructor() {
-                this.canvas = null;
-                this.ctx = null;
+                this.missionWorld = document.getElementById('missionWorld');
+                this.enemiesContainer = document.getElementById('enemiesContainer');
+                this.projectilesContainer = document.getElementById('projectilesContainer');
+                this.statusMessage = document.getElementById('statusMessage');
                 this.animationId = null;
                 this.running = false;
                 
                 // Player state
                 this.player = {
-                    x: 400,
-                    y: 500,
-                    width: 16,
-                    height: 16,
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight * 0.85,
+                    size: 24,
                     health: 100,
                     maxHealth: 100,
-                    ammo: 60,
+                    ammo: 30,
+                    maxAmmo: 180,
                     angle: 0,
-                    speed: 4,
-                    size: 8
+                    speed: 4
                 };
                 
-                // Projectiles
-                this.projectiles = [];
-                this.lastPlayerShot = 0;
-                this.playerFireRate = 200; // ms between shots
-                
-                // Enemies
+                // Game state
                 this.enemies = [];
-                this.maxEnemies = 4;
+                this.projectiles = [];
+                this.artifact = { collected: false };
+                this.lastPlayerShot = 0;
+                this.playerFireRate = 200;
+                this.maxEnemies = 2;
+                this.threatLevel = 'green';
+                
                 this.spawnEnemies();
-                
-                // Artifact
-                this.artifact = {
-                    x: 400 + (Math.random() - 0.5) * 60,
-                    y: 250 + (Math.random() - 0.5) * 60,
-                    collected: false,
-                    size: 12
-                };
-                
-                // Outpost
-                this.outpost = {
-                    x: 400,
-                    y: 250,
-                    width: 80,
-                    height: 80
-                };
-                
-                // Landing zone (spawn point)
-                this.landingZone = {
-                    x: 400,
-                    y: 500,
-                    radius: 40
-                };
-                
-                // Camera
-                this.camera = { x: 0, y: 0 };
+                this.setupInputHandlers();
             }
+            
+            spawnEnemies() {
+                this.enemies = [];
+                const spawnPositions = [
+                    { x: window.innerWidth * 0.2, y: window.innerHeight * 0.3 },
+                    { x: window.innerWidth * 0.8, y: window.innerHeight * 0.2 }
+                ];
+                
+                for (let i = 0; i < this.maxEnemies && i < spawnPositions.length; i++) {
+                    const pos = spawnPositions[i];
+                    this.enemies.push({
+                        id: Math.random(),
+                        x: pos.x,
+                        y: pos.y,
+                        size: 16,
+                        health: 25,
+                        maxHealth: 25,
+                        speed: 1.2,
+                        angle: Math.random() * Math.PI * 2,
+                        lastShot: 0,
+                        shootCooldown: 2000,
+                        element: null,
+                        state: 'patrol'
+                    });
+                }
+            }
+            
+            setupInputHandlers() {
+                // WASD movement
+                window.addEventListener('keydown', (e) => {
+                    const key = e.key.toLowerCase();
+                    if (key === 'w') this.player.y = Math.max(this.player.size, this.player.y - this.player.speed);
+                    if (key === 's') this.player.y = Math.min(window.innerHeight - this.player.size, this.player.y + this.player.speed);
+                    if (key === 'a') this.player.x = Math.max(this.player.size, this.player.x - this.player.speed);
+                    if (key === 'd') this.player.x = Math.min(window.innerWidth - this.player.size, this.player.x + this.player.speed);
+                });
+                
+                // Mouse aiming
+                this.missionWorld.addEventListener('mousemove', (e) => {
+                    const rect = this.missionWorld.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+                    this.player.angle = Math.atan2(mouseY - this.player.y, mouseX - this.player.x);
+                    
+                    // Rotate player direction indicator
+                    const playerElement = document.getElementById('player');
+                    if (playerElement) {
+                        playerElement.style.transform = `translate(-50%, 0) rotate(${this.player.angle * 180 / Math.PI}deg)`;
+                    }
+                });
+                
+                // Click to shoot
+                this.missionWorld.addEventListener('click', () => this.playerShoot());
+            }
+            
+            playerShoot() {
+                const now = Date.now();
+                if (now - this.lastPlayerShot < this.playerFireRate) return;
+                if (this.player.ammo <= 0) return;
+                
+                this.player.ammo--;
+                this.lastPlayerShot = now;
+                
+                // Create projectile
+                const projectile = {
+                    id: Math.random(),
+                    x: this.player.x,
+                    y: this.player.y,
+                    vx: Math.cos(this.player.angle) * 6,
+                    vy: Math.sin(this.player.angle) * 6,
+                    size: 6,
+                    owner: 'player',
+                    damage: 20
+                };
+                
+                this.projectiles.push(projectile);
+                
+                // Create visual projectile
+                const projDiv = document.createElement('div');
+                projDiv.style.cssText = `position: absolute; left: ${projectile.x}px; top: ${projectile.y}px; width: 6px; height: 6px; background: #00d4ff; border-radius: 50%; box-shadow: 0 0 8px #00d4ff; pointer-events: none; z-index: 25;`;
+                this.projectilesContainer.appendChild(projDiv);
+                projectile.element = projDiv;
+            }
+            
+            updateEnemies() {
+                for (const enemy of this.enemies) {
+                    if (enemy.health <= 0) {
+                        if (enemy.element) enemy.element.remove();
+                        continue;
+                    }
+                    
+                    const dx = this.player.x - enemy.x;
+                    const dy = this.player.y - enemy.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Chase if player nearby
+                    if (distance < 150) {
+                        enemy.state = 'chase';
+                        enemy.angle = Math.atan2(dy, dx);
+                        enemy.x += Math.cos(enemy.angle) * enemy.speed;
+                        enemy.y += Math.sin(enemy.angle) * enemy.speed;
+                        
+                        // Shoot if in range
+                        if (distance < 80 && Date.now() - enemy.lastShot > enemy.shootCooldown) {
+                            this.enemyShoot(enemy);
+                            enemy.lastShot = Date.now();
+                        }
+                        
+                        this.updateThreatLevel('red');
+                    } else {
+                        // Patrol mode
+                        enemy.state = 'patrol';
+                        enemy.angle += (Math.random() - 0.5) * 0.1;
+                        enemy.x += Math.cos(enemy.angle) * 0.5;
+                        enemy.y += Math.sin(enemy.angle) * 0.5;
+                    }
+                    
+                    // Boundary check
+                    enemy.x = Math.max(0, Math.min(window.innerWidth, enemy.x));
+                    enemy.y = Math.max(0, Math.min(window.innerHeight, enemy.y));
+                    
+                    // Update enemy visual
+                    if (!enemy.element) {
+                        enemy.element = document.createElement('div');
+                        enemy.element.style.cssText = `position: absolute; width: ${enemy.size}px; height: ${enemy.size}px; background: #ff6600; border: 2px solid #ffaa00; box-shadow: 0 0 10px #ff6600; pointer-events: none; z-index: 30;`;
+                        this.enemiesContainer.appendChild(enemy.element);
+                    }
+                    
+                    enemy.element.style.left = (enemy.x - enemy.size / 2) + 'px';
+                    enemy.element.style.top = (enemy.y - enemy.size / 2) + 'px';
+                    
+                    // Health color
+                    const healthPercent = enemy.health / enemy.maxHealth;
+                    enemy.element.style.boxShadow = `0 0 10px #ff6600, inset 0 0 0 2px ${healthPercent > 0.5 ? '#00ff88' : '#ff4444'}`;
+                }
+            }
+            
+            enemyShoot(enemy) {
+                const dx = this.player.x - enemy.x;
+                const dy = this.player.y - enemy.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist === 0) return;
+                
+                const projectile = {
+                    id: Math.random(),
+                    x: enemy.x,
+                    y: enemy.y,
+                    vx: (dx / dist) * 4,
+                    vy: (dy / dist) * 4,
+                    size: 5,
+                    owner: 'enemy',
+                    damage: 10
+                };
+                
+                this.projectiles.push(projectile);
+                
+                // Create visual projectile (orange)
+                const projDiv = document.createElement('div');
+                projDiv.style.cssText = `position: absolute; left: ${projectile.x}px; top: ${projectile.y}px; width: 5px; height: 5px; background: #ff8800; border-radius: 50%; box-shadow: 0 0 6px #ff8800; pointer-events: none; z-index: 25;`;
+                this.projectilesContainer.appendChild(projDiv);
+                projectile.element = projDiv;
+            }
+            
+            updateProjectiles() {
+                for (let i = this.projectiles.length - 1; i >= 0; i--) {
+                    const proj = this.projectiles[i];
+                    proj.x += proj.vx;
+                    proj.y += proj.vy;
+                    
+                    if (proj.element) {
+                        proj.element.style.left = proj.x + 'px';
+                        proj.element.style.top = proj.y + 'px';
+                    }
+                    
+                    // Remove if out of bounds
+                    if (proj.x < 0 || proj.x > window.innerWidth || proj.y < 0 || proj.y > window.innerHeight) {
+                        if (proj.element) proj.element.remove();
+                        this.projectiles.splice(i, 1);
+                    }
+                }
+            }
+            
+            checkCollisions() {
+                // Projectile-enemy collisions
+                for (let i = this.projectiles.length - 1; i >= 0; i--) {
+                    const proj = this.projectiles[i];
+                    
+                    if (proj.owner === 'player') {
+                        for (const enemy of this.enemies) {
+                            if (enemy.health <= 0) continue;
+                            
+                            const dx = proj.x - enemy.x;
+                            const dy = proj.y - enemy.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (dist < (enemy.size / 2 + proj.size)) {
+                                enemy.health -= proj.damage;
+                                if (proj.element) proj.element.remove();
+                                this.projectiles.splice(i, 1);
+                                
+                                if (enemy.health <= 0) {
+                                    gameState.credits += 5;
+                                    gameState.currentMission.enemiesKilled++;
+                                }
+                                return;
+                            }
+                        }
+                    } else if (proj.owner === 'enemy') {
+                        // Check hit on player
+                        const dx = proj.x - this.player.x;
+                        const dy = proj.y - this.player.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (dist < (this.player.size / 2 + proj.size)) {
+                            this.player.health -= proj.damage;
+                            if (proj.element) proj.element.remove();
+                            this.projectiles.splice(i, 1);
+                            this.updateHUD();
+                            return;
+                        }
+                    }
+                }
+                
+                // Artifact pickup
+                const artifactEl = document.getElementById('artifact');
+                if (!this.artifact.collected && artifactEl) {
+                    const rect = artifactEl.getBoundingClientRect();
+                    const missionRect = this.missionWorld.getBoundingClientRect();
+                    const artifactX = rect.left - missionRect.left + rect.width / 2;
+                    const artifactY = rect.top - missionRect.top + rect.height / 2;
+                    
+                    const dx = this.player.x - artifactX;
+                    const dy = this.player.y - artifactY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 50) {
+                        this.artifact.collected = true;
+                        gameState.missionObjectives.artifactFound = true;
+                        this.showMessage('★ ARTIFACT COLLECTED ★');
+                        artifactEl.style.animation = 'none';
+                        artifactEl.style.opacity = '0.3';
+                    }
+                }
+                
+                // Extraction zone (bottom of screen)
+                if (this.artifact.collected) {
+                    const extractZoneX = window.innerWidth / 2;
+                    const extractZoneY = window.innerHeight * 0.95;
+                    
+                    const dx = this.player.x - extractZoneX;
+                    const dy = this.player.y - extractZoneY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 100) {
+                        this.triggerExtraction();
+                    }
+                }
+            }
+            
+            updateHUD() {
+                document.getElementById('hudHP').textContent = Math.max(0, Math.round(this.player.health));
+                document.getElementById('hudAmmo').textContent = this.player.ammo;
+                
+                const threatEl = document.getElementById('threatLevel');
+                if (this.player.health <= 30) {
+                    threatEl.textContent = '🔴 CRITICAL';
+                    threatEl.style.color = '#ff4444';
+                } else if (this.threatLevel === 'red') {
+                    threatEl.textContent = '🟠 COMBAT';
+                    threatEl.style.color = '#ffaa00';
+                } else {
+                    threatEl.textContent = '🟢 STABLE';
+                    threatEl.style.color = '#00ff88';
+                }
+                
+                if (!this.artifact.collected) {
+                    document.getElementById('objectiveText').textContent = 'Find Artifact in Outpost';
+                } else {
+                    document.getElementById('objectiveText').textContent = 'Return to Landing Zone';
+                }
+            }
+            
+            updateThreatLevel(newLevel) {
+                this.threatLevel = newLevel;
+                setTimeout(() => { if (this.threatLevel === 'red') this.threatLevel = 'green'; }, 5000);
+            }
+            
+            showMessage(text) {
+                this.statusMessage.textContent = text;
+                this.statusMessage.style.display = 'block';
+                setTimeout(() => { this.statusMessage.style.display = 'none'; }, 3000);
+            }
+            
+            triggerExtraction() {
+                this.running = false;
+                cancelAnimationFrame(this.animationId);
+                this.showMessage('EXTRACTION IN PROGRESS...');
+                
+                setTimeout(() => this.missionComplete(), 3000);
+            }
+            
+            missionComplete() {
+                const reward = {
+                    credits: 200,
+                    materials: 5,
+                    enemiesDefeated: gameState.currentMission.enemiesKilled
+                };
+                
+                gameState.lastMissionReward = reward;
+                gameState.credits += reward.credits;
+                gameState.materials += reward.materials;
+                
+                gameState.missionActive = false;
+                document.getElementById('missionContainer').style.display = 'none';
+                document.getElementById('shipHubContainer').style.display = 'block';
+                gameState.currentLocation = 'ship';
+                
+                this.showMessage(`✅ MISSION COMPLETE! +${reward.credits} credits`);
+                setTimeout(() => alert(`✅ MISSION COMPLETE!\n\nEnemies Defeated: ${reward.enemiesDefeated}\nReward: ${reward.credits} credits + ${reward.materials} materials`), 1000);
+            }
+            
+            missionFailed(reason) {
+                this.running = false;
+                cancelAnimationFrame(this.animationId);
+                
+                gameState.missionActive = false;
+                document.getElementById('missionContainer').style.display = 'none';
+                document.getElementById('shipHubContainer').style.display = 'block';
+                gameState.currentLocation = 'ship';
+                
+                alert(`❌ MISSION FAILED\n\n${reason}`);
+            }
+            
+            gameLoop() {
+                if (!this.running) return;
+                
+                try {
+                    this.updateEnemies();
+                    this.updateProjectiles();
+                    this.checkCollisions();
+                    this.updateHUD();
+                    
+                    // Update player position on screen
+                    const playerEl = document.getElementById('player');
+                    if (playerEl) {
+                        playerEl.style.left = this.player.x + 'px';
+                        playerEl.style.top = this.player.y + 'px';
+                    }
+                    
+                    // Check mission end
+                    if (this.player.health <= 0) {
+                        this.missionFailed('SOLDIER ELIMINATED');
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Mission error:', e);
+                    this.running = false;
+                    return;
+                }
+                
+                this.animationId = requestAnimationFrame(() => this.gameLoop());
+            }
+            
+            run() {
+                gameState.currentLocation = 'mission';
+                gameState.missionActive = true;
+                gameState.missionObjectives = {
+                    explored: false,
+                    artifactFound: false,
+                    extracted: false
+                };
+                gameState.currentMission = {
+                    name: 'HELIOS-7 Extraction',
+                    enemiesKilled: 0,
+                    timeStarted: Date.now(),
+                    healthRemaining: 100
+                };
+                
+                this.running = true;
+                this.updateHUD();
+                this.gameLoop();
+            }
+        }
             
             spawnEnemies() {
                 this.enemies = [];
