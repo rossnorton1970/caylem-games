@@ -566,6 +566,190 @@
             font-weight: bold;
         }
 
+        /* ARMORY LOADOUT SYSTEM */
+        .armory-container {
+            display: grid;
+            grid-template-columns: 250px 1fr 280px;
+            gap: 30px;
+            height: 100%;
+        }
+
+        .armory-column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .armory-section-title {
+            color: #ff8800;
+            font-weight: bold;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #ff8800;
+            padding-bottom: 8px;
+        }
+
+        .armory-item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .armory-item-btn {
+            background: rgba(255, 136, 0, 0.1);
+            border: 1px solid #ff8800;
+            color: #fff;
+            padding: 10px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .armory-item-btn:hover {
+            background: rgba(255, 136, 0, 0.2);
+            border-color: #ffaa00;
+            box-shadow: 0 0 10px rgba(255, 136, 0, 0.3);
+        }
+
+        .armory-item-btn.selected {
+            background: rgba(255, 136, 0, 0.3);
+            border-color: #ffaa00;
+            box-shadow: 0 0 15px rgba(255, 136, 0, 0.4);
+        }
+
+        .armory-preview-box {
+            background: rgba(20, 20, 50, 0.95);
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .armory-preview-title {
+            color: #00d4ff;
+            font-weight: bold;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 15px;
+        }
+
+        .armory-preview-item {
+            font-size: 36px;
+            margin: 15px 0;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .armory-preview-name {
+            color: #fff;
+            font-weight: bold;
+            font-size: 13px;
+            margin: 10px 0;
+        }
+
+        .armory-stat-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .armory-stat-label {
+            color: #888;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: bold;
+            min-width: 70px;
+            letter-spacing: 0.05em;
+        }
+
+        .armory-stat-bar-container {
+            flex: 1;
+            background: #333;
+            height: 8px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+
+        .armory-stat-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff8800, #ffaa00);
+            transition: width 0.3s;
+        }
+
+        .armory-stat-value {
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .armory-current-loadout {
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 4px solid #00ff88;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .armory-current-loadout-title {
+            color: #00ff88;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.1em;
+        }
+
+        .armory-loadout-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .armory-loadout-item:last-child {
+            border-bottom: none;
+        }
+
+        .armory-loadout-value {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .armory-save-btn {
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            color: #000;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            width: 100%;
+        }
+
+        .armory-save-btn:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+            transform: translateY(-2px);
+        }
+
     </style>
 </head>
 <body>
@@ -637,6 +821,158 @@
                 engineLevel: 1,
                 researches: {},
                 appliedTechs: []
+            },
+            loadout: {
+                primary: 'assaultRifle',
+                secondary: 'combatPistol',
+                armor: 'medium',
+                gadget: 'medkit'
+            }
+        };
+        
+        // WEAPON DATABASE
+        const weaponDatabase = {
+            // PRIMARY WEAPONS
+            primary: {
+                assaultRifle: {
+                    name: 'Assault Rifle',
+                    category: 'primary',
+                    damage: 75,
+                    fireRate: 8,
+                    accuracy: 85,
+                    reloadTime: 2.0,
+                    icon: '🔫',
+                    color: '#ff8800',
+                    description: 'Reliable all-rounder. Balanced damage and accuracy.'
+                },
+                smg: {
+                    name: 'SMG',
+                    category: 'primary',
+                    damage: 55,
+                    fireRate: 12,
+                    accuracy: 75,
+                    reloadTime: 1.5,
+                    icon: '⚡',
+                    color: '#ffaa00',
+                    description: 'High rate of fire. Lower accuracy at distance.'
+                },
+                shotgun: {
+                    name: 'Shotgun',
+                    category: 'primary',
+                    damage: 95,
+                    fireRate: 3,
+                    accuracy: 60,
+                    reloadTime: 2.5,
+                    icon: '💥',
+                    color: '#ff4444',
+                    description: 'Devastating close-range weapon.'
+                },
+                sniper: {
+                    name: 'Sniper Rifle',
+                    category: 'primary',
+                    damage: 120,
+                    fireRate: 1,
+                    accuracy: 95,
+                    reloadTime: 3.0,
+                    icon: '🎯',
+                    color: '#00d4ff',
+                    description: 'Pinpoint accuracy. One shot, one kill.'
+                }
+            },
+            // SECONDARY WEAPONS (PISTOL)
+            secondary: {
+                combatPistol: {
+                    name: 'Combat Pistol',
+                    category: 'secondary',
+                    damage: 45,
+                    fireRate: 6,
+                    accuracy: 80,
+                    reloadTime: 1.2,
+                    icon: '🔰',
+                    color: '#00d4ff',
+                    description: 'Reliable backup weapon.'
+                },
+                heavyPistol: {
+                    name: 'Heavy Pistol',
+                    category: 'secondary',
+                    damage: 65,
+                    fireRate: 4,
+                    accuracy: 75,
+                    reloadTime: 1.5,
+                    icon: '💣',
+                    color: '#ff8800',
+                    description: 'Powerful sidearm. Slower rate of fire.'
+                }
+            }
+        };
+        
+        // ARMOR DATABASE
+        const armorDatabase = {
+            light: {
+                name: 'Light Armor',
+                type: 'light',
+                health: 50,
+                speed: 20,
+                resistance: 15,
+                icon: '⚔',
+                color: '#00d4ff',
+                description: 'Maximum mobility. Minimal protection.'
+            },
+            medium: {
+                name: 'Medium Armor',
+                type: 'medium',
+                health: 100,
+                speed: 10,
+                resistance: 30,
+                icon: '🛡',
+                color: '#ffaa00',
+                description: 'Balanced protection and mobility.'
+            },
+            heavy: {
+                name: 'Heavy Armor',
+                type: 'heavy',
+                health: 150,
+                speed: -10,
+                resistance: 50,
+                icon: '⛓',
+                color: '#ff4444',
+                description: 'Maximum protection. Reduced speed.'
+            }
+        };
+        
+        // GADGET DATABASE
+        const gadgetDatabase = {
+            grenade: {
+                name: 'Grenade',
+                type: 'grenade',
+                uses: 1,
+                description: 'Combat offensive. Area damage.',
+                icon: '💣',
+                color: '#ff4444'
+            },
+            medkit: {
+                name: 'Medkit',
+                type: 'medkit',
+                uses: 2,
+                description: 'Restore health mid-mission.',
+                icon: '⚕',
+                color: '#00ff88'
+            },
+            scanner: {
+                name: 'Scanner',
+                type: 'scanner',
+                uses: 3,
+                description: 'Reveal enemy positions.',
+                icon: '📡',
+                color: '#00d4ff'
+            },
+            empDevice: {
+                name: 'EMP Device',
+                type: 'emp',
+                uses: 1,
+                description: 'Disable robots temporarily.',
+                icon: '⚡',
+                color: '#ffaa00'
             }
         };
         
@@ -961,6 +1297,182 @@
         });
 
         // Initialize starfield
+        
+        // ARMORY LOADOUT SYSTEM FUNCTIONS
+        function showArmoryLoadoutUI() {
+            const modalContent = document.getElementById('modalContent');
+            let currentlyViewingCategory = 'primary';
+            
+            // Build the initial UI
+            renderArmoryUI(currentlyViewingCategory);
+            
+            function renderArmoryUI(viewingCategory) {
+                const currentLoadout = gameState.loadout;
+                const primaryWeapon = weaponDatabase.primary[currentLoadout.primary];
+                const secondaryWeapon = weaponDatabase.secondary[currentLoadout.secondary];
+                const armor = armorDatabase[currentLoadout.armor];
+                const gadget = gadgetDatabase[currentLoadout.gadget];
+                
+                // Get all available items
+                const allPrimaries = Object.entries(weaponDatabase.primary).map(([key, weapon]) => ({key, ...weapon}));
+                const allSecondaries = Object.entries(weaponDatabase.secondary).map(([key, weapon]) => ({key, ...weapon}));
+                const allArmors = Object.entries(armorDatabase).map(([key, a]) => ({key, ...a}));
+                const allGadgets = Object.entries(gadgetDatabase).map(([key, g]) => ({key, ...g}));
+                
+                // Build LEFT COLUMN: Categories
+                let leftColumn = '<div class="armory-column">';
+                leftColumn += '<div class="armory-section-title">PRIMARY</div>';
+                leftColumn += '<div class="armory-item-list">';
+                allPrimaries.forEach(w => {
+                    const isSelected = currentLoadout.primary === w.key;
+                    leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('primary', '${w.key}')" style="border-color: ${w.color}; background: ${isSelected ? w.color + '30' : 'rgba(255, 136, 0, 0.1)'}; color: ${w.color};">${w.icon} ${w.name}</button>`;
+                });
+                leftColumn += '</div>';
+                
+                leftColumn += '<div class="armory-section-title" style="border-color: #00d4ff; color: #00d4ff;">SECONDARY</div>';
+                leftColumn += '<div class="armory-item-list">';
+                allSecondaries.forEach(w => {
+                    const isSelected = currentLoadout.secondary === w.key;
+                    leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('secondary', '${w.key}')" style="border-color: ${w.color}; background: ${isSelected ? w.color + '30' : 'rgba(0, 212, 255, 0.1)'}; color: ${w.color};">${w.icon} ${w.name}</button>`;
+                });
+                leftColumn += '</div>';
+                
+                leftColumn += '<div class="armory-section-title" style="border-color: #ffaa00; color: #ffaa00;">ARMOR</div>';
+                leftColumn += '<div class="armory-item-list">';
+                allArmors.forEach(a => {
+                    const isSelected = currentLoadout.armor === a.key;
+                    leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('armor', '${a.key}')" style="border-color: ${a.color}; background: ${isSelected ? a.color + '30' : 'rgba(255, 170, 0, 0.1)'}; color: ${a.color};">${a.icon} ${a.name}</button>`;
+                });
+                leftColumn += '</div>';
+                
+                leftColumn += '<div class="armory-section-title" style="border-color: #bb00ff; color: #bb00ff;">GADGET</div>';
+                leftColumn += '<div class="armory-item-list">';
+                allGadgets.forEach(g => {
+                    const isSelected = currentLoadout.gadget === g.key;
+                    leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('gadget', '${g.key}')" style="border-color: ${g.color}; background: ${isSelected ? g.color + '30' : 'rgba(187, 0, 255, 0.1)'}; color: ${g.color};">${g.icon} ${g.name}</button>`;
+                });
+                leftColumn += '</div>';
+                leftColumn += '</div>';
+                
+                // Build MIDDLE COLUMN: Preview
+                let middleColumn = '<div class="armory-column" style="align-items: center;">';
+                middleColumn += '<div class="armory-preview-box">';
+                middleColumn += '<div class="armory-preview-title">⚔ Current Loadout</div>';
+                middleColumn += '<div style="margin: 20px 0; border-bottom: 1px solid #00d4ff; padding-bottom: 15px;">';
+                middleColumn += `<div class="armory-preview-item">${primaryWeapon.icon}</div>`;
+                middleColumn += `<div class="armory-preview-name">${primaryWeapon.name}</div>`;
+                middleColumn += '<div style="font-size: 11px; color: #888;">Primary Weapon</div>';
+                middleColumn += '</div>';
+                
+                middleColumn += '<div style="margin: 15px 0; border-bottom: 1px solid #00d4ff; padding-bottom: 15px;">';
+                middleColumn += `<div class="armory-preview-item" style="font-size: 32px;">${secondaryWeapon.icon}</div>`;
+                middleColumn += `<div class="armory-preview-name">${secondaryWeapon.name}</div>`;
+                middleColumn += '<div style="font-size: 11px; color: #888;">Secondary Weapon</div>';
+                middleColumn += '</div>';
+                
+                middleColumn += '<div style="margin: 15px 0; border-bottom: 1px solid #00d4ff; padding-bottom: 15px;">';
+                middleColumn += `<div class="armory-preview-item" style="font-size: 32px;">${armor.icon}</div>`;
+                middleColumn += `<div class="armory-preview-name">${armor.name}</div>`;
+                middleColumn += '<div style="font-size: 11px; color: #888;">Armor Set</div>';
+                middleColumn += '</div>';
+                
+                middleColumn += '<div style="margin: 15px 0;">';
+                middleColumn += `<div class="armory-preview-item" style="font-size: 32px;">${gadget.icon}</div>`;
+                middleColumn += `<div class="armory-preview-name">${gadget.name}</div>`;
+                middleColumn += '<div style="font-size: 11px; color: #888;">Gadget/Ability</div>';
+                middleColumn += '</div>';
+                middleColumn += '</div>';
+                middleColumn += '</div>';
+                
+                // Build RIGHT COLUMN: Stats
+                let rightColumn = '<div class="armory-column">';
+                rightColumn += '<div style="margin-bottom: 20px;">';
+                rightColumn += '<div class="armory-section-title">⚔ WEAPON STATS</div>';
+                rightColumn += '<div style="background: rgba(255, 136, 0, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #ff8800;">';
+                rightColumn += `<div class="armory-preview-name" style="color: #ff8800; margin-bottom: 12px;">${primaryWeapon.name}</div>`;
+                
+                // Damage bar
+                rightColumn += '<div class="armory-stat-bar">';
+                rightColumn += '<div class="armory-stat-label">DMG</div>';
+                rightColumn += '<div class="armory-stat-bar-container"><div class="armory-stat-bar-fill" style="width: ' + (primaryWeapon.damage / 120 * 100) + '%;"></div></div>';
+                rightColumn += `<div class="armory-stat-value">${primaryWeapon.damage}</div>`;
+                rightColumn += '</div>';
+                
+                // Fire Rate bar
+                rightColumn += '<div class="armory-stat-bar">';
+                rightColumn += '<div class="armory-stat-label">RATE</div>';
+                rightColumn += '<div class="armory-stat-bar-container"><div class="armory-stat-bar-fill" style="width: ' + (primaryWeapon.fireRate / 12 * 100) + '%;"></div></div>';
+                rightColumn += `<div class="armory-stat-value">${primaryWeapon.fireRate}</div>`;
+                rightColumn += '</div>';
+                
+                // Accuracy bar
+                rightColumn += '<div class="armory-stat-bar">';
+                rightColumn += '<div class="armory-stat-label">ACC</div>';
+                rightColumn += '<div class="armory-stat-bar-container"><div class="armory-stat-bar-fill" style="width: ' + (primaryWeapon.accuracy) + '%;"></div></div>';
+                rightColumn += `<div class="armory-stat-value">${primaryWeapon.accuracy}%</div>`;
+                rightColumn += '</div>';
+                
+                // Reload Time
+                rightColumn += '<div class="armory-stat-bar">';
+                rightColumn += '<div class="armory-stat-label">RELOAD</div>';
+                rightColumn += '<div class="armory-stat-bar-container"><div class="armory-stat-bar-fill" style="width: ' + (100 - (primaryWeapon.reloadTime / 3 * 100)) + '%;"></div></div>';
+                rightColumn += `<div class="armory-stat-value">${primaryWeapon.reloadTime}s</div>`;
+                rightColumn += '</div>';
+                
+                rightColumn += '</div>';
+                rightColumn += '</div>';
+                
+                // Armor stats
+                rightColumn += '<div style="margin-bottom: 20px;">';
+                rightColumn += '<div class="armory-section-title" style="color: #ffaa00; border-color: #ffaa00;">🛡 ARMOR STATS</div>';
+                rightColumn += '<div style="background: rgba(255, 170, 0, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #ffaa00;">';
+                rightColumn += `<div class="armory-preview-name" style="color: #ffaa00; margin-bottom: 10px;">${armor.name}</div>`;
+                rightColumn += `<div style="font-size: 11px; color: #aaa; margin-bottom: 10px;">${armor.description}</div>`;
+                rightColumn += `<div style="color: #00ff88; font-size: 12px; font-weight: bold; margin-top: 8px;">+${armor.health} Health</div>`;
+                rightColumn += `<div style="color: ${armor.speed >= 0 ? '#00ff88' : '#ff6666'}; font-size: 12px; font-weight: bold; margin-top: 4px;">${armor.speed >= 0 ? '+' : ''}${armor.speed}% Speed</div>`;
+                rightColumn += `<div style="color: #00d4ff; font-size: 12px; font-weight: bold; margin-top: 4px;">${armor.resistance}% Resistance</div>`;
+                rightColumn += '</div>';
+                rightColumn += '</div>';
+                
+                // Gadget info
+                rightColumn += '<div style="margin-bottom: 20px;">';
+                rightColumn += '<div class="armory-section-title" style="color: #bb00ff; border-color: #bb00ff;">⚡ GADGET</div>';
+                rightColumn += '<div style="background: rgba(187, 0, 255, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #bb00ff;">';
+                rightColumn += `<div class="armory-preview-name" style="color: #bb00ff;">${gadget.name}</div>`;
+                rightColumn += `<div style="font-size: 11px; color: #aaa; margin-top: 8px;">${gadget.description}</div>`;
+                rightColumn += '</div>';
+                rightColumn += '</div>';
+                
+                // Save button
+                rightColumn += '<button class="armory-save-btn" onclick="saveLoadout()">✓ SAVE LOADOUT</button>';
+                rightColumn += '</div>';
+                
+                modalContent.innerHTML = `
+                    <div class="interaction-modal-header">⚔ ARMORY — LOADOUT SYSTEM</div>
+                    <div class="interaction-modal-content" style="max-height: 65vh; overflow-y: auto;">
+                        <div class="armory-container">
+                            ${leftColumn}
+                            ${middleColumn}
+                            ${rightColumn}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function updateArmorySelection(category, key) {
+            gameState.loadout[category] = key;
+            showArmoryLoadoutUI();
+        }
+        
+        function saveLoadout() {
+            closeInteractionModal();
+            // Haptic feedback would go here
+            setTimeout(() => {
+                alert('✓ Loadout saved!\nPrimary: ' + weaponDatabase.primary[gameState.loadout.primary].name + '\nSecondary: ' + weaponDatabase.secondary[gameState.loadout.secondary].name + '\nArmor: ' + armorDatabase[gameState.loadout.armor].name + '\nGadget: ' + gadgetDatabase[gameState.loadout.gadget].name);
+            }, 200);
+        }
+        
         // Start game
         function startGame() {
             document.getElementById('mainMenu').style.display = 'none';
@@ -1134,14 +1646,8 @@
             
             switch(roomKey) {
                 case 'armory':
-                    modalContent.innerHTML = `
-                        <div class="interaction-modal-header">⚔ ARMORY</div>
-                        <div class="interaction-modal-content">
-                            <p>Weapon loadouts and upgrades coming soon!</p>
-                            <p style="margin-top: 15px; font-size: 12px; color: #666;">Tactical weapons storage | Armor configurations</p>
-                        </div>
-                    `;
-                    break;
+                    showArmoryLoadoutUI();
+                    return;
                 case 'engineering':
                     const appliedTechsDisplay = gameState.ship.appliedTechs.length > 0 ? `
                         <div style="background: rgba(0, 255, 136, 0.1); border-left: 4px solid #00ff88; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
