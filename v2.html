@@ -75,10 +75,34 @@
             overflow: hidden;
         }
 
+        /* Main foreground planet - massive and close */
+        #mainPlanet {
+            position: absolute;
+            bottom: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150vw;
+            height: 150vw;
+            max-width: 2000px;
+            max-height: 2000px;
+            border-radius: 50%;
+            filter: drop-shadow(0 -20px 80px rgba(0, 0, 0, 0.5));
+            z-index: 5;
+        }
+
+        #mainPlanet canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        /* Distance planets */
         .menu-planet-item {
             position: absolute;
             border-radius: 50%;
-            filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.15));
+            filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.1));
+            opacity: 0.7;
         }
 
         .menu-planet-item canvas {
@@ -99,7 +123,7 @@
 
         .menu-content {
             position: relative;
-            z-index: 10;
+            z-index: 20;
             text-align: center;
             animation: fadeInDown 0.8s ease-out;
         }
@@ -210,7 +234,7 @@
             font-size: 11px;
             letter-spacing: 0.2em;
             color: #666;
-            z-index: 10;
+            z-index: 20;
         }
 
         /* SHIP HUB */
@@ -440,7 +464,10 @@
         <div class="menu-bg-glow"></div>
         <div class="menu-bg-planet"></div>
         <div class="menu-stars" id="starsContainer"></div>
-        <div class="menu-planets-container" id="planetsContainer"></div>
+        <div class="menu-planets-container">
+            <div id="mainPlanet"></div>
+            <div id="planetsContainer"></div>
+        </div>
 
         <div class="menu-content">
             <div class="menu-logo">
@@ -1112,18 +1139,31 @@
             ctx.fillRect(0, 0, size, size);
         }
         
-        // Initialize floating planets with parallax
+        // Initialize planets with cinematic layout
         function initPlanets() {
+            // Create MASSIVE main planet (up close)
+            const mainPlanetDiv = document.getElementById('mainPlanet');
+            const mainSize = Math.max(window.innerWidth, window.innerHeight) * 2;
+            const mainCanvas = document.createElement('canvas');
+            mainCanvas.width = mainSize;
+            mainCanvas.height = mainSize;
+            
+            // Draw highest detail main planet
+            drawPlanet(mainCanvas, 3); // Earth-like planet
+            mainPlanetDiv.appendChild(mainCanvas);
+            
+            // Add subtle floating animation to main planet
+            mainPlanetDiv.style.animation = 'float 12s ease-in-out infinite';
+            
+            // Create distance planets (tiny, far away)
             const planetsContainer = document.getElementById('planetsContainer');
-            const planetData = [
-                { type: 1, size: 250, left: '15%', top: '20%', delay: '0s' },
-                { type: 2, size: 180, left: '75%', top: '15%', delay: '2s' },
-                { type: 3, size: 150, left: '85%', top: '65%', delay: '1s' },
-                { type: 4, size: 200, left: '10%', top: '70%', delay: '3s' },
-                { type: 5, size: 120, left: '50%', top: '75%', delay: '1.5s' }
+            const distancePlanets = [
+                { type: 2, size: 80, left: '20%', top: '15%', delay: '0s' },
+                { type: 4, size: 100, left: '75%', top: '20%', delay: '2s' },
+                { type: 5, size: 60, left: '85%', top: '40%', delay: '1.5s' }
             ];
             
-            planetData.forEach((data, idx) => {
+            distancePlanets.forEach((data) => {
                 const planetDiv = document.createElement('div');
                 planetDiv.className = 'menu-planet-item';
                 planetDiv.style.width = data.size + 'px';
@@ -1141,17 +1181,17 @@
                 planetsContainer.appendChild(planetDiv);
             });
             
-            // Add parallax effect on mouse move
+            // Subtle parallax for distance planets only
             document.addEventListener('mousemove', (e) => {
                 const planets = document.querySelectorAll('.menu-planet-item');
                 const x = (e.clientX / window.innerWidth) - 0.5;
                 const y = (e.clientY / window.innerHeight) - 0.5;
                 
                 planets.forEach((planet, index) => {
-                    const depth = (index + 1) * 5;
+                    const depth = 3; // Subtle parallax
                     const offsetX = x * depth;
                     const offsetY = y * depth;
-                    planet.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${(index + 1) * 5}deg)`;
+                    planet.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
                 });
             });
         }
