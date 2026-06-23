@@ -3214,21 +3214,18 @@
                 z-index: 200;
             `;
             
-            // Create canvas
+            // Create canvas that fills the screen
             const canvas = document.createElement('canvas');
             canvas.id = 'hudCanvas';
-            canvas.width = 1280;
-            canvas.height = 720;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
             canvas.style.cssText = `
                 position: fixed;
-                top: 50%; left: 50%;
-                transform: translate(-50%, -50%);
+                top: 0;
+                left: 0;
                 display: block;
-                width: auto;
-                height: auto;
-                max-width: calc(100% - 20px);
-                max-height: calc(100% - 80px);
-                image-rendering: auto;
+                width: 100%;
+                height: 100%;
             `;
             
             // Create controls overlay
@@ -3249,6 +3246,15 @@
             document.body.appendChild(container);
             document.body.appendChild(controls);
             
+            // Handle ESC key
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    container.remove();
+                    controls.remove();
+                    hudProtoState.demoActive = false;
+                }
+            });
+            
             // Initialize HUD state
             hudProtoState.canvas = canvas;
             hudProtoState.ctx = canvas.getContext('2d');
@@ -3256,11 +3262,17 @@
             hudProtoState.startTime = Date.now();
             hudProtoState.threatCycle = 'green';
             
-            // Start rendering
-            renderHUDDemo();
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
             
             // Close the interaction modal
             closeInteractionModal();
+            
+            // Start rendering
+            renderHUDDemo();
         }
         
         function renderHUDDemo() {
@@ -3307,8 +3319,8 @@
         }
         
         function drawHUDPlayerStatus(ctx, canvas) {
-            const x = 30;
-            const y = 30;
+            const x = canvas.width * 0.02;
+            const y = canvas.height * 0.04;
             const threatColor = getThreatColor(hudProtoState.threatCycle);
             const glowIntensity = getGlowIntensity(hudProtoState.threatCycle);
             
@@ -3345,8 +3357,8 @@
         }
         
         function drawHUDWeaponSystem(ctx, canvas) {
-            const x = 30;
-            const y = canvas.height - 120;
+            const x = canvas.width * 0.02;
+            const y = canvas.height - (canvas.height * 0.17);
             
             ctx.font = 'bold 14px Arial';
             ctx.fillStyle = '#ffaa00';
@@ -3364,8 +3376,8 @@
         }
         
         function drawHUDGadgets(ctx, canvas) {
-            const x = canvas.width - 280;
-            const y = canvas.height - 120;
+            const x = canvas.width - (canvas.width * 0.22);
+            const y = canvas.height - (canvas.height * 0.17);
             const gadgets = [
                 { num: 1, name: 'MEDKIT', status: 'ready', color: '#00ff88' },
                 { num: 2, name: 'SCAN DRONE', status: '8s', color: '#ffaa00' },
@@ -3404,9 +3416,9 @@
         }
         
         function drawHUDMinimap(ctx, canvas) {
-            const x = canvas.width - 120;
-            const y = 120;
-            const radius = 60;
+            const x = canvas.width - (canvas.width * 0.10);
+            const y = canvas.height * 0.15;
+            const radius = Math.max(40, canvas.width * 0.05);
             
             // Circular minimap frame
             ctx.strokeStyle = '#00d4ff';
