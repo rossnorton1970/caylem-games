@@ -566,341 +566,577 @@
             font-weight: bold;
         }
 
-        /* ARMORY LOADOUT SYSTEM */
-        .armory-container {
-            display: grid;
-            grid-template-columns: 280px 1fr 300px;
-            gap: 30px;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(10, 14, 31, 0.8) 0%, rgba(15, 20, 40, 0.8) 100%);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid rgba(0, 212, 255, 0.1);
-        }
-        
-        .armory-container::before {
-            content: '';
-            position: absolute;
+        /* ARMORY TABBED INTERFACE */
+        .armory-full-screen {
+            position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0, 212, 255, 0.02) 2px,
-                    rgba(0, 212, 255, 0.02) 4px
-                );
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .armory-column {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0e1f 0%, #15142a 50%, #0a0e1f 100%);
             display: flex;
             flex-direction: column;
+            z-index: 200;
+            color: #e0e0e0;
+            font-family: 'Arial', sans-serif;
         }
 
-        .armory-section-title {
-            color: #ff8800;
-            font-weight: bold;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 12px;
-            border-bottom: 2px solid #ff8800;
-            padding-bottom: 8px;
+        .armory-main-layout {
+            display: grid;
+            grid-template-columns: 160px 1fr 280px;
+            gap: 0;
+            flex: 1;
+            overflow: hidden;
+            border-bottom: 2px solid #00d4ff;
         }
 
-        .armory-item-list {
+        /* LEFT PANEL: TAB NAVIGATION */
+        .armory-nav-panel {
+            background: rgba(26, 31, 58, 0.85);
+            border-right: 1px solid rgba(0, 212, 255, 0.2);
+            padding: 20px 0;
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin-bottom: 20px;
         }
 
-        .armory-item-btn {
-            background: rgba(255, 136, 0, 0.1);
-            border: 1px solid #ff8800;
-            color: #fff;
-            padding: 10px 12px;
-            border-radius: 4px;
+        .armory-nav-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 14px 16px;
             cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s;
             text-align: left;
-            font-weight: 500;
-        }
-
-        .armory-item-btn:hover {
-            background: rgba(255, 136, 0, 0.2);
-            border-color: #ffaa00;
-            box-shadow: 0 0 10px rgba(255, 136, 0, 0.3);
-        }
-
-        .armory-item-btn.selected {
-            background: rgba(255, 136, 0, 0.3);
-            border-color: #ffaa00;
-            box-shadow: 0 0 15px rgba(255, 136, 0, 0.4);
-        }
-
-        .armory-preview-box {
-            background: linear-gradient(135deg, rgba(20, 20, 50, 0.98) 0%, rgba(30, 30, 70, 0.95) 100%);
-            border: 2px solid #00d4ff;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.15), inset 0 0 20px rgba(0, 212, 255, 0.05);
-        }
-
-        .armory-preview-title {
-            color: #00d4ff;
-            font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            margin-bottom: 15px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            margin: 0 8px;
+            border-radius: 0 4px 4px 0;
         }
 
-        .armory-preview-item {
-            font-size: 36px;
-            margin: 15px 0;
-            height: 50px;
+        .armory-nav-btn:hover {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+        }
+
+        .armory-nav-btn.active {
+            background: rgba(0, 212, 255, 0.15);
+            color: #00d4ff;
+            border-left-color: #00d4ff;
+            box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.1);
+        }
+
+        /* CENTER PANEL: CONTENT */
+        .armory-content-panel {
+            background: #0a0e1f;
+            overflow-y: auto;
+            padding: 20px;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
         }
 
-        .armory-preview-name {
-            color: #fff;
+        .armory-tab-content {
+            display: none;
+        }
+
+        .armory-tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* GRID LAYOUTS FOR ITEMS */
+        .armory-item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            width: 100%;
+        }
+
+        .armory-item-card {
+            background: rgba(30, 35, 70, 0.8);
+            border: 2px solid #333;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 140px;
+        }
+
+        .armory-item-card:hover {
+            border-color: #00d4ff;
+            background: rgba(30, 35, 70, 1);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .armory-item-card.selected {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .armory-item-icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .armory-item-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 4px;
+        }
+
+        .armory-item-subtext {
+            font-size: 10px;
+            color: #888;
+        }
+
+        .armory-rarity-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 9px;
             font-weight: bold;
-            font-size: 13px;
-            margin: 10px 0;
+            text-transform: uppercase;
+            margin-top: 6px;
+            letter-spacing: 0.05em;
         }
 
-        .armory-stat-bar {
-            display: flex;
-            align-items: center;
+        .rarity-common { background: rgba(200, 200, 200, 0.2); color: #ccc; border: 1px solid #888; }
+        .rarity-rare { background: rgba(0, 212, 255, 0.2); color: #00d4ff; border: 1px solid #00d4ff; }
+        .rarity-exotic { background: rgba(187, 0, 255, 0.2); color: #bb00ff; border: 1px solid #bb00ff; }
+
+        /* ARMOR CARDS (LARGER) */
+        .armory-armor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            width: 100%;
+        }
+
+        .armory-armor-card {
+            background: rgba(30, 35, 70, 0.8);
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .armory-armor-card:hover {
+            border-color: #ffaa00;
+            background: rgba(30, 35, 70, 1);
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .armory-armor-card.selected {
+            border-color: #ffaa00;
+            background: rgba(255, 170, 0, 0.15);
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.4);
+        }
+
+        .armory-armor-icon {
+            font-size: 56px;
             margin-bottom: 12px;
+        }
+
+        .armory-armor-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #e0e0e0;
+            margin-bottom: 8px;
+        }
+
+        .armory-armor-stat {
+            font-size: 11px;
+            color: #aaa;
+            margin: 4px 0;
+        }
+
+        /* RIGHT PANEL: DETAILS & STATS */
+        .armory-details-panel {
+            background: rgba(26, 31, 58, 0.85);
+            border-left: 1px solid rgba(0, 212, 255, 0.2);
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .armory-detail-section {
+            margin-bottom: 20px;
+        }
+
+        .armory-detail-title {
+            color: #00d4ff;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            padding-bottom: 8px;
+        }
+
+        .armory-detail-name {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .armory-detail-desc {
+            font-size: 11px;
+            color: #aaa;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .armory-stat-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .armory-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
         }
 
         .armory-stat-label {
             color: #888;
-            font-size: 11px;
+            font-size: 10px;
             text-transform: uppercase;
-            font-weight: bold;
-            min-width: 70px;
+            font-weight: 600;
             letter-spacing: 0.05em;
         }
 
-        .armory-stat-bar-container {
+        .armory-stat-bar {
             flex: 1;
             background: #333;
-            height: 8px;
+            height: 6px;
             border-radius: 2px;
             overflow: hidden;
-            margin: 0 10px;
+            margin: 0 8px;
         }
 
-        .armory-stat-bar-fill {
+        .armory-stat-fill {
             height: 100%;
-            background: linear-gradient(90deg, #ff8800, #ffaa00);
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
             transition: width 0.3s;
         }
 
         .armory-stat-value {
-            color: #fff;
-            font-size: 11px;
-            font-weight: bold;
-            min-width: 40px;
+            color: #00d4ff;
+            font-size: 10px;
+            font-weight: 600;
+            min-width: 35px;
             text-align: right;
         }
 
-        .armory-current-loadout {
-            background: rgba(0, 255, 136, 0.1);
-            border-left: 4px solid #00ff88;
-            padding: 12px;
+        .armory-perk-box {
+            background: rgba(187, 0, 255, 0.1);
+            border-left: 3px solid #bb00ff;
+            padding: 10px;
             border-radius: 4px;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
         }
 
-        .armory-current-loadout-title {
-            color: #00ff88;
+        .armory-perk-icon {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .armory-perk-name {
+            color: #bb00ff;
             font-size: 11px;
-            font-weight: bold;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .armory-perk-desc {
+            color: #aaa;
+            font-size: 10px;
+            line-height: 1.3;
+        }
+
+        /* ACTION BUTTONS IN DETAILS */
+        .armory-action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .armory-action-btn {
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid #00d4ff;
+            color: #00d4ff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
             text-transform: uppercase;
-            margin-bottom: 10px;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .armory-action-btn:hover {
+            background: rgba(0, 212, 255, 0.4);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        /* BOTTOM BAR */
+        .armory-bottom-bar {
+            background: rgba(10, 14, 31, 0.95);
+            border-top: 2px solid #00d4ff;
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 20px;
+            align-items: center;
+            border-left: 160px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .armory-bottom-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .armory-bottom-btn {
+            background: rgba(0, 212, 255, 0.15);
+            border: 1px solid #00d4ff;
+            color: #00d4ff;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .armory-bottom-btn:hover {
+            background: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .armory-loadout-summary {
+            color: #aaa;
+            font-size: 11px;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .armory-loadout-summary strong {
+            color: #00ff88;
+        }
+
+        .armory-deploy-btn {
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            border: 2px solid #00d4ff;
+            color: #000;
+            padding: 12px 28px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
             letter-spacing: 0.1em;
+            transition: all 0.3s;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4), 0 0 40px rgba(0, 255, 136, 0.2);
+            animation: deploy-pulse 2s infinite;
+        }
+
+        .armory-deploy-btn:hover {
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.6), 0 0 60px rgba(0, 255, 136, 0.4);
+            transform: scale(1.05);
+        }
+
+        @keyframes deploy-pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.4), 0 0 40px rgba(0, 255, 136, 0.2); }
+            50% { box-shadow: 0 0 30px rgba(0, 212, 255, 0.6), 0 0 60px rgba(0, 255, 136, 0.4); }
+        }
+
+        /* LOADOUT DISPLAY SECTION (Loadouts Tab) */
+        .armory-loadout-display {
+            background: rgba(30, 35, 70, 0.8);
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
         }
 
         .armory-loadout-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
-            font-size: 11px;
-            color: #aaa;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
         }
 
         .armory-loadout-item:last-child {
             border-bottom: none;
         }
 
-        .armory-loadout-value {
-            color: #00ff88;
-            font-weight: bold;
+        .armory-loadout-slot {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .armory-save-btn {
-            background: linear-gradient(135deg, #00ff88, #00d4ff);
-            color: #000;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
+        .armory-loadout-label {
+            color: #00d4ff;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            min-width: 80px;
+        }
+
+        .armory-loadout-value {
+            color: #fff;
             font-size: 13px;
+            font-weight: 600;
+        }
+
+        .armory-loadout-change-btn {
+            background: rgba(255, 170, 0, 0.2);
+            border: 1px solid #ffaa00;
+            color: #ffaa00;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 10px;
             cursor: pointer;
             transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        .armory-loadout-change-btn:hover {
+            background: rgba(255, 170, 0, 0.4);
+            box-shadow: 0 0 8px rgba(255, 170, 0, 0.3);
+        }
+
+        /* UPGRADES GRID */
+        .armory-upgrade-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
             width: 100%;
         }
 
-        .armory-save-btn:hover {
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
-            transform: translateY(-2px);
-        }
-
-        /* ALIEN GEAR STYLES */
-        .alien-item-btn {
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid #00d4ff;
-            color: #00d4ff;
-            padding: 10px 12px;
-            border-radius: 4px;
+        .armory-upgrade-card {
+            background: rgba(30, 35, 70, 0.8);
+            border: 2px solid #333;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
             cursor: pointer;
-            font-size: 12px;
             transition: all 0.2s;
-            text-align: left;
-            font-weight: 500;
-            position: relative;
         }
 
-        .alien-item-btn:hover:not(.locked) {
-            background: rgba(0, 212, 255, 0.2);
-            border-color: #00ff88;
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        .armory-upgrade-card:hover:not(.locked) {
+            border-color: #bb00ff;
+            background: rgba(30, 35, 70, 1);
+            box-shadow: 0 0 15px rgba(187, 0, 255, 0.2);
         }
 
-        .alien-item-btn.selected {
-            background: rgba(0, 212, 255, 0.3);
-            border-color: #00ff88;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
-        }
-
-        .alien-item-btn.locked {
-            background: rgba(50, 50, 50, 0.5);
-            border-color: #444;
-            color: #666;
+        .armory-upgrade-card.locked {
+            opacity: 0.5;
             cursor: not-allowed;
-            opacity: 0.6;
+            border-color: #444;
         }
 
-        .alien-lock-icon {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 14px;
-        }
-
-        .alien-rarity-common { color: #fff; }
-        .alien-rarity-rare { color: #00d4ff; }
-        .alien-rarity-exotic { color: #bb00ff; }
-
-        .alien-glow {
-            text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
-        }
-
-        .armor-upgrade-item {
-            background: rgba(0, 212, 255, 0.08);
-            border-left: 3px solid #00d4ff;
-            padding: 10px;
-            border-radius: 3px;
+        .armory-upgrade-icon {
+            font-size: 32px;
             margin-bottom: 8px;
+        }
+
+        .armory-upgrade-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 4px;
+        }
+
+        .armory-upgrade-level {
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 6px;
+        }
+
+        .armory-upgrade-cost {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .armory-upgrade-btn {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 6px 8px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 600;
             cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
             transition: all 0.2s;
         }
 
-        .armor-upgrade-item:hover {
-            background: rgba(0, 212, 255, 0.15);
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        .armory-upgrade-btn:hover:not(.locked) {
+            background: rgba(0, 255, 136, 0.4);
+            box-shadow: 0 0 8px rgba(0, 255, 136, 0.3);
         }
 
-        .armor-upgrade-item.locked {
-            background: rgba(50, 50, 50, 0.1);
-            border-left-color: #444;
-            color: #666;
+        .armory-upgrade-btn.locked {
             cursor: not-allowed;
             opacity: 0.5;
         }
 
-        /* WEAPON TYPE BADGE */
-        .weapon-type-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: bold;
-            letter-spacing: 0.05em;
-            margin: 4px 0;
-            text-transform: uppercase;
+        /* SCROLL STYLING */
+        .armory-content-panel::-webkit-scrollbar,
+        .armory-details-panel::-webkit-scrollbar {
+            width: 8px;
         }
 
-        .weapon-type-badge.assault {
-            background: rgba(255, 136, 0, 0.2);
-            color: #ff8800;
-            border: 1px solid #ff8800;
+        .armory-content-panel::-webkit-scrollbar-track,
+        .armory-details-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
         }
 
-        .weapon-type-badge.special {
-            background: rgba(0, 212, 255, 0.2);
-            color: #00d4ff;
-            border: 1px solid #00d4ff;
+        .armory-content-panel::-webkit-scrollbar-thumb,
+        .armory-details-panel::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 4px;
         }
 
-        .weapon-type-badge.heavy {
-            background: rgba(255, 68, 68, 0.2);
-            color: #ff4444;
-            border: 1px solid #ff4444;
-        }
-
-        .weapon-type-badge.sidearm {
-            background: rgba(0, 212, 255, 0.2);
-            color: #00d4ff;
-            border: 1px solid #00d4ff;
-        }
-
-        .weapon-type-badge.experimental {
-            background: rgba(187, 0, 255, 0.2);
-            color: #bb00ff;
-            border: 1px solid #bb00ff;
-        }
-
-        .weapon-note {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 9px;
-            font-weight: bold;
-            letter-spacing: 0.05em;
-            margin-left: 4px;
-            background: rgba(187, 0, 255, 0.15);
-            color: #bb00ff;
-            border: 1px solid #bb00ff;
+        .armory-content-panel::-webkit-scrollbar-thumb:hover,
+        .armory-details-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 212, 255, 0.5);
         }
 
     </style>
@@ -1846,356 +2082,428 @@
 
         // Initialize starfield
         
-        // ARMORY LOADOUT SYSTEM FUNCTIONS - PHASE 3 (With Alien Gear)
+        // ARMORY FULL-SCREEN TABBED INTERFACE
         function showArmoryLoadoutUI() {
-            const modalContent = document.getElementById('modalContent');
+            // Create fullscreen armory container
+            const armoryContainer = document.createElement('div');
+            armoryContainer.id = 'armoryFullScreen';
+            armoryContainer.className = 'armory-full-screen';
+        // COMPLETE TABBED ARMORY INTERFACE
+        function showArmoryLoadoutUI() {
+            // Remove modal overlay approach - create fullscreen container
+            const armoryContainer = document.createElement('div');
+            armoryContainer.id = 'armoryFullScreen';
+            armoryContainer.className = 'armory-full-screen';
+            document.body.appendChild(armoryContainer);
             
-            // Build the UI
-            renderArmoryUI(modalContent);
+            const currentLoadout = gameState.loadout;
+            const primaryWeapon = weaponDatabase.primary[currentLoadout.primary];
+            const secondaryWeapon = weaponDatabase.secondary[currentLoadout.secondary];
+            const armor = armorDatabase[currentLoadout.armor];
+            const gadget = gadgetDatabase[currentLoadout.gadget];
             
-            function renderArmoryUI(container) {
-                const currentLoadout = gameState.loadout;
-                const primaryWeapon = weaponDatabase.primary[currentLoadout.primary];
-                const secondaryWeapon = weaponDatabase.secondary[currentLoadout.secondary];
-                const armor = armorDatabase[currentLoadout.armor];
-                const gadget = gadgetDatabase[currentLoadout.gadget];
+            // HTML Structure
+            armoryContainer.innerHTML = `
+                <div class="armory-main-layout">
+                    <!-- LEFT PANEL: TAB NAVIGATION -->
+                    <div class="armory-nav-panel">
+                        <button class="armory-nav-btn active" data-tab="weapons">⚔ WEAPONS</button>
+                        <button class="armory-nav-btn" data-tab="armor">🛡 ARMOUR</button>
+                        <button class="armory-nav-btn" data-tab="gadgets">⚡ GADGETS</button>
+                        <button class="armory-nav-btn" data-tab="loadouts">📦 LOADOUTS</button>
+                        <button class="armory-nav-btn" data-tab="upgrades">⚙ UPGRADES</button>
+                        <button class="armory-nav-btn close-armory-btn" style="margin-top: auto; color: #ff4444; border-left-color: transparent;" onclick="closeArmory()">✕ CLOSE</button>
+                    </div>
+                    
+                    <!-- CENTER PANEL: CONTENT -->
+                    <div class="armory-content-panel">
+                        <!-- WEAPONS TAB -->
+                        <div class="armory-tab-content active" data-tab="weapons">
+                            <h2 style="color: #00d4ff; font-size: 16px; margin-bottom: 16px; border-bottom: 2px solid #00d4ff; padding-bottom: 8px;">PRIMARY WEAPONS</h2>
+                            <div class="armory-item-grid" id="weaponsPrimaryGrid"></div>
+                            
+                            <h2 style="color: #00d4ff; font-size: 16px; margin-top: 24px; margin-bottom: 16px; border-bottom: 2px solid #00d4ff; padding-bottom: 8px;">SECONDARY WEAPONS</h2>
+                            <div class="armory-item-grid" id="weaponsSecondaryGrid"></div>
+                        </div>
+                        
+                        <!-- ARMOUR TAB -->
+                        <div class="armory-tab-content" data-tab="armor">
+                            <h2 style="color: #ffaa00; font-size: 16px; margin-bottom: 16px; border-bottom: 2px solid #ffaa00; padding-bottom: 8px;">ARMOR SELECTION</h2>
+                            <div class="armory-armor-grid" id="armorGrid"></div>
+                        </div>
+                        
+                        <!-- GADGETS TAB -->
+                        <div class="armory-tab-content" data-tab="gadgets">
+                            <h2 style="color: #bb00ff; font-size: 16px; margin-bottom: 16px; border-bottom: 2px solid #bb00ff; padding-bottom: 8px;">GADGET LOADOUT</h2>
+                            <div class="armory-item-grid" id="gadgetsGrid"></div>
+                        </div>
+                        
+                        <!-- LOADOUTS TAB -->
+                        <div class="armory-tab-content" data-tab="loadouts">
+                            <h2 style="color: #00ff88; font-size: 16px; margin-bottom: 16px; border-bottom: 2px solid #00ff88; padding-bottom: 8px;">CURRENT LOADOUT</h2>
+                            <div class="armory-loadout-display">
+                                <div class="armory-loadout-item">
+                                    <div class="armory-loadout-slot">
+                                        <div class="armory-loadout-label">PRIMARY</div>
+                                        <div class="armory-loadout-value" id="loadoutPrimary"></div>
+                                    </div>
+                                    <button class="armory-loadout-change-btn" onclick="switchTab('weapons')">CHANGE</button>
+                                </div>
+                                <div class="armory-loadout-item">
+                                    <div class="armory-loadout-slot">
+                                        <div class="armory-loadout-label">SECONDARY</div>
+                                        <div class="armory-loadout-value" id="loadoutSecondary"></div>
+                                    </div>
+                                    <button class="armory-loadout-change-btn" onclick="switchTab('weapons')">CHANGE</button>
+                                </div>
+                                <div class="armory-loadout-item">
+                                    <div class="armory-loadout-slot">
+                                        <div class="armory-loadout-label">ARMOUR</div>
+                                        <div class="armory-loadout-value" id="loadoutArmor"></div>
+                                    </div>
+                                    <button class="armory-loadout-change-btn" onclick="switchTab('armor')">CHANGE</button>
+                                </div>
+                                <div class="armory-loadout-item">
+                                    <div class="armory-loadout-slot">
+                                        <div class="armory-loadout-label">GADGET</div>
+                                        <div class="armory-loadout-value" id="loadoutGadget"></div>
+                                    </div>
+                                    <button class="armory-loadout-change-btn" onclick="switchTab('gadgets')">CHANGE</button>
+                                </div>
+                            </div>
+                            
+                            <h2 style="color: #00d4ff; font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid #00d4ff; padding-bottom: 6px;">LOADOUT STATS</h2>
+                            <div style="background: rgba(0, 212, 255, 0.1); padding: 12px; border-radius: 4px; border-left: 3px solid #00d4ff;">
+                                <div class="armory-stat-row">
+                                    <div class="armory-stat-label">TOTAL DAMAGE</div>
+                                    <div class="armory-stat-value" id="totalDamage">0</div>
+                                </div>
+                                <div class="armory-stat-row">
+                                    <div class="armory-stat-label">TOTAL DEFENCE</div>
+                                    <div class="armory-stat-value" id="totalDefence">0</div>
+                                </div>
+                                <div class="armory-stat-row">
+                                    <div class="armory-stat-label">MOBILITY</div>
+                                    <div class="armory-stat-value" id="totalMobility">0</div>
+                                </div>
+                                <div class="armory-stat-row">
+                                    <div class="armory-stat-label">SUITABILITY</div>
+                                    <div class="armory-stat-value" id="missionSuitability">Balanced</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- UPGRADES TAB -->
+                        <div class="armory-tab-content" data-tab="upgrades">
+                            <h2 style="color: #bb00ff; font-size: 16px; margin-bottom: 16px; border-bottom: 2px solid #bb00ff; padding-bottom: 8px;">WEAPON UPGRADES</h2>
+                            <div class="armory-upgrade-grid" id="upgradesGrid"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- RIGHT PANEL: DETAILS & STATS -->
+                    <div class="armory-details-panel">
+                        <div id="detailsContent">
+                            <div class="armory-detail-section">
+                                <div class="armory-detail-title">SELECTED ITEM</div>
+                                <div class="armory-detail-name" id="detailName">${primaryWeapon.name}</div>
+                                <div class="armory-detail-desc" id="detailDesc">${primaryWeapon.description}</div>
+                            </div>
+                            
+                            <div class="armory-detail-section">
+                                <div class="armory-detail-title">STATS</div>
+                                <div id="detailStats"></div>
+                            </div>
+                            
+                            <div class="armory-detail-section">
+                                <div class="armory-action-buttons">
+                                    <button class="armory-action-btn" id="detailBtn1">EQUIP</button>
+                                    <button class="armory-action-btn" id="detailBtn2">INFO</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
-                // Get all available items
-                const allPrimaries = Object.entries(weaponDatabase.primary).map(([key, weapon]) => ({key, ...weapon}));
-                const allSecondaries = Object.entries(weaponDatabase.secondary).map(([key, weapon]) => ({key, ...weapon}));
-                const allArmors = Object.entries(armorDatabase).map(([key, a]) => ({key, ...a}));
-                const allGadgets = Object.entries(gadgetDatabase).map(([key, g]) => ({key, ...g}));
-                
-                // Alien weapons & gear (only show unlocked)
-                const allAlienWeapons = Object.entries(alienGearDatabase.weapons)
-                    .filter(([key]) => gameState.unlockedAlienGear.includes(key))
-                    .map(([key, weapon]) => ({key, ...weapon, isAlien: true}));
-                
-                const allAlienGadgets = Object.entries(alienGearDatabase.gadgets)
-                    .filter(([key]) => gameState.unlockedAlienGear.includes(key))
-                    .map(([key, gadget]) => ({key, ...gadget, isAlien: true}));
-                
-                // Build LEFT COLUMN: Categories
-                let leftColumn = '<div class="armory-column" style="overflow-y: auto; max-height: 65vh;">';
-                leftColumn += '<div class="armory-section-title">⚔ MILITARY WEAPONS</div>';
-                
-                // Organize primaries by type
-                const primarysByType = {
-                    assault: [],
-                    special: [],
-                    heavy: [],
-                    experimental: []
+                <!-- BOTTOM BAR -->
+                <div class="armory-bottom-bar">
+                    <div class="armory-bottom-actions">
+                        <button class="armory-bottom-btn" onclick="resetLoadout()">RESET</button>
+                        <button class="armory-bottom-btn" onclick="compareLoadouts()">COMPARE</button>
+                    </div>
+                    <div class="armory-loadout-summary">
+                        <strong id="bottomSummary">Ready to Deploy</strong>
+                    </div>
+                    <button class="armory-deploy-btn" onclick="deployFromArmory()">🚀 DEPLOY</button>
+                </div>
+            `;
+            
+            // Populate grids
+            populateWeaponsTab();
+            populateArmorTab();
+            populateGadgetsTab();
+            populateUpgradesTab();
+            updateLoadoutDisplay();
+            
+            // Tab switching functionality
+            document.querySelectorAll('.armory-nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (!btn.classList.contains('close-armory-btn')) {
+                        const tabName = btn.dataset.tab;
+                        switchTab(tabName);
+                    }
+                });
+            });
+        }
+        
+        function switchTab(tabName) {
+            // Update nav buttons
+            document.querySelectorAll('.armory-nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.tab === tabName) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update content tabs
+            document.querySelectorAll('.armory-tab-content').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+        
+        function populateWeaponsTab() {
+            const primaryGrid = document.getElementById('weaponsPrimaryGrid');
+            const secondaryGrid = document.getElementById('weaponsSecondaryGrid');
+            const currentLoadout = gameState.loadout;
+            
+            // Populate primary weapons
+            Object.entries(weaponDatabase.primary).forEach(([key, weapon]) => {
+                const card = createWeaponCard(key, weapon, currentLoadout.primary === key);
+                card.onclick = () => selectWeapon('primary', key, weapon);
+                primaryGrid.appendChild(card);
+            });
+            
+            // Populate secondary weapons
+            Object.entries(weaponDatabase.secondary).forEach(([key, weapon]) => {
+                const card = createWeaponCard(key, weapon, currentLoadout.secondary === key);
+                card.onclick = () => selectWeapon('secondary', key, weapon);
+                secondaryGrid.appendChild(card);
+            });
+        }
+        
+        function createWeaponCard(key, weapon, isSelected) {
+            const card = document.createElement('div');
+            card.className = `armory-item-card ${isSelected ? 'selected' : ''}`;
+            card.innerHTML = `
+                <div class="armory-item-icon">${weapon.icon}</div>
+                <div class="armory-item-name">${weapon.name}</div>
+                <div class="armory-item-subtext">${weapon.damage} DMG</div>
+                <div class="armory-rarity-badge rarity-common">MILITARY</div>
+            `;
+            return card;
+        }
+        
+        function selectWeapon(category, key, weapon) {
+            // Update loadout
+            gameState.loadout[category] = key;
+            
+            // Update UI
+            document.querySelectorAll(`[data-weapon-key="${key}"]`).forEach(el => {
+                el.classList.add('selected');
+            });
+            
+            // Update details panel
+            updateDetailsPanel(weapon);
+            updateLoadoutDisplay();
+        }
+        
+        function populateArmorTab() {
+            const armorGrid = document.getElementById('armorGrid');
+            const currentLoadout = gameState.loadout;
+            
+            Object.entries(armorDatabase).forEach(([key, armor]) => {
+                const card = document.createElement('div');
+                card.className = `armory-armor-card ${currentLoadout.armor === key ? 'selected' : ''}`;
+                card.innerHTML = `
+                    <div class="armory-armor-icon">${armor.icon}</div>
+                    <div class="armory-armor-name">${armor.name}</div>
+                    <div class="armory-armor-stat">+${armor.health} Health</div>
+                    <div class="armory-armor-stat">${armor.speed >= 0 ? '+' : ''}${armor.speed}% Speed</div>
+                    <div class="armory-armor-stat">${armor.resistance}% Resistance</div>
+                `;
+                card.onclick = () => {
+                    gameState.loadout.armor = key;
+                    updateDetailsPanel(armor);
+                    updateLoadoutDisplay();
+                    document.querySelectorAll('.armory-armor-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
                 };
-                
-                allPrimaries.forEach(w => {
-                    const weaponType = w.type || 'assault';
-                    if (primarysByType[weaponType]) {
-                        primarysByType[weaponType].push(w);
-                    }
-                });
-                
-                // Display ASSAULT weapons
-                if (primarysByType.assault.length > 0) {
-                    leftColumn += '<div style="color: #ff8800; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin: 8px 0 6px 0; padding-left: 4px; border-left: 2px solid #ff8800;">⚔ ASSAULT</div>';
-                    leftColumn += '<div class="armory-item-list" style="margin-bottom: 8px;">';
-                    primarysByType.assault.forEach(w => {
-                        const isSelected = currentLoadout.primary === w.key;
-                        leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('primary', '${w.key}')" style="border-color: ${w.color}; background: ${isSelected ? w.color + '30' : 'rgba(255, 136, 0, 0.1)'}; color: ${w.color};">${w.icon} ${w.name}</button>`;
-                    });
-                    leftColumn += '</div>';
-                }
-                
-                // Display SPECIAL weapons
-                if (primarysByType.special.length > 0) {
-                    leftColumn += '<div style="color: #00d4ff; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin: 8px 0 6px 0; padding-left: 4px; border-left: 2px solid #00d4ff;">⚡ SPECIAL</div>';
-                    leftColumn += '<div class="armory-item-list" style="margin-bottom: 8px;">';
-                    primarysByType.special.forEach(w => {
-                        const isSelected = currentLoadout.primary === w.key;
-                        leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('primary', '${w.key}')" style="border-color: ${w.color}; background: ${isSelected ? w.color + '30' : 'rgba(0, 212, 255, 0.1)'}; color: ${w.color};">${w.icon} ${w.name}</button>`;
-                    });
-                    leftColumn += '</div>';
-                }
-                
-                // Display HEAVY weapons
-                if (primarysByType.heavy.length > 0) {
-                    leftColumn += '<div style="color: #ff4444; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin: 8px 0 6px 0; padding-left: 4px; border-left: 2px solid #ff4444;">💣 HEAVY</div>';
-                    leftColumn += '<div class="armory-item-list" style="margin-bottom: 8px;">';
-                    primarysByType.heavy.forEach(w => {
-                        const isSelected = currentLoadout.primary === w.key;
-                        leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('primary', '${w.key}')" style="border-color: ${w.color}; background: ${isSelected ? w.color + '30' : 'rgba(255, 68, 68, 0.1)'}; color: ${w.color};">${w.icon} ${w.name}</button>`;
-                    });
-                    leftColumn += '</div>';
-                }
-                
-                // Display EXPERIMENTAL weapons
-                const allExperimental = Object.entries(weaponDatabase.experimental || {}).map(([key, weapon]) => ({key, ...weapon}));
-                if (allExperimental.length > 0) {
-                    leftColumn += '<div style="color: #bb00ff; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin: 8px 0 6px 0; padding-left: 4px; border-left: 2px solid #bb00ff;">🔮 EXPERIMENTAL</div>';
-                    leftColumn += '<div class="armory-item-list" style="margin-bottom: 8px;">';
-                    allExperimental.forEach(w => {
-                        const isSelected = currentLoadout.primary === w.key;
-                        const isLocked = w.locked || false;
-                        if (isLocked) {
-                            leftColumn += `<button class="armory-item-btn" onclick="" style="border-color: #666; background: rgba(100, 100, 100, 0.1); color: #666; cursor: not-allowed; opacity: 0.6;" title="Requires: ${w.unlockedBy}">🔒 ${w.name}</button>`;
-                        } else {
-                            leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('primary', '${w.key}')" style="border-color: ${w.color}; background: ${isSelected ? w.color + '30' : 'rgba(187, 0, 255, 0.1)'}; color: ${w.color};">${w.icon} ${w.name}</button>`;
-                        }
-                    });
-                    leftColumn += '</div>';
-                }
-                
-                leftColumn += '<div class="armory-section-title" style="border-color: #00d4ff; color: #00d4ff;">SIDEARMS</div>';
-                leftColumn += '<div class="armory-item-list">';
-                allSecondaries.forEach(w => {
-                    const isSelected = currentLoadout.secondary === w.key;
-                    leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('secondary', '${w.key}')" style="border-color: ${w.color}; background: ${isSelected ? w.color + '30' : 'rgba(0, 212, 255, 0.1)'}; color: ${w.color};">${w.icon} ${w.name}</button>`;
-                });
-                leftColumn += '</div>';
-                
-                // ALIEN WEAPONS SECTION
-                if (allAlienWeapons.length > 0) {
-                    leftColumn += '<div class="armory-section-title" style="border-color: #00d4ff; color: #00d4ff; margin-top: 15px;">⚡ ALIEN WEAPONS</div>';
-                    leftColumn += '<div class="armory-item-list">';
-                    allAlienWeapons.forEach(w => {
-                        const isSelected = currentLoadout.primary === w.key;
-                        const rarityClass = 'alien-rarity-' + w.rarity;
-                        leftColumn += `<button class="alien-item-btn ${isSelected ? 'selected' : ''} ${rarityClass}" onclick="updateArmorySelection('primary', '${w.key}')" style="background: ${isSelected ? 'rgba(0, 212, 255, 0.3)' : 'rgba(0, 212, 255, 0.08)'};">${w.icon} ${w.name} <span style="font-size: 10px;">(${w.rarity})</span></button>`;
-                    });
-                    leftColumn += '</div>';
-                } else {
-                    leftColumn += '<div style="background: rgba(100, 100, 100, 0.1); border-left: 2px solid #444; padding: 8px; margin: 10px 0; border-radius: 3px; font-size: 11px; color: #666;">🔒 Complete Research Lab missions to unlock Alien Weapons</div>';
-                }
-                
-                leftColumn += '<div class="armory-section-title" style="border-color: #ffaa00; color: #ffaa00;">ARMOR</div>';
-                leftColumn += '<div class="armory-item-list">';
-                allArmors.forEach(a => {
-                    const isSelected = currentLoadout.armor === a.key;
-                    leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('armor', '${a.key}')" style="border-color: ${a.color}; background: ${isSelected ? a.color + '30' : 'rgba(255, 170, 0, 0.1)'}; color: ${a.color};">${a.icon} ${a.name}</button>`;
-                });
-                leftColumn += '</div>';
-                
-                leftColumn += '<div class="armory-section-title" style="border-color: #bb00ff; color: #bb00ff;">GADGET</div>';
-                leftColumn += '<div class="armory-item-list">';
-                allGadgets.forEach(g => {
-                    const isSelected = currentLoadout.gadget === g.key;
-                    leftColumn += `<button class="armory-item-btn ${isSelected ? 'selected' : ''}" onclick="updateArmorySelection('gadget', '${g.key}')" style="border-color: ${g.color}; background: ${isSelected ? g.color + '30' : 'rgba(187, 0, 255, 0.1)'}; color: ${g.color};">${g.icon} ${g.name}</button>`;
-                });
-                leftColumn += '</div>';
-                
-                // ALIEN GADGETS SECTION
-                if (allAlienGadgets.length > 0) {
-                    leftColumn += '<div class="armory-section-title" style="border-color: #00d4ff; color: #00d4ff; margin-top: 15px;">⚡ ALIEN GADGETS</div>';
-                    leftColumn += '<div class="armory-item-list">';
-                    allAlienGadgets.forEach(g => {
-                        const isSelected = currentLoadout.gadget === g.key;
-                        const rarityClass = 'alien-rarity-' + g.rarity;
-                        leftColumn += `<button class="alien-item-btn ${isSelected ? 'selected' : ''} ${rarityClass}" onclick="updateArmorySelection('gadget', '${g.key}')" style="background: ${isSelected ? 'rgba(0, 212, 255, 0.3)' : 'rgba(0, 212, 255, 0.08)'};">${g.icon} ${g.name} <span style="font-size: 10px;">(${g.rarity})</span></button>`;
-                    });
-                    leftColumn += '</div>';
-                }
-                leftColumn += '</div>';
-                
-                // Build MIDDLE COLUMN: Preview
-                let middleColumn = '<div class="armory-column" style="align-items: center;">';
-                middleColumn += '<div class="armory-preview-box">';
-                middleColumn += '<div class="armory-preview-title">⚔ CURRENT LOADOUT</div>';
-                const primaryIsAlien = gameState.unlockedAlienGear.includes(currentLoadout.primary);
-                const primaryGlowStyle = primaryIsAlien ? 'text-shadow: 0 0 20px rgba(0, 212, 255, 0.6); filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.4));' : '';
-                middleColumn += '<div style="margin: 20px 0; border-bottom: 1px solid #00d4ff; padding-bottom: 15px;">';
-                middleColumn += `<div class="armory-preview-item" style="${primaryGlowStyle}">${primaryWeapon.icon}</div>`;
-                middleColumn += `<div class="armory-preview-name" style="${primaryIsAlien ? 'color: #00d4ff;' : ''}">${primaryWeapon.name}</div>`;
-                middleColumn += `<div style="font-size: 11px; color: ${primaryIsAlien ? '#00d4ff' : '#888'};">${primaryIsAlien ? '👽 Alien Technology' : 'Primary Weapon'}</div>`;
-                middleColumn += '</div>';
-                
-                middleColumn += '<div style="margin: 15px 0; border-bottom: 1px solid #00d4ff; padding-bottom: 15px;">';
-                middleColumn += `<div class="armory-preview-item" style="font-size: 32px;">${secondaryWeapon.icon}</div>`;
-                middleColumn += `<div class="armory-preview-name">${secondaryWeapon.name}</div>`;
-                middleColumn += '<div style="font-size: 11px; color: #888;">Secondary Weapon</div>';
-                middleColumn += '</div>';
-                
-                middleColumn += '<div style="margin: 15px 0; border-bottom: 1px solid #00d4ff; padding-bottom: 15px;">';
-                middleColumn += `<div class="armory-preview-item" style="font-size: 32px;">${armor.icon}</div>`;
-                middleColumn += `<div class="armory-preview-name">${armor.name}</div>`;
-                middleColumn += '<div style="font-size: 11px; color: #888;">Armor Set</div>';
-                middleColumn += '</div>';
-                
-                middleColumn += '<div style="margin: 15px 0;">';
-                middleColumn += `<div class="armory-preview-item" style="font-size: 32px;">${gadget.icon}</div>`;
-                middleColumn += `<div class="armory-preview-name">${gadget.name}</div>`;
-                middleColumn += '<div style="font-size: 11px; color: #888;">Gadget/Ability</div>';
-                middleColumn += '</div>';
-                middleColumn += '</div>';
-                middleColumn += '</div>';
-                
-                // Build RIGHT COLUMN: Stats
-                let rightColumn = '<div class="armory-column">';
-                rightColumn += '<div style="margin-bottom: 20px;">';
-                rightColumn += '<div class="armory-section-title">⚔ WEAPON STATS</div>';
-                rightColumn += '<div style="background: rgba(255, 136, 0, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #ff8800;">';
-                rightColumn += `<div class="armory-preview-name" style="color: #ff8800; margin-bottom: 12px;">${primaryWeapon.name}</div>`;
-                
-                // Add weapon type badge
-                const weaponType = primaryWeapon.type || 'assault';
-                rightColumn += `<div class="weapon-type-badge ${weaponType}">⚔ ${weaponType.toUpperCase()}</div>`;
-                
-                // Add special notes if present
-                if (primaryWeapon.note) {
-                    rightColumn += `<div class="weapon-note">${primaryWeapon.note}</div>`;
-                }
-                
-                // Damage bar
-                rightColumn += '<div class="armory-stat-bar">';
-                rightColumn += '<div class="armory-stat-label">DMG</div>';
-                rightColumn += '<div class="armory-stat-bar-container"><div class="armory-stat-bar-fill" style="width: ' + (primaryWeapon.damage / 120 * 100) + '%;"></div></div>';
-                rightColumn += `<div class="armory-stat-value">${primaryWeapon.damage}</div>`;
-                rightColumn += '</div>';
-                
-                // Fire Rate bar
-                rightColumn += '<div class="armory-stat-bar">';
-                rightColumn += '<div class="armory-stat-label">RATE</div>';
-                rightColumn += '<div class="armory-stat-bar-container"><div class="armory-stat-bar-fill" style="width: ' + (primaryWeapon.fireRate / 12 * 100) + '%;"></div></div>';
-                rightColumn += `<div class="armory-stat-value">${primaryWeapon.fireRate}</div>`;
-                rightColumn += '</div>';
-                
-                // Accuracy bar
-                rightColumn += '<div class="armory-stat-bar">';
-                rightColumn += '<div class="armory-stat-label">ACC</div>';
-                rightColumn += '<div class="armory-stat-bar-container"><div class="armory-stat-bar-fill" style="width: ' + (primaryWeapon.accuracy) + '%;"></div></div>';
-                rightColumn += `<div class="armory-stat-value">${primaryWeapon.accuracy}%</div>`;
-                rightColumn += '</div>';
-                
-                // Reload Time
-                rightColumn += '<div class="armory-stat-bar">';
-                rightColumn += '<div class="armory-stat-label">RELOAD</div>';
-                rightColumn += '<div class="armory-stat-bar-container"><div class="armory-stat-bar-fill" style="width: ' + (100 - (primaryWeapon.reloadTime / 3 * 100)) + '%;"></div></div>';
-                rightColumn += `<div class="armory-stat-value">${primaryWeapon.reloadTime}s</div>`;
-                rightColumn += '</div>';
-                
-                rightColumn += '</div>';
-                rightColumn += '</div>';
-                
-                // Armor stats
-                rightColumn += '<div style="margin-bottom: 20px;">';
-                rightColumn += '<div class="armory-section-title" style="color: #ffaa00; border-color: #ffaa00;">🛡 ARMOR STATS</div>';
-                rightColumn += '<div style="background: rgba(255, 170, 0, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #ffaa00;">';
-                rightColumn += `<div class="armory-preview-name" style="color: #ffaa00; margin-bottom: 10px;">${armor.name}</div>`;
-                rightColumn += `<div style="font-size: 11px; color: #aaa; margin-bottom: 10px;">${armor.description}</div>`;
-                rightColumn += `<div style="color: #00ff88; font-size: 12px; font-weight: bold; margin-top: 8px;">+${armor.health} Health</div>`;
-                rightColumn += `<div style="color: ${armor.speed >= 0 ? '#00ff88' : '#ff6666'}; font-size: 12px; font-weight: bold; margin-top: 4px;">${armor.speed >= 0 ? '+' : ''}${armor.speed}% Speed</div>`;
-                rightColumn += `<div style="color: #00d4ff; font-size: 12px; font-weight: bold; margin-top: 4px;">${armor.resistance}% Resistance</div>`;
-                rightColumn += '</div>';
-                rightColumn += '</div>';
-                
-                // WEAPON UPGRADES SECTION (NEW!)
-                rightColumn += '<div style="margin-bottom: 20px;">';
-                rightColumn += '<div class="armory-section-title" style="color: #bb00ff; border-color: #bb00ff;">⚙ WEAPON UPGRADES</div>';
-                const primaryUpgrades = gameState.weaponUpgrades[currentLoadout.primary] || [];
-                const availableUpgrades = Object.entries(weaponUpgrades).filter(([key]) => !primaryUpgrades.includes(key));
-                rightColumn += '<div style="background: rgba(187, 0, 255, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #bb00ff;">';
-                rightColumn += `<div style="color: #bb00ff; font-size: 11px; font-weight: bold; margin-bottom: 10px;">ACTIVE UPGRADES (${primaryUpgrades.length}/3)</div>`;
-                
-                // Show active upgrade slots
-                for (let i = 0; i < 3; i++) {
-                    const upgradeKey = primaryUpgrades[i];
-                    if (upgradeKey) {
-                        const upgrade = weaponUpgrades[upgradeKey];
-                        rightColumn += `<div style="background: rgba(0, 255, 136, 0.15); padding: 6px; border-radius: 3px; margin-bottom: 6px; border-left: 2px solid #00ff88; display: flex; justify-content: space-between; align-items: center;">`;
-                        rightColumn += `<div><span style="color: #00ff88; font-weight: bold; font-size: 11px;">${upgrade.icon} ${upgrade.name}</span><div style="font-size: 9px; color: #888;">${upgrade.description}</div></div>`;
-                        rightColumn += `<button style="background: #ff4444; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; font-size: 10px; cursor: pointer; font-weight: bold;" onclick="removeWeaponUpgrade('${currentLoadout.primary}', '${upgradeKey}', 'primary')">✕</button>`;
-                        rightColumn += '</div>';
-                    } else {
-                        rightColumn += `<div style="background: rgba(100, 100, 100, 0.1); padding: 6px; border-radius: 3px; margin-bottom: 6px; color: #666; font-size: 11px; text-align: center;">Upgrade Slot ${i + 1}</div>`;
-                    }
-                }
-                
-                // Available upgrades to add
-                if (availableUpgrades.length > 0 && primaryUpgrades.length < 3) {
-                    rightColumn += `<div style="margin-top: 10px; border-top: 1px solid rgba(187, 0, 255, 0.3); padding-top: 10px;">`;
-                    rightColumn += `<div style="color: #ffaa00; font-size: 10px; font-weight: bold; margin-bottom: 8px;">AVAILABLE UPGRADES</div>`;
-                    availableUpgrades.slice(0, 3).forEach(([key, upgrade]) => {
-                        rightColumn += `<button style="display: block; width: 100%; background: rgba(255, 170, 0, 0.15); border: 1px solid #ffaa00; color: #fff; padding: 6px; border-radius: 3px; margin-bottom: 4px; cursor: pointer; font-size: 10px; text-align: left;" onclick="addWeaponUpgrade('${currentLoadout.primary}', '${key}', 'primary')"><span style="color: #ffaa00; font-weight: bold;">${upgrade.icon} ${upgrade.name}</span> <span style="color: #ffcc00;">(${upgrade.cost}c)</span></button>`;
-                    });
-                    rightColumn += '</div>';
-                }
-                rightColumn += '</div>';
-                rightColumn += '</div>';
-                
-                // Armor stats with PERK display (ENHANCED!)
-                rightColumn += '<div style="margin-bottom: 20px;">';
-                rightColumn += '<div class="armory-section-title" style="color: #ffaa00; border-color: #ffaa00;">🛡 ARMOR STATS & PERKS</div>';
-                rightColumn += '<div style="background: rgba(255, 170, 0, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #ffaa00;">';
-                rightColumn += `<div class="armory-preview-name" style="color: #ffaa00; margin-bottom: 10px;">${armor.name}</div>`;
-                rightColumn += `<div style="font-size: 11px; color: #aaa; margin-bottom: 10px;">${armor.description}</div>`;
-                rightColumn += `<div style="color: #00ff88; font-size: 12px; font-weight: bold; margin-top: 8px;">+${armor.health} Health</div>`;
-                rightColumn += `<div style="color: ${armor.speed >= 0 ? '#00ff88' : '#ff6666'}; font-size: 12px; font-weight: bold; margin-top: 4px;">${armor.speed >= 0 ? '+' : ''}${armor.speed}% Speed</div>`;
-                rightColumn += `<div style="color: #00d4ff; font-size: 12px; font-weight: bold; margin-top: 4px;">${armor.resistance}% Resistance</div>`;
-                
-                // INHERENT PERK
-                rightColumn += `<div style="background: rgba(187, 0, 255, 0.2); border-left: 3px solid #bb00ff; padding: 8px; margin-top: 12px; border-radius: 3px;">`;
-                rightColumn += `<div style="color: #bb00ff; font-size: 11px; font-weight: bold; margin-bottom: 4px;">✦ PERK: ${armor.perk.name}</div>`;
-                rightColumn += `<div style="color: #bb00ff; font-size: 12px; font-weight: bold;">${armor.perk.icon} ${armor.perk.description}</div>`;
-                rightColumn += `<div style="color: #aaa; font-size: 10px; margin-top: 4px; font-style: italic;">${armor.perk.effect}</div>`;
-                rightColumn += '</div>';
-                rightColumn += '</div>';
-                rightColumn += '</div>';
-                
-                // ALIEN ARMOR UPGRADES SECTION
-                const alienArmorUpgrades = Object.entries(alienGearDatabase.armorUpgrades)
-                    .filter(([key]) => gameState.unlockedAlienGear.includes(key))
-                    .map(([key, upgrade]) => ({key, ...upgrade}));
-                
-                if (alienArmorUpgrades.length > 0) {
-                    rightColumn += '<div style="margin-bottom: 20px;">';
-                    rightColumn += '<div class="armory-section-title" style="color: #00d4ff; border-color: #00d4ff;">⚡ ALIEN ARMOR UPGRADES</div>';
-                    rightColumn += '<div style="background: rgba(0, 212, 255, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #00d4ff;">';
-                    alienArmorUpgrades.forEach(upgrade => {
-                        rightColumn += `<div class="armor-upgrade-item">`;
-                        rightColumn += `<div style="color: #00d4ff; font-weight: bold; font-size: 11px;">${upgrade.icon} ${upgrade.name}</div>`;
-                        rightColumn += `<div style="color: #888; font-size: 10px; margin-top: 4px;">${upgrade.description}</div>`;
-                        rightColumn += `<div style="color: #00ff88; font-size: 10px; margin-top: 4px; font-weight: bold;">RARITY: ${upgrade.rarity.toUpperCase()}</div>`;
-                        rightColumn += `</div>`;
-                    });
-                    rightColumn += '</div>';
-                    rightColumn += '</div>';
-                }
-                
-                // Gadget info (EXPANDED!)
-                rightColumn += '<div style="margin-bottom: 20px;">';
-                rightColumn += '<div class="armory-section-title" style="color: #bb00ff; border-color: #bb00ff;">⚡ GADGET SELECTION</div>';
-                rightColumn += '<div style="background: rgba(187, 0, 255, 0.05); padding: 12px; border-radius: 4px; border-left: 3px solid #bb00ff;">';
-                rightColumn += `<div class="armory-preview-name" style="color: #bb00ff; margin-bottom: 8px;">${gadget.name}</div>`;
-                rightColumn += `<div style="font-size: 11px; color: #888; margin-bottom: 8px;">Category: <span style="color: #fff;">${gadget.category}</span></div>`;
-                rightColumn += `<div style="font-size: 11px; color: #aaa;">${gadget.description}</div>`;
-                if (gadget.cooldown > 0) {
-                    rightColumn += `<div style="margin-top: 6px; color: #ffaa00; font-size: 11px;">⏱ Cooldown: ${gadget.cooldown}s</div>`;
-                } else {
-                    rightColumn += `<div style="margin-top: 6px; color: #00ff88; font-size: 11px;">✓ Consumable Item</div>`;
-                }
-                rightColumn += '</div>';
-                rightColumn += '</div>';
-                
-                // Equipment slots display
-                rightColumn += '<div style="background: rgba(0, 212, 255, 0.1); border: 2px solid #00d4ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;">';
-                rightColumn += '<div class="armory-section-title" style="color: #00d4ff; border-color: #00d4ff; margin-bottom: 12px;">⚡ EQUIPMENT SLOTS</div>';
-                rightColumn += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">';
-                rightColumn += `<div style="background: rgba(255, 136, 0, 0.15); padding: 10px; border-radius: 3px; border-left: 3px solid #ff8800;"><div style="color: #ff8800; font-size: 11px; font-weight: bold;">PRIMARY</div><div style="color: #fff; font-size: 13px; margin-top: 3px;">${primaryWeapon.icon} ${primaryWeapon.name}</div></div>`;
-                rightColumn += `<div style="background: rgba(0, 212, 255, 0.15); padding: 10px; border-radius: 3px; border-left: 3px solid #00d4ff;"><div style="color: #00d4ff; font-size: 11px; font-weight: bold;">SECONDARY</div><div style="color: #fff; font-size: 13px; margin-top: 3px;">${secondaryWeapon.icon} ${secondaryWeapon.name}</div></div>`;
-                rightColumn += `<div style="background: rgba(255, 170, 0, 0.15); padding: 10px; border-radius: 3px; border-left: 3px solid #ffaa00;"><div style="color: #ffaa00; font-size: 11px; font-weight: bold;">ARMOR</div><div style="color: #fff; font-size: 13px; margin-top: 3px;">${armor.icon} ${armor.name}</div></div>`;
-                rightColumn += `<div style="background: rgba(187, 0, 255, 0.15); padding: 10px; border-radius: 3px; border-left: 3px solid #bb00ff;"><div style="color: #bb00ff; font-size: 11px; font-weight: bold;">GADGET</div><div style="color: #fff; font-size: 13px; margin-top: 3px;">${gadget.icon} ${gadget.name}</div></div>`;
-                rightColumn += '</div>';
-                rightColumn += '</div>';
-                
-                // Save & Deploy buttons
-                rightColumn += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">';
-                rightColumn += '<button class="armory-save-btn" onclick="saveLoadout()" style="background: #444; border-color: #666;">✓ SAVE</button>';
-                rightColumn += '<button class="armory-save-btn" onclick="deployFromArmory()" style="background: #f97316; border-color: #ff8800; font-size: 16px; font-weight: bold;">🚀 DEPLOY</button>';
-                rightColumn += '</div>';
-                rightColumn += '</div>';
-                
-                modalContent.innerHTML = `
-                    <div class="interaction-modal-header">⚔ ARMORY — LOADOUT SYSTEM 🛰</div>
-                    <div style="color: #888; font-size: 12px; padding: 10px 0; border-bottom: 1px solid rgba(0, 212, 255, 0.2);">Military Equipment Storage | Alien Research Lab Integration</div>
-                    <div class="interaction-modal-content" style="max-height: 65vh; overflow-y: auto;">
+                armorGrid.appendChild(card);
+            });
+        }
+        
+        function populateGadgetsTab() {
+            const gadgetsGrid = document.getElementById('gadgetsGrid');
+            const currentLoadout = gameState.loadout;
+            
+            Object.entries(gadgetDatabase).forEach(([key, gadget]) => {
+                const card = document.createElement('div');
+                card.className = `armory-item-card ${currentLoadout.gadget === key ? 'selected' : ''}`;
+                card.innerHTML = `
+                    <div class="armory-item-icon">${gadget.icon}</div>
+                    <div class="armory-item-name">${gadget.name}</div>
+                    <div class="armory-item-subtext">${gadget.category}</div>
+                    <div class="armory-rarity-badge" style="background: rgba(${gadget.color === '#ff4444' ? '255, 68, 68' : gadget.color === '#00d4ff' ? '0, 212, 255' : '0, 255, 136'}, 0.2); color: ${gadget.color}; border: 1px solid ${gadget.color};">${gadget.type.toUpperCase()}</div>
+                `;
+                card.onclick = () => {
+                    gameState.loadout.gadget = key;
+                    updateDetailsPanel(gadget);
+                    updateLoadoutDisplay();
+                    document.querySelectorAll('#gadgetsGrid .armory-item-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                };
+                gadgetsGrid.appendChild(card);
+            });
+        }
+        
+        function populateUpgradesTab() {
+            const upgradesGrid = document.getElementById('upgradesGrid');
+            
+            Object.entries(weaponUpgrades).forEach(([key, upgrade]) => {
+                const card = document.createElement('div');
+                card.className = 'armory-upgrade-card';
+                card.innerHTML = `
+                    <div class="armory-upgrade-icon">${upgrade.icon}</div>
+                    <div class="armory-upgrade-name">${upgrade.name}</div>
+                    <div class="armory-upgrade-level">Level 1/3</div>
+                    <div class="armory-upgrade-cost">💰 ${upgrade.cost}</div>
+                    <button class="armory-upgrade-btn" onclick="unlockUpgrade('${key}')">UNLOCK</button>
+                `;
+                upgradesGrid.appendChild(card);
+            });
+        }
+        
+        function updateDetailsPanel(item) {
+            const detailName = document.getElementById('detailName');
+            const detailDesc = document.getElementById('detailDesc');
+            const detailStats = document.getElementById('detailStats');
+            
+            detailName.textContent = item.name;
+            detailDesc.textContent = item.description || '';
+            
+            // Build stats display
+            let statsHTML = '';
+            if (item.damage) {
+                statsHTML += `
+                    <div class="armory-stat-row">
+                        <div class="armory-stat-label">Damage</div>
+                        <div class="armory-stat-bar">
+                            <div class="armory-stat-fill" style="width: ${(item.damage / 120) * 100}%"></div>
+                        </div>
+                        <div class="armory-stat-value">${item.damage}</div>
+                    </div>
+                `;
+            }
+            if (item.fireRate) {
+                statsHTML += `
+                    <div class="armory-stat-row">
+                        <div class="armory-stat-label">Fire Rate</div>
+                        <div class="armory-stat-bar">
+                            <div class="armory-stat-fill" style="width: ${(item.fireRate / 14) * 100}%"></div>
+                        </div>
+                        <div class="armory-stat-value">${item.fireRate}</div>
+                    </div>
+                `;
+            }
+            if (item.accuracy) {
+                statsHTML += `
+                    <div class="armory-stat-row">
+                        <div class="armory-stat-label">Accuracy</div>
+                        <div class="armory-stat-bar">
+                            <div class="armory-stat-fill" style="width: ${item.accuracy}%"></div>
+                        </div>
+                        <div class="armory-stat-value">${item.accuracy}%</div>
+                    </div>
+                `;
+            }
+            if (item.health) {
+                statsHTML += `
+                    <div class="armory-stat-row">
+                        <div class="armory-stat-label">Health Bonus</div>
+                        <div class="armory-stat-value">+${item.health}</div>
+                    </div>
+                `;
+            }
+            if (item.resistance) {
+                statsHTML += `
+                    <div class="armory-stat-row">
+                        <div class="armory-stat-label">Resistance</div>
+                        <div class="armory-stat-bar">
+                            <div class="armory-stat-fill" style="width: ${item.resistance}%"></div>
+                        </div>
+                        <div class="armory-stat-value">${item.resistance}%</div>
+                    </div>
+                `;
+            }
+            
+            detailStats.innerHTML = statsHTML;
+        }
+        
+        function updateLoadoutDisplay() {
+            const loadout = gameState.loadout;
+            document.getElementById('loadoutPrimary').textContent = weaponDatabase.primary[loadout.primary].name;
+            document.getElementById('loadoutSecondary').textContent = weaponDatabase.secondary[loadout.secondary].name;
+            document.getElementById('loadoutArmor').textContent = armorDatabase[loadout.armor].name;
+            document.getElementById('loadoutGadget').textContent = gadgetDatabase[loadout.gadget].name;
+            
+            // Calculate total stats
+            const primary = weaponDatabase.primary[loadout.primary];
+            const armor = armorDatabase[loadout.armor];
+            const totalDamage = primary.damage + (armor.health / 10);
+            const totalDefence = armor.health + armor.resistance;
+            const totalMobility = 100 + armor.speed;
+            
+            document.getElementById('totalDamage').textContent = totalDamage;
+            document.getElementById('totalDefence').textContent = totalDefence;
+            document.getElementById('totalMobility').textContent = totalMobility + '%';
+            
+            const suitability = totalDamage > 90 ? 'Aggressive' : totalDefence > 150 ? 'Defensive' : 'Balanced';
+            document.getElementById('missionSuitability').textContent = suitability;
+            document.getElementById('bottomSummary').textContent = `Loadout: ${primary.name} | ${suitability}`;
+        }
+        
+        function closeArmory() {
+            const armoryElement = document.getElementById('armoryFullScreen');
+            if (armoryElement) {
+                armoryElement.remove();
+            }
+        }
+        
+        function resetLoadout() {
+            gameState.loadout = {
+                primary: 'assaultRifle',
+                secondary: 'combatPistol',
+                armor: 'medium',
+                gadget: 'medkit'
+            };
+            closeArmory();
+            showArmoryLoadoutUI();
+        }
+        
+        function compareLoadouts() {
+            alert('Loadout comparison coming soon!');
+        }
+        
+        function unlockUpgrade(upgradeKey) {
+            alert(`Upgrade ${upgradeKey} unlocked!`);
+        }
+        
+        function deployFromArmory() {
+            closeArmory();
+            alert('🚀 Loadout equipped! Ready for mission.');
+        }
                         <div class="armory-container">
                             ${leftColumn}
                             ${middleColumn}
