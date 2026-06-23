@@ -45,7 +45,6 @@
         .menu-stars {
             position: absolute;
             inset: 0;
-            opacity: 0.3;
             z-index: 2;
         }
 
@@ -56,9 +55,75 @@
             animation: twinkle 3s infinite;
         }
 
+        .menu-star.near { opacity: 0.8; }
+        .menu-star.mid { opacity: 0.5; }
+        .menu-star.far { opacity: 0.2; }
+        
+        .menu-star.blue { background: rgba(59, 130, 246, 0.8); }
+        .menu-star.yellow { background: rgba(234, 179, 8, 0.7); }
+
         @keyframes twinkle {
             0%, 100% { opacity: 0.3; }
             50% { opacity: 1; }
+        }
+
+        /* PLANETS */
+        .menu-planets-container {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            overflow: hidden;
+        }
+
+        .menu-planet-item {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(1px);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-planet-item.planet-1 {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle at 30% 30%, rgba(249, 115, 22, 0.4), rgba(239, 68, 68, 0.2));
+            box-shadow: 0 0 60px rgba(249, 115, 22, 0.3), inset -20px -20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .menu-planet-item.planet-2 {
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle at 35% 35%, rgba(59, 130, 246, 0.35), rgba(30, 58, 138, 0.15));
+            box-shadow: 0 0 50px rgba(59, 130, 246, 0.25), inset -15px -15px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .menu-planet-item.planet-3 {
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle at 40% 40%, rgba(34, 197, 94, 0.3), rgba(20, 83, 45, 0.1));
+            box-shadow: 0 0 45px rgba(34, 197, 94, 0.2), inset -12px -12px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .menu-planet-item.planet-4 {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle at 35% 35%, rgba(168, 85, 247, 0.3), rgba(88, 28, 135, 0.1));
+            box-shadow: 0 0 55px rgba(168, 85, 247, 0.2), inset -15px -15px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .menu-planet-item.planet-5 {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.35), rgba(131, 24, 67, 0.15));
+            box-shadow: 0 0 40px rgba(236, 72, 153, 0.25), inset -10px -10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        .menu-planet-item {
+            animation: float 8s ease-in-out infinite;
         }
 
         .menu-content {
@@ -404,6 +469,7 @@
         <div class="menu-bg-glow"></div>
         <div class="menu-bg-planet"></div>
         <div class="menu-stars" id="starsContainer"></div>
+        <div class="menu-planets-container" id="planetsContainer"></div>
 
         <div class="menu-content">
             <div class="menu-logo">
@@ -598,19 +664,82 @@
             keys[e.key.toLowerCase()] = false;
         });
 
-        // Initialize starfield
+        // Initialize starfield with depth layers
         function initStarfield() {
-            const container = document.getElementById('starsContainer');
-            for (let i = 0; i < 100; i++) {
+            const starsContainer = document.getElementById('starsContainer');
+            
+            // Create 250+ stars with depth variation
+            for (let i = 0; i < 250; i++) {
                 const star = document.createElement('div');
                 star.className = 'menu-star';
-                star.style.width = Math.random() * 2 + 'px';
-                star.style.height = star.style.width;
+                
+                // Depth layers
+                const depth = Math.random();
+                if (depth < 0.4) {
+                    star.classList.add('far');
+                } else if (depth < 0.7) {
+                    star.classList.add('mid');
+                } else {
+                    star.classList.add('near');
+                }
+                
+                // Color variation
+                const color = Math.random();
+                if (color < 0.3) {
+                    star.classList.add('blue');
+                } else if (color < 0.5) {
+                    star.classList.add('yellow');
+                }
+                
+                // Size varies with depth
+                const sizeMultiplier = 0.5 + depth;
+                const size = Math.random() * 2.5 * sizeMultiplier;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                
                 star.style.left = Math.random() * 100 + '%';
                 star.style.top = Math.random() * 100 + '%';
                 star.style.animationDelay = Math.random() * 3 + 's';
-                container.appendChild(star);
+                starsContainer.appendChild(star);
             }
+            
+            // Initialize planets
+            initPlanets();
+        }
+        
+        // Initialize floating planets with parallax
+        function initPlanets() {
+            const planetsContainer = document.getElementById('planetsContainer');
+            const planetData = [
+                { class: 'planet-1', left: '15%', top: '20%', delay: '0s' },
+                { class: 'planet-2', left: '75%', top: '15%', delay: '2s' },
+                { class: 'planet-3', left: '85%', top: '65%', delay: '1s' },
+                { class: 'planet-4', left: '10%', top: '70%', delay: '3s' },
+                { class: 'planet-5', left: '50%', top: '75%', delay: '1.5s' }
+            ];
+            
+            planetData.forEach(data => {
+                const planet = document.createElement('div');
+                planet.className = 'menu-planet-item ' + data.class;
+                planet.style.left = data.left;
+                planet.style.top = data.top;
+                planet.style.animationDelay = data.delay;
+                planetsContainer.appendChild(planet);
+            });
+            
+            // Add parallax effect on mouse move
+            document.addEventListener('mousemove', (e) => {
+                const planets = document.querySelectorAll('.menu-planet-item');
+                const x = (e.clientX / window.innerWidth) - 0.5;
+                const y = (e.clientY / window.innerHeight) - 0.5;
+                
+                planets.forEach((planet, index) => {
+                    const depth = (index + 1) * 5;
+                    const offsetX = x * depth;
+                    const offsetY = y * depth;
+                    planet.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${(index + 1) * 5}deg)`;
+                });
+            });
         }
 
         // Start game
