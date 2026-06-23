@@ -639,10 +639,10 @@
             ];
 
             // Initialize main planet in bottom-right (massive, partially off-screen)
-            const mainPlanetRadius = Math.max(canvas.width, canvas.height) * 0.6;
+            const mainPlanetRadius = Math.max(canvas.width, canvas.height) * 0.42;
             spaceState.mainPlanet = {
                 x: canvas.width * 0.75,
-                y: canvas.height * 1.05,
+                y: canvas.height * 1.0,
                 radius: mainPlanetRadius,
                 type: 3,
                 rotation: 0,
@@ -897,12 +897,12 @@
                             r = 120 + terrain * 80; g = 100 + terrain * 60; b = 80 + terrain * 40;
                         }
                         
-                        // Cloud coverage
-                        if (clouds > 0.7) {
-                            const cloudBlend = (clouds - 0.7) * 3.33;
-                            r = Math.floor(r * (1 - cloudBlend * 0.4) + 240 * cloudBlend * 0.5);
-                            g = Math.floor(g * (1 - cloudBlend * 0.4) + 245 * cloudBlend * 0.5);
-                            b = Math.floor(b * (1 - cloudBlend * 0.4) + 250 * cloudBlend * 0.5);
+                        // Cloud coverage - more realistic
+                        if (clouds > 0.45) {
+                            const cloudBlend = Math.min(1, (clouds - 0.45) * 2.0);
+                            r = Math.floor(r * (1 - cloudBlend * 0.5) + 235 * cloudBlend * 0.7);
+                            g = Math.floor(g * (1 - cloudBlend * 0.5) + 242 * cloudBlend * 0.7);
+                            b = Math.floor(b * (1 - cloudBlend * 0.5) + 250 * cloudBlend * 0.7);
                         }
                         
                         // Realistic lighting - sun from top-left
