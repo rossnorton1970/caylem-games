@@ -279,12 +279,16 @@
             font-size: 14px;
             line-height: 1.6;
             padding: 0 40px 20px 40px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
         }
         
         #modalContent {
             position: relative;
             flex: 1;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 10px;
         }
 
         .close-modal-btn {
