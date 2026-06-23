@@ -2692,20 +2692,43 @@
         }
         
         // Start game
-        function startGame() {
+        window.startGame = function() {
+            console.log('startGame() called');
             try {
-                document.getElementById('mainMenu').style.display = 'none';
-                document.getElementById('shipHubContainer').style.display = 'block';
-                gameState.currentLocation = 'ship';
-                gameState.playerX = 450;
-                gameState.playerY = 390;
-                if (typeof initializeEncounters === 'function') initializeEncounters();
-                if (typeof initShipHub === 'function') initShipHub();
+                const menu = document.getElementById('mainMenu');
+                const hub = document.getElementById('shipHubContainer');
+                
+                if (!menu) {
+                    alert('ERROR: mainMenu element not found');
+                    return;
+                }
+                if (!hub) {
+                    alert('ERROR: shipHubContainer element not found');
+                    return;
+                }
+                
+                menu.style.display = 'none';
+                hub.style.display = 'block';
+                
+                if (typeof gameState !== 'undefined') {
+                    gameState.currentLocation = 'ship';
+                    gameState.playerX = 450;
+                    gameState.playerY = 390;
+                }
+                
+                if (typeof initializeEncounters === 'function') {
+                    initializeEncounters();
+                }
+                if (typeof initShipHub === 'function') {
+                    initShipHub();
+                }
+                
+                console.log('startGame() completed successfully');
             } catch (e) {
                 console.error('startGame error:', e);
-                alert('Error starting game: ' + e.message);
+                alert('ERROR in startGame: ' + e.message);
             }
-        }
+        };
 
         // Initialize ship hub
         let shipCanvas, shipCtx;
@@ -3886,17 +3909,17 @@
             }
         }
 
-        function exitGame() {
+        window.exitGame = function() {
+            console.log('exitGame() called');
             try {
                 if (confirm('Exit Planetfall: Extraction?')) {
-                    alert('Thanks for playing!');
                     location.reload();
                 }
             } catch (e) {
                 console.error('exitGame error:', e);
-                alert('Error: ' + e.message);
+                alert('ERROR: ' + e.message);
             }
-        }
+        };
         
         function exitToMenu() {
             if (confirm('Return to main menu?')) {
