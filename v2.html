@@ -1183,7 +1183,7 @@
         <canvas id="shipHubCanvas"></canvas>
         <!-- MISSION CONTAINER (HTML-BASED) -->
         <div id="missionContainer" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999;">
-            <div id="missionWorld" style="position: relative; width: 100%; height: 100%; overflow: hidden; background: linear-gradient(180deg, #87ceeb 0%, #e0c59f 50%, #8b7355 100%);">
+            <div id="missionWorld" style="position: relative; width: 100%; height: 100%; overflow: hidden; background: linear-gradient(180deg, #87ceeb 0%, #e0c59f 50%, #8b7355 100%); animation: fadeInMission 2s ease-in;">
                 <!-- ZONE LAYERS (Background) -->
                 <div id="landingZone" style="position: absolute; bottom: 0; left: 0; right: 0; height: 30%; background: linear-gradient(180deg, #d4a574 0%, #c9a876 100%); border-top: 3px solid #a68860;"></div>
                 <div id="duneFields" style="position: absolute; bottom: 30%; left: 0; right: 0; height: 25%; background: repeating-linear-gradient(45deg, #d4a574, #d4a574 20px, #c9a876 20px, #c9a876 40px); opacity: 0.9;"></div>
@@ -1233,6 +1233,11 @@
                 <div id="statusMessage" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); border: 2px solid #ffcc00; border-radius: 5px; padding: 12px 24px; font-size: 14px; color: #ffcc00; text-align: center; display: none; pointer-events: auto; z-index: 101;">
                     <!-- Messages go here -->
                 </div>
+                
+                <!-- MISSION EXIT BUTTON -->
+                <div style="position: fixed; bottom: 20px; right: 20px; background: rgba(255,68,68,0.2); border: 2px solid #ff4444; border-radius: 5px; padding: 12px 16px; font-size: 12px; color: #ff4444; text-align: center; pointer-events: auto; z-index: 101; cursor: pointer;" onclick="exitMission()" title="Press ESC or click to exit">
+                    <div style="font-weight: bold;">ESC - EXIT MISSION</div>
+                </div>
             </div>
         </div>
         
@@ -1247,6 +1252,10 @@
             }
             @keyframes projectileTrail {
                 to { opacity: 0; }
+            }
+            @keyframes fadeInMission {
+                from { opacity: 0; background: #000; }
+                to { opacity: 1; background: linear-gradient(180deg, #87ceeb 0%, #e0c59f 50%, #8b7355 100%); }
             }
         </style>
         <canvas id="spaceCanvas" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;"></canvas>
@@ -2052,8 +2061,35 @@
             }
         };
 
-        // Planets array - RESET: will be rebuilt from scratch
-        const planets = [];
+        // Planets array - KEPLER-442B DESERT WORLD (Phase 4)
+        const planets = [
+            {
+                id: 'kepler442b',
+                name: 'KEPLER-442B',
+                type: 'desert',
+                description: 'Desert world with ancient ruins. Moderate threat level.',
+                difficulty: 'medium',
+                color: '#ffaa00',
+                environment: 'Desert - Sand plains with alien structures',
+                threatLevel: 'MODERATE',
+                threatColor: '#ffaa00',
+                objectives: 'Explore the desert, locate artifacts',
+                rewards: {
+                    credits: 250,
+                    materials: 5
+                },
+                missions: [
+                    {
+                        id: 'exploration',
+                        name: 'Exploration Mission',
+                        type: 'explore',
+                        description: 'Explore the desert world and gather intelligence',
+                        difficulty: 'Easy',
+                        estimatedTime: '15-20 min'
+                    }
+                ]
+            }
+        ];
 
         // HUD and Mission State - RESET: removed for rebuild
         // To be implemented in Phase 4+
@@ -2063,22 +2099,26 @@
         let lastInteractionTime = 0;
 
         window.addEventListener('keydown', (e) => {
-            // Don't handle ship hub input during missions
-            if (gameState.missionActive) return;
-            
             keys[e.key.toLowerCase()] = true;
+            
+            // Mission-specific controls
+            if (gameState.missionActive) {
+                if (e.key === 'Escape') {
+                    exitMission();
+                }
+                return;  // Don't process ship hub interactions during mission
+            }
+            
+            // Ship hub controls
             if (e.key.toLowerCase() === 'e') {
                 if (Date.now() - lastInteractionTime > 200) {
                     handleInteraction();
                     lastInteractionTime = Date.now();
                 }
             }
-            
-            // ESC handling - reserved for future use
         });
         
         window.addEventListener('keyup', (e) => {
-            if (gameState.missionActive) return;
             keys[e.key.toLowerCase()] = false;
         });
 
@@ -3095,13 +3135,25 @@
                         `<div style="background: rgba(0, 255, 136, 0.15); border-left: 4px solid #00ff88; padding: 12px; border-radius: 3px; margin-bottom: 15px; color: #00ff88;">✓ Loadout saved and ready for deployment</div>` :
                         `<div style="background: rgba(255, 100, 100, 0.15); border-left: 4px solid #ff6464; padding: 12px; border-radius: 3px; margin-bottom: 15px; color: #ff6464;">⚠ You must save a loadout in the Armory first before descending!</div>`;
                     
+                    const missionsHTML = planets.map((planet, idx) => `
+                        <div style="background: rgba(30, 30, 60, 0.8); border: 2px solid ${planet.color}; border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+                            <div style="color: ${planet.color}; font-weight: bold; font-size: 16px; margin-bottom: 10px;">🌍 ${planet.name}</div>
+                            <div style="color: #aaa; font-size: 12px; margin-bottom: 12px; line-height: 1.5;">
+                                <div><strong>Type:</strong> ${planet.type.toUpperCase()}</div>
+                                <div><strong>Environment:</strong> ${planet.environment}</div>
+                                <div><strong>Threat:</strong> <span style="color: ${planet.threatColor};">${planet.threatLevel}</span></div>
+                                <div><strong>Description:</strong> ${planet.description}</div>
+                            </div>
+                            <button class="planet-btn" style="background: ${planet.color};" onclick="deployToMission(${idx}, 'explore')">▶ DEPLOY TO ${planet.name}</button>
+                        </div>
+                    `).join('');
+                    
                     modalContent.innerHTML = `
                         <div class="interaction-modal-header">🖥 CONTROL ROOM — AVAILABLE OPERATIONS</div>
                         <div class="interaction-modal-content">
-                            <div style="background: rgba(255, 170, 0, 0.1); border-left: 4px solid #ffaa00; padding: 15px; border-radius: 5px; text-align: center;">
-                                <div style="color: #ffaa00; font-weight: bold; margin-bottom: 8px;">⚠ NO MISSIONS AVAILABLE</div>
-                                <p style="color: #aaa; font-size: 13px;">Mission system will be rebuilt in Phase 4+</p>
-                            </div>
+                            ${loadoutReady}
+                            <div style="color: #00d4ff; font-weight: bold; margin-bottom: 12px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Available Planets:</div>
+                            ${missionsHTML}
                         </div>
                     `;
                     break;
@@ -3304,7 +3356,6 @@
         }
         function getMissionObjective(missionType) { return 'TBD'; }
         function closePreMissionScreen() { closeInteractionModal(); }
-        function deployToMission(idx) { showMissionInitializing(); }
 
         // Show artifact preview and acceptance dialog
         function showArtifactPreview(artifact, onAccept, onReject) {
@@ -3487,14 +3538,190 @@
         }
 
         // Deploy to mission
-        // Mission deployment functions - RESET FOR REBUILD
         function deployToMission(idx, missionType = 'main') {
-            showMissionInitializing();
+            const planet = planets[idx];
+            if (!planet) return;
+            
+            // Check if loadout is ready
+            if (!gameState.currentLoadout) {
+                alert('You must save a loadout in the Armory first!');
+                return;
+            }
+            
+            closeInteractionModal();
+            launchHeliosMission(planet, planet.missions[0], missionType);
         }
         
         function launchHeliosMission(planet, missionData, missionType) {
-            // Stub - will be rebuilt in Phase 4+
-            showMissionInitializing();
+            gameState.missionActive = true;
+            closeInteractionModal();
+            
+            // Hide ship hub
+            document.getElementById('shipHubContainer').style.display = 'none';
+            
+            // Create cinematic canvas and play deployment sequence
+            playDeploymentCinematic(planet);
+        }
+        
+        // Cinematic sequence before mission
+        function playDeploymentCinematic(planet) {
+            const canvas = document.getElementById('spaceCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvas.style.display = 'block';
+            
+            let frame = 0;
+            const cinematicSteps = [
+                { time: 0, text: 'DROPSHIP SEPARATING FROM MOTHERSHIP...', fade: 0, y: 150 },
+                { time: 15, text: 'ENTERING PLANETARY ATMOSPHERE...', fade: 0, y: 150 },
+                { time: 30, text: 'HEAT SHIELDING ENGAGED', fade: 0, y: 150 },
+                { time: 45, text: `DESTINATION: ${planet.name}`, fade: 0, y: 150 },
+                { time: 60, text: 'SCANNING LANDING ZONE...', fade: 0, y: 150 },
+                { time: 75, text: 'OPTIMAL INSERTION VECTOR LOCKED', fade: 0, y: 150 },
+                { time: 90, text: 'DEPLOYING SOLDIER...', fade: 0, y: 150 },
+                { time: 105, text: 'GOOD LUCK OUT THERE', fade: 0, y: 150 }
+            ];
+            
+            function renderCinematicFrame() {
+                // Black background
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Fade transition
+                const fadeOut = Math.max(0, Math.min(1, (frame - 100) / 20));
+                ctx.globalAlpha = 1 - fadeOut;
+                
+                // Find current text
+                const current = cinematicSteps.find(s => s.time <= frame && frame < (cinematicSteps[cinematicSteps.indexOf(s) + 1]?.time || 999));
+                if (current) {
+                    ctx.fillStyle = '#00d4ff';
+                    ctx.font = 'bold 32px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(current.text, canvas.width / 2, current.y);
+                }
+                
+                ctx.globalAlpha = 1;
+                
+                frame++;
+                
+                // End cinematic after 120 frames (~2 seconds at 60fps)
+                if (frame < 120) {
+                    requestAnimationFrame(renderCinematicFrame);
+                } else {
+                    // Transition to mission
+                    canvas.style.display = 'none';
+                    startMissionWorld(planet);
+                }
+            }
+            
+            renderCinematicFrame();
+        }
+        
+        // Initialize mission world (desert environment)
+        function startMissionWorld(planet) {
+            gameState.currentPlanet = planet;
+            gameState.missionActive = true;
+            
+            // Show mission container
+            const container = document.getElementById('missionContainer');
+            container.style.display = 'block';
+            
+            // Create game world
+            initializeGameWorld(planet);
+            
+            // Start game loop
+            startGameLoop();
+        }
+        
+        // Initialize the desert world
+        function initializeGameWorld(planet) {
+            gameState.playerX = 640;  // Center of screen
+            gameState.playerY = 600;  // Player spawn point at bottom
+            gameState.playerHealth = 100;
+            gameState.playerMaxHealth = 100;
+            gameState.playerAmmo = 30;
+            gameState.playerMaxAmmo = 180;
+            gameState.missionActive = true;
+            
+            // Set up mission variables
+            gameState.mission = {
+                objective: 'Explore the desert',
+                threatLevel: 'STABLE',
+                threatColor: '#00ff88'
+            };
+        }
+        
+        // Game loop for mission world
+        let gameLoopRunning = false;
+        function startGameLoop() {
+            if (gameLoopRunning) return;
+            gameLoopRunning = true;
+            
+            function gameLoop() {
+                updateGameWorld();
+                renderGameWorld();
+                
+                if (gameState.missionActive) {
+                    requestAnimationFrame(gameLoop);
+                }
+            }
+            
+            gameLoop();
+        }
+        
+        // Update game world
+        function updateGameWorld() {
+            const world = document.getElementById('missionWorld');
+            if (!world) return;
+            
+            // Player movement
+            const speed = 3;
+            if (keys['w']) gameState.playerY -= speed;
+            if (keys['s']) gameState.playerY += speed;
+            if (keys['a']) gameState.playerX -= speed;
+            if (keys['d']) gameState.playerX += speed;
+            
+            // Keep player in bounds (roughly within game world)
+            gameState.playerX = Math.max(50, Math.min(window.innerWidth - 50, gameState.playerX));
+            gameState.playerY = Math.max(50, Math.min(window.innerHeight - 50, gameState.playerY));
+            
+            // Update player position
+            const player = document.getElementById('player');
+            if (player) {
+                player.style.left = gameState.playerX + 'px';
+                player.style.top = gameState.playerY + 'px';
+                player.style.transform = 'translate(-50%, -50%)';
+            }
+            
+            // Update HUD
+            const hudHP = document.getElementById('hudHP');
+            if (hudHP) hudHP.textContent = gameState.playerHealth;
+            
+            const hudAmmo = document.getElementById('hudAmmo');
+            if (hudAmmo) hudAmmo.textContent = gameState.playerAmmo;
+            
+            const threatLevel = document.getElementById('threatLevel');
+            if (threatLevel) {
+                threatLevel.textContent = '🟢 STABLE';
+            }
+        }
+        
+        // Render game world (canvas-based if needed)
+        function renderGameWorld() {
+            // Visual updates handled by CSS/DOM
+        }
+        
+        // Exit mission
+        function exitMission() {
+            if (confirm('Leave mission?')) {
+                gameState.missionActive = false;
+                gameLoopRunning = false;
+                document.getElementById('missionContainer').style.display = 'none';
+                document.getElementById('shipHubContainer').style.display = 'block';
+            }
         }
 
         window.exitGame = function() {
@@ -4348,6 +4575,24 @@
         // Hook into deployment button to trigger cinematic
         function deployWithCinematic() {
             startCinematicDropship();
+        }
+        
+        // Helper to show initializing message
+        function showMissionInitializing() {
+            const modal = document.getElementById('interactionModal');
+            const overlay = document.getElementById('modalOverlay');
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <div class="interaction-modal-header">🚀 LAUNCHING MISSION...</div>
+                <div class="interaction-modal-content" style="text-align: center;">
+                    <div style="color: #00d4ff; font-size: 18px; margin: 40px 0;">Preparing dropship...</div>
+                    <div style="color: #aaa; font-size: 13px;">Initializing mission parameters...</div>
+                </div>
+            `;
+            
+            overlay.classList.add('show');
+            modal.classList.add('show');
         }
         
         // Start the actual mission after cinematic completes
