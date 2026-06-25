@@ -4725,6 +4725,26 @@
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('missionContainer').style.display = 'block';
             
+            // Clean up any old enemies/projectiles
+            const enemiesContainer = document.getElementById('enemiesContainer');
+            const projectilesContainer = document.getElementById('projectilesContainer');
+            if (enemiesContainer) enemiesContainer.innerHTML = '';
+            if (projectilesContainer) projectilesContainer.innerHTML = '';
+            
+            // Reset artifact visual
+            const artifactEl = document.getElementById('artifact');
+            if (artifactEl) {
+                artifactEl.style.opacity = '1';
+                artifactEl.style.animation = 'artifactPulse 1.5s infinite';
+            }
+            
+            // Reset player position
+            const playerEl = document.getElementById('player');
+            if (playerEl) {
+                playerEl.style.left = (window.innerWidth / 2) + 'px';
+                playerEl.style.top = (window.innerHeight * 0.85) + 'px';
+            }
+            
             // Initialize mission state
             gameState.currentLocation = 'mission';
             gameState.missionActive = true;
@@ -4733,12 +4753,11 @@
                 artifactFound: false,
                 extracted: false
             };
-            gameState.currentMission = {
-                name: 'HELIOS-7 Extraction',
-                enemiesKilled: 0,
-                timeStarted: Date.now(),
-                healthRemaining: 100
-            };
+            if (!gameState.currentMission) {
+                gameState.currentMission = {};
+            }
+            gameState.currentMission.enemiesKilled = 0;
+            gameState.currentMission.timeStarted = Date.now();
             
             // Initialize mission engine
             const missionEngine = new MissionEngine();
