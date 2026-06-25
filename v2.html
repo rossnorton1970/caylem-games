@@ -2052,162 +2052,11 @@
             }
         };
 
-        // Planets with preset mission types
-        const planets = [
-            {
-                name: 'Kepler-442b',
-                mainMission: {
-                    missionType: 'ELIMINATION',
-                    threatLevel: 35,
-                    terrainType: 'Desert Wasteland',
-                    enemyType: 'Scavenger Drones',
-                    enemyCount: 12,
-                    rewardMin: 400,
-                    rewardMax: 650
-                },
-                artifactHunt: {
-                    missionType: 'ARTIFACT_HUNT',
-                    threatLevel: 60,
-                    terrainType: 'Desert Wasteland - Ancient Ruins',
-                    enemyType: 'Guardian Drones',
-                    enemyCount: 18,
-                    rewardMin: 0,
-                    rewardMax: 0,
-                    artifactRewards: 3
-                }
-            },
-            {
-                name: 'TRAPPIST-1d',
-                mainMission: {
-                    missionType: 'SURVIVAL',
-                    threatLevel: 52,
-                    terrainType: 'Ice World',
-                    enemyType: 'Frost Stalkers',
-                    enemyCount: 8,
-                    rewardMin: 500,
-                    rewardMax: 800
-                },
-                artifactHunt: {
-                    missionType: 'ARTIFACT_HUNT',
-                    threatLevel: 70,
-                    terrainType: 'Ice Caverns - Alien Archive',
-                    enemyType: 'Crystalline Sentries',
-                    enemyCount: 12,
-                    rewardMin: 0,
-                    rewardMax: 0,
-                    artifactRewards: 3
-                }
-            },
-            {
-                name: 'Proxima-b',
-                mainMission: {
-                    missionType: 'DEFENSE',
-                    threatLevel: 68,
-                    terrainType: 'Volcanic Expanse',
-                    enemyType: 'Lava Elementals',
-                    enemyCount: 15,
-                    rewardMin: 700,
-                    rewardMax: 1100
-                },
-                artifactHunt: {
-                    missionType: 'ARTIFACT_HUNT',
-                    threatLevel: 85,
-                    terrainType: 'Volcanic Temple',
-                    enemyType: 'Ancient Guardians',
-                    enemyCount: 20,
-                    rewardMin: 0,
-                    rewardMax: 0,
-                    artifactRewards: 4
-                }
-            },
-            {
-                name: 'LHS 475 b',
-                mainMission: {
-                    missionType: 'SURVIVAL',
-                    threatLevel: 45,
-                    terrainType: 'Urban Ruins',
-                    enemyType: 'Synthetic Remnants',
-                    enemyCount: 10,
-                    rewardMin: 450,
-                    rewardMax: 750
-                },
-                artifactHunt: {
-                    missionType: 'ARTIFACT_HUNT',
-                    threatLevel: 65,
-                    terrainType: 'Underground Labs',
-                    enemyType: 'Rogue Synthetics',
-                    enemyCount: 14,
-                    rewardMin: 0,
-                    rewardMax: 0,
-                    artifactRewards: 3
-                }
-            },
-            {
-                name: 'HELIOS-7',
-                mainMission: {
-                    missionType: 'EXTRACTION',
-                    threatLevel: 40,
-                    terrainType: 'Desert Ruins',
-                    enemyType: 'Scavenger Drones',
-                    enemyCount: 8,
-                    rewardMin: 300,
-                    rewardMax: 600
-                },
-                artifactHunt: {
-                    missionType: 'ARTIFACT_HUNT',
-                    threatLevel: 55,
-                    terrainType: 'Outpost Sigma',
-                    enemyType: 'Frost Stalkers',
-                    enemyCount: 6,
-                    rewardMin: 0,
-                    rewardMax: 0,
-                    artifactRewards: 2
-                }
-            }
-        ];
+        // Planets array - RESET: will be rebuilt from scratch
+        const planets = [];
 
-        // HUD Prototype State
-        const hudProtoState = {
-            active: false,
-            canvas: null,
-            ctx: null,
-            threatLevel: 0, // 0=green, 1=orange, 2=red
-            threatCycle: 'green',
-            threatTimer: 0,
-            threatDuration: 5000, // 5 seconds per state
-            startTime: 0,
-            demoActive: false
-        };
-        
-        // MISSION WORLD STATE
-        const missionWorldState = {
-            active: false,
-            canvas: null,
-            ctx: null,
-            width: 1280,
-            height: 720,
-            camera: { x: 0, y: 0 },
-            player: {
-                x: 640,
-                y: 600,
-                width: 24,
-                height: 24,
-                speed: 5,
-                health: 100,
-                maxHealth: 100,
-                velX: 0,
-                velY: 0
-            },
-            terrain: {
-                type: 'desert',
-                color: { r: 210, g: 165, b: 116 }
-            },
-            objects: [],
-            enemies: [],
-            particles: [],
-            gameLoop: null,
-            isPaused: false
-        };
+        // HUD and Mission State - RESET: removed for rebuild
+        // To be implemented in Phase 4+
         
         // Key tracking
         const keys = {};
@@ -2225,10 +2074,7 @@
                 }
             }
             
-            // ESC to close HUD demo
-            if (e.key === 'Escape' && hudProtoState.demoActive) {
-                closeHUDDemo();
-            }
+            // ESC handling - reserved for future use
         });
         
         window.addEventListener('keyup', (e) => {
@@ -2743,286 +2589,27 @@
         // MISSION WORLD SYSTEM
         // ============================================
         
-        class MissionWorld {
-            constructor() {
-                this.state = missionWorldState;
-                this.keys = {};
-                this.setupCanvas();
-                this.setupInput();
-                this.initTerrain();
-            }
-            
-            setupCanvas() {
-                const missionContainer = document.getElementById('missionContainer');
-                const missionWorld = document.getElementById('missionWorld');
-                
-                if (!missionContainer || !missionWorld) {
-                    console.error('Mission world elements not found');
-                    return;
-                }
-                
-                // Create canvas overlay for mission world rendering
-                let canvas = document.getElementById('missionWorldCanvas');
-                if (!canvas) {
-                    canvas = document.createElement('canvas');
-                    canvas.id = 'missionWorldCanvas';
-                    canvas.width = missionWorldState.width;
-                    canvas.height = missionWorldState.height;
-                    canvas.style.cssText = 'position: absolute; top: 0; left: 0; z-index: 40; display: block;';
-                    missionWorld.appendChild(canvas);
-                }
-                
-                this.state.canvas = canvas;
-                this.state.ctx = canvas.getContext('2d');
-            }
-            
-            setupInput() {
-                const handleKeyDown = (e) => {
-                    if (!this.state.active) return;
-                    this.keys[e.key.toLowerCase()] = true;
-                    
-                    // ESC to pause/menu
-                    if (e.key === 'Escape') {
-                        this.togglePause();
-                    }
-                };
-                
-                const handleKeyUp = (e) => {
-                    if (!this.state.active) return;
-                    this.keys[e.key.toLowerCase()] = false;
-                };
-                
-                document.addEventListener('keydown', handleKeyDown);
-                document.addEventListener('keyup', handleKeyUp);
-                
-                this.keys = {};
-            }
-            
-            initTerrain() {
-                // Simple terrain with some interactive objects
-                this.state.objects = [
-                    { x: 400, y: 300, width: 100, height: 100, type: 'ruin', color: 'rgba(0, 212, 255, 0.6)' },
-                    { x: 1000, y: 400, width: 80, height: 80, type: 'wreckage', color: 'rgba(100, 100, 100, 0.5)' },
-                    { x: 200, y: 500, width: 60, height: 60, type: 'artifact', color: 'rgba(255, 255, 0, 0.8)' }
-                ];
-            }
-            
-            update(deltaTime = 0.016) {
-                if (this.state.isPaused) return;
-                
-                // Handle player movement
-                const player = this.state.player;
-                player.velX = 0;
-                player.velY = 0;
-                
-                if (this.keys['w']) player.velY = -player.speed;
-                if (this.keys['s']) player.velY = player.speed;
-                if (this.keys['a']) player.velX = -player.speed;
-                if (this.keys['d']) player.velX = player.speed;
-                
-                // Update position
-                player.x += player.velX;
-                player.y += player.velY;
-                
-                // Clamp to world bounds (keep player visible)
-                player.x = Math.max(player.width / 2, Math.min(this.state.width - player.width / 2, player.x));
-                player.y = Math.max(player.height / 2, Math.min(this.state.height - player.height / 2, player.y));
-                
-                // Update camera to follow player (centered)
-                this.state.camera.x = player.x - this.state.width / 2;
-                this.state.camera.y = player.y - this.state.height / 2;
-                
-                // Update HUD
-                this.updateHUD();
-            }
-            
-            updateHUD() {
-                const hudHP = document.getElementById('hudHP');
-                if (hudHP) hudHP.textContent = Math.round(this.state.player.health);
-            }
-            
-            render() {
-                const ctx = this.state.ctx;
-                const width = this.state.width;
-                const height = this.state.height;
-                const camera = this.state.camera;
-                const player = this.state.player;
-                
-                // Clear canvas
-                ctx.fillStyle = '#d4a574';
-                ctx.fillRect(0, 0, width, height);
-                
-                // Draw desert gradient background
-                const gradient = ctx.createLinearGradient(0, 0, 0, height);
-                gradient.addColorStop(0, '#e0c59f');
-                gradient.addColorStop(0.5, '#d4a574');
-                gradient.addColorStop(1, '#8b7355');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, width, height);
-                
-                // Draw sand dunes (simple pattern)
-                ctx.fillStyle = 'rgba(200, 180, 140, 0.3)';
-                for (let i = 0; i < width; i += 100) {
-                    ctx.beginPath();
-                    ctx.arc(i, height - 100, 50, Math.PI, 0);
-                    ctx.fill();
-                }
-                
-                // Draw terrain objects
-                for (const obj of this.state.objects) {
-                    const screenX = obj.x - camera.x;
-                    const screenY = obj.y - camera.y;
-                    
-                    ctx.fillStyle = obj.color;
-                    ctx.fillRect(screenX - obj.width / 2, screenY - obj.height / 2, obj.width, obj.height);
-                    
-                    // Draw border
-                    ctx.strokeStyle = obj.type === 'artifact' ? 'rgba(255, 255, 0, 1)' : 'rgba(0, 212, 255, 0.6)';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(screenX - obj.width / 2, screenY - obj.height / 2, obj.width, obj.height);
-                    
-                    // Label
-                    ctx.fillStyle = '#fff';
-                    ctx.font = 'bold 12px Arial';
-                    ctx.textAlign = 'center';
-                    const label = obj.type === 'artifact' ? '🌟' : '⚙';
-                    ctx.fillText(label, screenX, screenY + 5);
-                }
-                
-                // Draw player (center of screen since camera follows)
-                const playerScreenX = width / 2;
-                const playerScreenY = height / 2;
-                
-                ctx.fillStyle = '#00ffff';
-                ctx.fillRect(playerScreenX - player.width / 2, playerScreenY - player.height / 2, player.width, player.height);
-                ctx.strokeStyle = '#00d4ff';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(playerScreenX - player.width / 2, playerScreenY - player.height / 2, player.width, player.height);
-                ctx.shadowColor = 'rgba(0, 255, 255, 0.5)';
-                ctx.shadowBlur = 10;
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 10px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('YOU', playerScreenX, playerScreenY + 4);
-                ctx.shadowColor = 'transparent';
-                
-                // Draw coordinate display
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-                ctx.fillRect(width - 150, 10, 140, 50);
-                ctx.fillStyle = '#00d4ff';
-                ctx.font = '11px monospace';
-                ctx.textAlign = 'right';
-                ctx.fillText(`X: ${Math.round(player.x)}`, width - 20, 25);
-                ctx.fillText(`Y: ${Math.round(player.y)}`, width - 20, 40);
-                ctx.fillText(`ZONE: Desert`, width - 20, 55);
-            }
-            
-            togglePause() {
-                this.state.isPaused = !this.state.isPaused;
-                const status = document.getElementById('statusMessage');
-                if (status) {
-                    status.textContent = this.state.isPaused ? '⏸ MISSION PAUSED - Press ESC to continue' : '';
-                    status.style.display = this.state.isPaused ? 'block' : 'none';
-                }
-            }
-            
-            start() {
-                this.state.active = true;
-                const missionContainer = document.getElementById('missionContainer');
-                if (missionContainer) missionContainer.style.display = 'block';
-                
-                // Start game loop
-                let lastTime = Date.now();
-                const gameLoopFn = () => {
-                    if (!this.state.active) return;
-                    
-                    const currentTime = Date.now();
-                    const deltaTime = (currentTime - lastTime) / 1000;
-                    lastTime = currentTime;
-                    
-                    this.update(deltaTime);
-                    this.render();
-                    
-                    this.state.gameLoop = requestAnimationFrame(gameLoopFn);
-                };
-                
-                this.state.gameLoop = requestAnimationFrame(gameLoopFn);
-            }
-            
-            stop() {
-                this.state.active = false;
-                if (this.state.gameLoop) {
-                    cancelAnimationFrame(this.state.gameLoop);
-                    this.state.gameLoop = null;
-                }
-                const missionContainer = document.getElementById('missionContainer');
-                if (missionContainer) missionContainer.style.display = 'none';
-            }
-        }
+        // MISSION WORLD CODE - RESET FOR REBUILD
+        // MissionWorld class, startMission(), exitMission() removed
+        // To be rebuilt in Phase 4+
         
-        // Global mission world instance
-        let missionWorld = null;
+        // startMissionWorld - REMOVED FOR RESET
+        // To be rebuilt in Phase 4+
         
-        function startMission(planetData) {
-            console.log('startMission() called for:', planetData);
-            
-            // Hide ship hub
-            const shipHub = document.getElementById('shipHubContainer');
-            if (shipHub) shipHub.style.display = 'none';
-            
-            // Initialize mission world
-            if (!missionWorld) {
-                missionWorld = new MissionWorld();
-            }
-            
-            // Reset player state
-            missionWorld.state.player.health = 100;
-            missionWorld.state.player.x = 640;
-            missionWorld.state.player.y = 600;
-            missionWorld.state.isPaused = false;
-            
-            // Start mission
-            missionWorld.start();
-            
-            console.log('Mission started!');
-        }
-        
-        function exitMission() {
-            console.log('exitMission() called');
-            
-            if (missionWorld) {
-                missionWorld.stop();
-            }
-            
-            // Show ship hub
-            const shipHub = document.getElementById('shipHubContainer');
-            if (shipHub) shipHub.style.display = 'block';
-            
-            console.log('Returned to ship hub');
-        }
-        
-        function startMissionWorld() {
-            console.log('startMissionWorld() called');
-            
-            // Hide ship hub
-            const shipHub = document.getElementById('shipHubContainer');
-            if (shipHub) shipHub.style.display = 'none';
-            
-            // Initialize mission world if needed
-            if (!missionWorld) {
-                missionWorld = new MissionWorld();
-            }
-            
-            // Reset player state
-            missionWorld.state.player.health = 100;
-            missionWorld.state.player.x = 640;
-            missionWorld.state.player.y = 600;
-            missionWorld.state.isPaused = false;
-            
-            // Start mission
-            missionWorld.start();
-            
-            console.log('Mission world started!');
+        // MINIMAL startMission() function - placeholder
+        function startMission() {
+            console.log('startMission() called - showing initialization screen');
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div class="interaction-modal-header">MISSION INITIALIZING...</div>
+                <div class="interaction-modal-content">
+                    <div style="color: #aaa; font-size: 14px; line-height: 1.6; text-align: center; padding: 20px;">
+                        <p>Mission system is being rebuilt.</p>
+                        <p style="font-size: 12px; color: #666; margin-top: 20px;">Phase 4+ implementation</p>
+                    </div>
+                </div>
+            `;
+            openInteractionModal();
         }
         
         // Start game
@@ -3511,31 +3098,9 @@
                     modalContent.innerHTML = `
                         <div class="interaction-modal-header">🖥 CONTROL ROOM — AVAILABLE OPERATIONS</div>
                         <div class="interaction-modal-content">
-                            ${loadoutReady}
-                            <p style="margin-bottom: 20px; color: #888; font-size: 13px;">Select a planet to view mission options:</p>
-                            <div class="planet-grid">
-                                ${planets.map((planet, idx) => {
-                                    const mainMission = planet.mainMission;
-                                    const enemySpecies = mainMission.enemyType;
-                                    const playerAdvantage = gameState.encounterData[enemySpecies] && gameState.encounterData[enemySpecies].tier > 0 ? 
-                                        `+${gameState.encounterData[enemySpecies].damageBonus}% vs ${enemySpecies}` : null;
-                                    
-                                    return `
-                                        <div class="planet-card" onclick="showMissionOptions(${idx})" style="cursor: pointer;">
-                                            <div class="planet-name">${planet.name}</div>
-                                            <div style="margin-top: 10px; font-size: 12px; color: #aaa;">
-                                                <div>MAIN MISSION: <span style="color: ${getMissionTypeColor(mainMission.missionType)};">${mainMission.missionType}</span></div>
-                                                <div style="margin-top: 8px;">Enemies: <span style="color: #ff8800;">${mainMission.enemyCount}x ${mainMission.enemyType}</span></div>
-                                                <div style="margin-top: 6px;">Threat: <span style="color: ${getThreatColor(mainMission.threatLevel)};">${mainMission.threatLevel}%</span></div>
-                                                ${playerAdvantage ? `<div style="margin-top: 6px; color: #00ff88; font-weight: bold;">✓ Your Advantage: ${playerAdvantage}</div>` : ''}
-                                            </div>
-                                            <div style="margin-top: 12px; font-size: 12px; color: #ff8800;">
-                                                <strong>+ ARTIFACT HUNT</strong> available
-                                            </div>
-                                            <button class="planet-btn" style="margin-top: 12px;">SELECT PLANET</button>
-                                        </div>
-                                    `;
-                                }).join('')}
+                            <div style="background: rgba(255, 170, 0, 0.1); border-left: 4px solid #ffaa00; padding: 15px; border-radius: 5px; text-align: center;">
+                                <div style="color: #ffaa00; font-weight: bold; margin-bottom: 8px;">⚠ NO MISSIONS AVAILABLE</div>
+                                <p style="color: #aaa; font-size: 13px;">Mission system will be rebuilt in Phase 4+</p>
                             </div>
                         </div>
                     `;
@@ -3704,299 +3269,42 @@
             window.addEventListener('keydown', escHandler);
         }
         
-        function renderHUDDemo() {
-            if (!hudProtoState.demoActive) return;
-            
-            const ctx = hudProtoState.ctx;
-            const canvas = hudProtoState.canvas;
-            
-            // Clear background with sci-fi aesthetic
-            ctx.fillStyle = '#0a0e1f';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Add subtle scanlines effect
-            ctx.strokeStyle = 'rgba(0, 212, 255, 0.03)';
-            ctx.lineWidth = 1;
-            for (let y = 0; y < canvas.height; y += 2) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
-            }
-            
-            // Update threat cycle timer
-            const elapsed = Date.now() - hudProtoState.startTime;
-            const cyclePosition = (elapsed % 15000) / 5000; // 15 seconds total (3x 5sec)
-            
-            if (cyclePosition < 1) {
-                hudProtoState.threatCycle = 'green';
-            } else if (cyclePosition < 2) {
-                hudProtoState.threatCycle = 'orange';
-            } else {
-                hudProtoState.threatCycle = 'red';
-            }
-            
-            // Render HUD components
-            drawHUDPlayerStatus(ctx, canvas);
-            drawHUDWeaponSystem(ctx, canvas);
-            drawHUDGadgets(ctx, canvas);
-            drawHUDCompass(ctx, canvas);
-            drawHUDMinimap(ctx, canvas);
-            drawHUDEffects(ctx, canvas);
-            
-            requestAnimationFrame(renderHUDDemo);
-        }
-        
-        function drawHUDPlayerStatus(ctx, canvas) {
-            const x = 20;
-            const y = 40;
-            const threatColor = getThreatColor(hudProtoState.threatCycle);
-            const glowIntensity = getGlowIntensity(hudProtoState.threatCycle);
-            
-            ctx.font = 'bold 16px Arial';
-            ctx.fillStyle = '#00ff88';
-            ctx.textAlign = 'left';
-            ctx.fillText('❤️ 100 HP', x, y);
-            
-            ctx.font = '13px Arial';
-            ctx.fillStyle = '#00d4ff';
-            ctx.fillText('🛡️ SHIELD 50%', x, y + 25);
-            
-            // Threat indicator with glow
-            const threatY = y + 50;
-            ctx.shadowColor = threatColor;
-            ctx.shadowBlur = glowIntensity * 20;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
-            
-            ctx.fillStyle = threatColor;
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText(`● THREAT: ${hudProtoState.threatCycle.toUpperCase()}`, x, threatY);
-            
-            ctx.shadowColor = 'transparent';
-        }
-        
-        function drawHUDWeaponSystem(ctx, canvas) {
-            const x = 20;
-            const y = canvas.height - 100;
-            
-            ctx.font = 'bold 14px Arial';
-            ctx.fillStyle = '#ffaa00';
-            ctx.textAlign = 'left';
-            ctx.fillText('AR-9 RIFLE', x, y);
-            
-            ctx.font = '13px Arial';
-            ctx.fillStyle = '#fff';
-            ctx.fillText('30 / 180', x, y + 25);
-        }
-        
-        function drawHUDGadgets(ctx, canvas) {
-            const x = canvas.width - 280;
-            const y = canvas.height - 100;
-            const gadgets = [
-                { num: 1, name: 'MEDKIT', status: 'ready', color: '#00ff88' },
-                { num: 2, name: 'SCAN DRONE', status: '8s', color: '#ffaa00' },
-                { num: 3, name: 'SHIELD BUBBLE', status: 'ready', color: '#00d4ff' }
-            ];
-            
-            ctx.font = 'bold 12px Arial';
-            ctx.fillStyle = '#bb00ff';
-            ctx.fillText('GADGETS:', x, y - 20);
-            
-            gadgets.forEach((g, idx) => {
-                const gadgetY = y + idx * 25;
-                const statusColor = g.status === 'ready' ? '#00ff88' : '#ffaa00';
-                
-                ctx.font = '11px Arial';
-                ctx.fillStyle = '#fff';
-                ctx.fillText(`[${g.num}]`, x, gadgetY);
-                ctx.fillStyle = '#888';
-                ctx.fillText(g.name, x + 30, gadgetY);
-                ctx.fillStyle = statusColor;
-                ctx.fillText(`[${g.status}]`, x + 140, gadgetY);
-            });
-        }
-        
-        function drawHUDCompass(ctx, canvas) {
-            const centerX = canvas.width / 2;
-            const y = 20;
-            
-            ctx.font = '11px Arial';
-            ctx.fillStyle = '#00d4ff';
-            const compassText = 'N  NE  E  SE  S';
-            ctx.textAlign = 'center';
-            ctx.fillText(compassText, centerX, y);
-            ctx.fillText('↓ OBJECTIVE: COLLECT ARTIFACT', centerX, y + 20);
-            ctx.textAlign = 'left';
-        }
-        
-        function drawHUDMinimap(ctx, canvas) {
-            const x = canvas.width - 100;
-            const y = 120;
-            const radius = 60;
-            
-            // Circular minimap frame
-            ctx.strokeStyle = '#00d4ff';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(x + radius, y + radius, radius, 0, Math.PI * 2);
-            ctx.stroke();
-            
-            // Minimap background
-            ctx.fillStyle = 'rgba(0, 212, 255, 0.05)';
-            ctx.beginPath();
-            ctx.arc(x + radius, y + radius, radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Player (center arrow)
-            ctx.fillStyle = '#00ff88';
-            ctx.font = '18px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('↑', x + radius, y + radius);
-            
-            // Objective marker (pulsing)
-            const pulse = Math.sin(Date.now() / 500) * 0.3 + 0.7;
-            ctx.fillStyle = `rgba(255, 170, 0, ${pulse})`;
-            ctx.beginPath();
-            ctx.arc(x + radius + 30, y + radius - 20, 4, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Enemy dots
-            ctx.fillStyle = 'rgba(255, 68, 68, 0.6)';
-            ctx.beginPath();
-            ctx.arc(x + radius - 25, y + radius + 15, 3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x + radius + 10, y + radius + 25, 3, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'alphabetic';
-        }
-        
-        function drawHUDEffects(ctx, canvas) {
-            const threatCycle = hudProtoState.threatCycle;
-            
-            if (threatCycle === 'orange') {
-                // Subtle pulse animation
-                const pulse = Math.sin(Date.now() / 200) * 0.15 + 0.85;
-                ctx.fillStyle = `rgba(255, 170, 0, ${pulse * 0.2})`;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            } else if (threatCycle === 'red') {
-                // Red pulse overlay with shake effect
-                const shakeX = (Math.random() - 0.5) * 4;
-                const shakeY = (Math.random() - 0.5) * 4;
-                const pulse = Math.sin(Date.now() / 150) * 0.2 + 0.8;
-                
-                ctx.fillStyle = `rgba(255, 68, 68, ${pulse * 0.3})`;
-                ctx.fillRect(shakeX, shakeY, canvas.width, canvas.height);
-                
-                // Red vignette at edges
-                const gradient = ctx.createRadialGradient(
-                    canvas.width / 2, canvas.height / 2, canvas.width / 3,
-                    canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) / 2
-                );
-                gradient.addColorStop(0, 'rgba(255, 68, 68, 0)');
-                gradient.addColorStop(1, 'rgba(255, 68, 68, 0.15)');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
-            
-            // Status text in corner
-            ctx.font = '11px Arial';
-            ctx.fillStyle = '#888';
-            ctx.textAlign = 'right';
-            ctx.fillText('v0.2 ALPHA | HUD PROTOTYPE DEMO', canvas.width - 20, canvas.height - 20);
-        }
-        
-        function getThreatColor(threatCycle) {
-            switch(threatCycle) {
-                case 'green': return '#00ff88';
-                case 'orange': return '#ffaa00';
-                case 'red': return '#ff4444';
-                default: return '#00ff88';
-            }
-        }
-        
-        function getGlowIntensity(threatCycle) {
-            switch(threatCycle) {
-                case 'green': return 0.5;
-                case 'orange': return 1.0;
-                case 'red': return 2.0;
-                default: return 0.5;
-            }
-        }
-        
-        function closeHUDDemo() {
-            hudProtoState.demoActive = false;
-            const container = document.getElementById('hudDemoContainer');
-            if (container) {
-                container.remove();
-            }
-        }
+        // HUD DEMO FUNCTIONS - REMOVED FOR RESET
+        // renderHUDDemo, drawHUDPlayerStatus, drawHUDWeaponSystem, drawHUDGadgets, 
+        // drawHUDCompass, drawHUDMinimap, drawHUDEffects, getThreatColor removed
+        // To be rebuilt in Phase 4+
+
+        // Orphaned HUD demo code cleanup - removed
         
         function showMissionOptions(idx) {
-            showPreMissionScreen(idx);
+            showMissionInitializing();
         }
 
-        // Get mission type color
-        function getMissionTypeColor(missionType) {
-            switch(missionType) {
-                case 'ELIMINATION': return '#ff4444';
-                case 'SURVIVAL': return '#44ff44';
-                case 'DEFENSE': return '#4444ff';
-                default: return '#ffaa00';
-            }
-        }
-
-        // Get threat level color
-        function getThreatColor(level) {
-            if (level < 40) return '#44ff44';
-            if (level < 60) return '#ffaa00';
-            return '#ff4444';
-        }
-
-        // Show pre-mission screen
-        function showPreMissionScreen(idx) {
-            const planet = planets[idx];
+        function showMissionInitializing() {
             const modalContent = document.getElementById('modalContent');
-            
-            const missionObjective = getMissionObjective(planet.missionType);
-            
             modalContent.innerHTML = `
-                <div class="interaction-modal-header">⚠ OPERATION BRIEFING</div>
+                <div class="interaction-modal-header">MISSION SYSTEM</div>
                 <div class="interaction-modal-content">
-                    <div style="background: rgba(0, 212, 255, 0.1); border-left: 4px solid ${getMissionTypeColor(planet.missionType)}; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-                        <div style="color: #00d4ff; font-weight: bold; margin-bottom: 10px;">📍 ${planet.name}</div>
-                        <div style="color: #aaa; font-size: 13px; line-height: 1.5;">
-                            <div><strong style="color: #fff;">MISSION TYPE:</strong> ${planet.missionType}</div>
-                            <div><strong style="color: #fff;">OBJECTIVE:</strong> ${missionObjective}</div>
-                            <div style="margin-top: 10px;"><strong style="color: ${getThreatColor(planet.threatLevel)};">THREAT LEVEL: ${planet.threatLevel}%</strong></div>
-                            <div><strong style="color: #fff;">TERRAIN:</strong> ${planet.terrainType}</div>
-                            <div><strong style="color: #fff;">HOSTILES:</strong> ${planet.enemyType} (${planet.enemyCount})</div>
-                            <div style="margin-top: 10px;"><strong style="color: #ffcc00;">ESTIMATED REWARD: ${planet.rewardMin}–${planet.rewardMax} Credits</strong></div>
-                        </div>
+                    <div style="color: #aaa; font-size: 14px; line-height: 1.6; text-align: center; padding: 20px;">
+                        <div style="color: #ffaa00; margin-bottom: 20px;">No missions available</div>
+                        <p style="font-size: 12px; color: #666;">Mission system will be rebuilt in Phase 4+</p>
                     </div>
-                    <button class="planet-btn" style="background: #f97316; margin-top: 10px;" onclick="deployToMission(${idx})">DESCEND TO OPERATION</button>
-                    <button class="planet-btn" style="background: #444; color: #aaa; margin-top: 10px;" onclick="closePreMissionScreen()">CANCEL</button>
+                    <button class="planet-btn" style="background: #444; color: #aaa; margin-top: 20px;" onclick="closeInteractionModal()">CLOSE</button>
                 </div>
             `;
         }
 
-        // Get mission objective description
-        function getMissionObjective(missionType) {
-            switch(missionType) {
-                case 'ELIMINATION':
-                    return 'Clear all hostile lifeforms in the AO.';
-                case 'SURVIVAL':
-                    return 'Survive until extraction arrives. Defend your position.';
-                case 'DEFENSE':
-                    return 'Protect critical equipment until secure pickup.';
-                default:
-                    return 'Unknown mission type.';
-            }
+        // Mission helper functions - stubs for rebuild
+        function getMissionTypeColor(missionType) { return '#ffaa00'; }
+        function getThreatColor(level) { return '#ffaa00'; }
+
+        // Pre-mission functions - RESET FOR REBUILD
+        function showPreMissionScreen(idx) {
+            // Stub - will be rebuilt
         }
+        function getMissionObjective(missionType) { return 'TBD'; }
+        function closePreMissionScreen() { closeInteractionModal(); }
+        function deployToMission(idx) { showMissionInitializing(); }
 
         // Show artifact preview and acceptance dialog
         function showArtifactPreview(artifact, onAccept, onReject) {
@@ -4179,73 +3487,14 @@
         }
 
         // Deploy to mission
+        // Mission deployment functions - RESET FOR REBUILD
         function deployToMission(idx, missionType = 'main') {
-            // CHECK: Player must have saved a loadout before descending
-            if (!gameState.currentLoadout) {
-                alert('⚠ You must select a loadout in the Armory first!\n\nGo to ARMORY, choose your weapons/armor/gadgets, then click SAVE LOADOUT.');
-                return;
-            }
-            
-            const planet = planets[idx];
-            const missionData = missionType === 'main' ? planet.mainMission : planet.artifactHunt;
-            const enemySpecies = missionData.enemyType;
-            const enemyCount = missionData.enemyCount;
-            
-            // Launch the actual mission game
-            launchHeliosMission(planet, missionData, missionType);
+            showMissionInitializing();
         }
         
         function launchHeliosMission(planet, missionData, missionType) {
-            // Initialize mission state FIRST (needed for cinematic)
-            gameState.currentLocation = 'mission';
-            gameState.missionActive = true;
-            gameState.currentMission = {
-                name: 'HELIOS-7 Extraction',
-                planet: planet.name,
-                type: missionType,
-                missionData: missionData,
-                enemiesKilled: 0,
-                timeStarted: Date.now()
-            };
-            gameState.missionObjectives = {
-                explored: false,
-                artifactFound: false,
-                extracted: false
-            };
-            
-            // Track encounters
-            const enemySpecies = missionData.enemyType;
-            if (!gameState.encounterData[enemySpecies]) {
-                gameState.encounterData[enemySpecies] = { encounters: 0, tier: 0, studied: false, damageBonus: 0 };
-            }
-            if (gameState.encounterData[enemySpecies]) {
-                gameState.encounterData[enemySpecies].encounters += missionData.enemyCount * 0.5; // Scale for actual gameplay
-                
-                // UPDATE TIER BASED ON ENCOUNTERS
-                if (gameState.encounterData[enemySpecies].encounters >= 30) {
-                    gameState.encounterData[enemySpecies].tier = 3;
-                    gameState.encounterData[enemySpecies].studied = true;
-                } else if (gameState.encounterData[enemySpecies].encounters >= 15) {
-                    gameState.encounterData[enemySpecies].tier = 2;
-                    gameState.encounterData[enemySpecies].studied = true;
-                } else if (gameState.encounterData[enemySpecies].encounters >= 5) {
-                    gameState.encounterData[enemySpecies].tier = 1;
-                    gameState.encounterData[enemySpecies].studied = true;
-                }
-            }
-            
-            // Close modal before cinematic
-            closeInteractionModal();
-            document.getElementById('modalOverlay').style.display = 'none';
-            document.getElementById('interactionModal').style.display = 'none';
-            
-            // Hide ship hub and menu
-            document.getElementById('shipHubContainer').style.display = 'none';
-            document.getElementById('mainMenu').style.display = 'none';
-            
-            // TRIGGER CINEMATIC DROPSHIP SEQUENCE
-            // The cinematic will call startMission() when complete
-            cinematicDropshipSequence.init();
+            // Stub - will be rebuilt in Phase 4+
+            showMissionInitializing();
         }
 
         window.exitGame = function() {
@@ -5145,457 +4394,23 @@
             gameState.currentMission.enemiesKilled = 0;
             gameState.currentMission.timeStarted = Date.now();
             
-            // Initialize mission engine
-            const missionEngine = new MissionEngine();
-            missionEngine.run();
+            // Mission engine initialization - REMOVED FOR RESET
+            // To be rebuilt in Phase 4+
+            console.log('startMission() stub - mission system will be rebuilt');
         }
         
-// HTML-Based Mission Engine - Desert world with player, drones, combat, artifact
-        class MissionEngine {
-            constructor() {
-                this.missionWorld = document.getElementById('missionWorld');
-                this.enemiesContainer = document.getElementById('enemiesContainer');
-                this.projectilesContainer = document.getElementById('projectilesContainer');
-                this.statusMessage = document.getElementById('statusMessage');
-                this.animationId = null;
-                this.running = false;
-                
-                // Get mission data from gameState
-                const missionData = gameState.currentMission.missionData || {};
-                
-                // Player state
-                this.player = {
-                    x: window.innerWidth / 2,
-                    y: window.innerHeight * 0.85,
-                    size: 24,
-                    health: 100,
-                    maxHealth: 100,
-                    ammo: 30,
-                    maxAmmo: 180,
-                    angle: 0,
-                    speed: 4
-                };
-                
-                // Game state
-                this.enemies = [];
-                this.projectiles = [];
-                this.artifact = { collected: false };
-                this.lastPlayerShot = 0;
-                this.playerFireRate = 200;
-                this.maxEnemies = Math.min(3, Math.ceil((missionData.enemyCount || 2) / 2));
-                this.threatLevel = 'green';
-                
-                this.spawnEnemies();
-                this.setupInputHandlers();
-            }
-            
-            spawnEnemies() {
-                this.enemies = [];
-                const spawnPositions = [
-                    { x: window.innerWidth * 0.2, y: window.innerHeight * 0.3 },
-                    { x: window.innerWidth * 0.8, y: window.innerHeight * 0.2 }
-                ];
-                
-                for (let i = 0; i < this.maxEnemies && i < spawnPositions.length; i++) {
-                    const pos = spawnPositions[i];
-                    this.enemies.push({
-                        id: Math.random(),
-                        x: pos.x,
-                        y: pos.y,
-                        size: 16,
-                        health: 25,
-                        maxHealth: 25,
-                        speed: 1.2,
-                        angle: Math.random() * Math.PI * 2,
-                        lastShot: 0,
-                        shootCooldown: 2000,
-                        element: null,
-                        state: 'patrol'
-                    });
-                }
-            }
-            
-            setupInputHandlers() {
-                // WASD movement
-                window.addEventListener('keydown', (e) => {
-                    const key = e.key.toLowerCase();
-                    if (key === 'w') this.player.y = Math.max(this.player.size, this.player.y - this.player.speed);
-                    if (key === 's') this.player.y = Math.min(window.innerHeight - this.player.size, this.player.y + this.player.speed);
-                    if (key === 'a') this.player.x = Math.max(this.player.size, this.player.x - this.player.speed);
-                    if (key === 'd') this.player.x = Math.min(window.innerWidth - this.player.size, this.player.x + this.player.speed);
-                });
-                
-                // Mouse aiming
-                this.missionWorld.addEventListener('mousemove', (e) => {
-                    const rect = this.missionWorld.getBoundingClientRect();
-                    const mouseX = e.clientX - rect.left;
-                    const mouseY = e.clientY - rect.top;
-                    this.player.angle = Math.atan2(mouseY - this.player.y, mouseX - this.player.x);
-                    
-                    // Rotate player direction indicator
-                    const playerElement = document.getElementById('player');
-                    if (playerElement) {
-                        playerElement.style.transform = `translate(-50%, 0) rotate(${this.player.angle * 180 / Math.PI}deg)`;
-                    }
-                });
-                
-                // Click to shoot
-                this.missionWorld.addEventListener('click', () => this.playerShoot());
-            }
-            
-            playerShoot() {
-                const now = Date.now();
-                if (now - this.lastPlayerShot < this.playerFireRate) return;
-                if (this.player.ammo <= 0) return;
-                
-                this.player.ammo--;
-                this.lastPlayerShot = now;
-                
-                // Create projectile
-                const projectile = {
-                    id: Math.random(),
-                    x: this.player.x,
-                    y: this.player.y,
-                    vx: Math.cos(this.player.angle) * 6,
-                    vy: Math.sin(this.player.angle) * 6,
-                    size: 6,
-                    owner: 'player',
-                    damage: 20
-                };
-                
-                this.projectiles.push(projectile);
-                
-                // Create visual projectile
-                const projDiv = document.createElement('div');
-                projDiv.style.cssText = `position: absolute; left: ${projectile.x}px; top: ${projectile.y}px; width: 6px; height: 6px; background: #00d4ff; border-radius: 50%; box-shadow: 0 0 8px #00d4ff; pointer-events: none; z-index: 25;`;
-                this.projectilesContainer.appendChild(projDiv);
-                projectile.element = projDiv;
-            }
-            
-            updateEnemies() {
-                for (const enemy of this.enemies) {
-                    if (enemy.health <= 0) {
-                        if (enemy.element) enemy.element.remove();
-                        continue;
-                    }
-                    
-                    const dx = this.player.x - enemy.x;
-                    const dy = this.player.y - enemy.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    // Chase if player nearby
-                    if (distance < 150) {
-                        enemy.state = 'chase';
-                        enemy.angle = Math.atan2(dy, dx);
-                        enemy.x += Math.cos(enemy.angle) * enemy.speed;
-                        enemy.y += Math.sin(enemy.angle) * enemy.speed;
-                        
-                        // Shoot if in range
-                        if (distance < 80 && Date.now() - enemy.lastShot > enemy.shootCooldown) {
-                            this.enemyShoot(enemy);
-                            enemy.lastShot = Date.now();
-                        }
-                        
-                        this.updateThreatLevel('red');
-                    } else {
-                        // Patrol mode
-                        enemy.state = 'patrol';
-                        enemy.angle += (Math.random() - 0.5) * 0.1;
-                        enemy.x += Math.cos(enemy.angle) * 0.5;
-                        enemy.y += Math.sin(enemy.angle) * 0.5;
-                    }
-                    
-                    // Boundary check
-                    enemy.x = Math.max(0, Math.min(window.innerWidth, enemy.x));
-                    enemy.y = Math.max(0, Math.min(window.innerHeight, enemy.y));
-                    
-                    // Update enemy visual
-                    if (!enemy.element) {
-                        enemy.element = document.createElement('div');
-                        enemy.element.style.cssText = `position: absolute; width: ${enemy.size}px; height: ${enemy.size}px; background: #ff6600; border: 2px solid #ffaa00; box-shadow: 0 0 10px #ff6600; pointer-events: none; z-index: 30;`;
-                        this.enemiesContainer.appendChild(enemy.element);
-                    }
-                    
-                    enemy.element.style.left = (enemy.x - enemy.size / 2) + 'px';
-                    enemy.element.style.top = (enemy.y - enemy.size / 2) + 'px';
-                    
-                    // Health color
-                    const healthPercent = enemy.health / enemy.maxHealth;
-                    enemy.element.style.boxShadow = `0 0 10px #ff6600, inset 0 0 0 2px ${healthPercent > 0.5 ? '#00ff88' : '#ff4444'}`;
-                }
-            }
-            
-            enemyShoot(enemy) {
-                const dx = this.player.x - enemy.x;
-                const dy = this.player.y - enemy.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                
-                if (dist === 0) return;
-                
-                const projectile = {
-                    id: Math.random(),
-                    x: enemy.x,
-                    y: enemy.y,
-                    vx: (dx / dist) * 4,
-                    vy: (dy / dist) * 4,
-                    size: 5,
-                    owner: 'enemy',
-                    damage: 10
-                };
-                
-                this.projectiles.push(projectile);
-                
-                // Create visual projectile (orange)
-                const projDiv = document.createElement('div');
-                projDiv.style.cssText = `position: absolute; left: ${projectile.x}px; top: ${projectile.y}px; width: 5px; height: 5px; background: #ff8800; border-radius: 50%; box-shadow: 0 0 6px #ff8800; pointer-events: none; z-index: 25;`;
-                this.projectilesContainer.appendChild(projDiv);
-                projectile.element = projDiv;
-            }
-            
-            updateProjectiles() {
-                for (let i = this.projectiles.length - 1; i >= 0; i--) {
-                    const proj = this.projectiles[i];
-                    proj.x += proj.vx;
-                    proj.y += proj.vy;
-                    
-                    if (proj.element) {
-                        proj.element.style.left = proj.x + 'px';
-                        proj.element.style.top = proj.y + 'px';
-                    }
-                    
-                    // Remove if out of bounds
-                    if (proj.x < 0 || proj.x > window.innerWidth || proj.y < 0 || proj.y > window.innerHeight) {
-                        if (proj.element) proj.element.remove();
-                        this.projectiles.splice(i, 1);
-                    }
-                }
-            }
-            
-            checkCollisions() {
-                // Projectile-enemy collisions
-                for (let i = this.projectiles.length - 1; i >= 0; i--) {
-                    const proj = this.projectiles[i];
-                    
-                    if (proj.owner === 'player') {
-                        for (const enemy of this.enemies) {
-                            if (enemy.health <= 0) continue;
-                            
-                            const dx = proj.x - enemy.x;
-                            const dy = proj.y - enemy.y;
-                            const dist = Math.sqrt(dx * dx + dy * dy);
-                            
-                            if (dist < (enemy.size / 2 + proj.size)) {
-                                enemy.health -= proj.damage;
-                                if (proj.element) proj.element.remove();
-                                this.projectiles.splice(i, 1);
-                                
-                                if (enemy.health <= 0) {
-                                    gameState.credits += 5;
-                                    gameState.currentMission.enemiesKilled++;
-                                }
-                                return;
-                            }
-                        }
-                    } else if (proj.owner === 'enemy') {
-                        // Check hit on player
-                        const dx = proj.x - this.player.x;
-                        const dy = proj.y - this.player.y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        
-                        if (dist < (this.player.size / 2 + proj.size)) {
-                            this.player.health -= proj.damage;
-                            if (proj.element) proj.element.remove();
-                            this.projectiles.splice(i, 1);
-                            this.updateHUD();
-                            return;
-                        }
-                    }
-                }
-                
-                // Artifact pickup
-                const artifactEl = document.getElementById('artifact');
-                if (!this.artifact.collected && artifactEl) {
-                    const rect = artifactEl.getBoundingClientRect();
-                    const missionRect = this.missionWorld.getBoundingClientRect();
-                    const artifactX = rect.left - missionRect.left + rect.width / 2;
-                    const artifactY = rect.top - missionRect.top + rect.height / 2;
-                    
-                    const dx = this.player.x - artifactX;
-                    const dy = this.player.y - artifactY;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (dist < 50) {
-                        this.artifact.collected = true;
-                        gameState.missionObjectives.artifactFound = true;
-                        this.showMessage('★ ARTIFACT COLLECTED ★');
-                        artifactEl.style.animation = 'none';
-                        artifactEl.style.opacity = '0.3';
-                    }
-                }
-                
-                // Extraction zone (bottom of screen)
-                if (this.artifact.collected) {
-                    const extractZoneX = window.innerWidth / 2;
-                    const extractZoneY = window.innerHeight * 0.95;
-                    
-                    const dx = this.player.x - extractZoneX;
-                    const dy = this.player.y - extractZoneY;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (dist < 100) {
-                        this.triggerExtraction();
-                    }
-                }
-            }
-            
-            updateHUD() {
-                document.getElementById('hudHP').textContent = Math.max(0, Math.round(this.player.health));
-                document.getElementById('hudAmmo').textContent = this.player.ammo;
-                
-                const threatEl = document.getElementById('threatLevel');
-                if (this.player.health <= 30) {
-                    threatEl.textContent = '🔴 CRITICAL';
-                    threatEl.style.color = '#ff4444';
-                } else if (this.threatLevel === 'red') {
-                    threatEl.textContent = '🟠 COMBAT';
-                    threatEl.style.color = '#ffaa00';
-                } else {
-                    threatEl.textContent = '🟢 STABLE';
-                    threatEl.style.color = '#00ff88';
-                }
-                
-                if (!this.artifact.collected) {
-                    document.getElementById('objectiveText').textContent = 'Find Artifact in Outpost';
-                } else {
-                    document.getElementById('objectiveText').textContent = 'Return to Landing Zone';
-                }
-            }
-            
-            updateThreatLevel(newLevel) {
-                this.threatLevel = newLevel;
-                setTimeout(() => { if (this.threatLevel === 'red') this.threatLevel = 'green'; }, 5000);
-            }
-            
-            showMessage(text) {
-                this.statusMessage.textContent = text;
-                this.statusMessage.style.display = 'block';
-                setTimeout(() => { this.statusMessage.style.display = 'none'; }, 3000);
-            }
-            
-            triggerExtraction() {
-                this.running = false;
-                cancelAnimationFrame(this.animationId);
-                this.showMessage('EXTRACTION IN PROGRESS...');
-                
-                setTimeout(() => this.missionComplete(), 3000);
-            }
-            
-            missionComplete() {
-                // Calculate rewards based on mission performance
-                let baseCredits = gameState.currentMission.missionData ? 
-                    Math.floor((gameState.currentMission.missionData.rewardMin + gameState.currentMission.missionData.rewardMax) / 2) : 200;
-                let baseMaterials = gameState.currentMission.missionData ? 
-                    (gameState.currentMission.missionData.materialReward || 5) : 5;
-                
-                // Bonus for kills
-                const killBonus = gameState.currentMission.enemiesKilled * 10;
-                baseCredits += killBonus;
-                
-                // Generate artifacts on artifact hunt missions
-                let artifacts = [];
-                if (gameState.currentMission.type === 'artifactHunt') {
-                    const count = (gameState.currentMission.missionData.artifactRewards || 2);
-                    for (let i = 0; i < count; i++) {
-                        artifacts.push(generateArtifact());
-                    }
-                }
-                
-                const reward = {
-                    credits: baseCredits,
-                    materials: baseMaterials,
-                    enemiesDefeated: gameState.currentMission.enemiesKilled,
-                    artifacts: artifacts
-                };
-                
-                gameState.lastMissionReward = reward;
-                gameState.credits += reward.credits;
-                gameState.materials += reward.materials;
-                gameState.artifacts.push(...artifacts);
-                gameState.organizationTrust = Math.min(100, gameState.organizationTrust + 5);
-                
-                gameState.missionActive = false;
-                document.getElementById('missionContainer').style.display = 'none';
-                document.getElementById('shipHubContainer').style.display = 'block';
-                gameState.currentLocation = 'ship';
-                
-                this.showMessage(`✅ MISSION COMPLETE! +${reward.credits} credits`);
-                let artifactStr = artifacts.length > 0 ? `\n\nARTIFACTS:\n${artifacts.map(a => `• ${a.name}`).join('\n')}` : '';
-                setTimeout(() => alert(`✅ MISSION COMPLETE!\n\nEnemies Defeated: ${reward.enemiesDefeated}\nReward: ${reward.credits} credits + ${reward.materials} materials${artifactStr}`), 1000);
-            }
-            
-            missionFailed(reason) {
-                this.running = false;
-                cancelAnimationFrame(this.animationId);
-                
-                gameState.missionActive = false;
-                document.getElementById('missionContainer').style.display = 'none';
-                document.getElementById('shipHubContainer').style.display = 'block';
-                gameState.currentLocation = 'ship';
-                
-                alert(`❌ MISSION FAILED\n\n${reason}`);
-            }
-            
-            gameLoop() {
-                if (!this.running) return;
-                
-                try {
-                    this.updateEnemies();
-                    this.updateProjectiles();
-                    this.checkCollisions();
-                    this.updateHUD();
-                    
-                    // Update player position on screen
-                    const playerEl = document.getElementById('player');
-                    if (playerEl) {
-                        playerEl.style.left = this.player.x + 'px';
-                        playerEl.style.top = this.player.y + 'px';
-                    }
-                    
-                    // Check mission end
-                    if (this.player.health <= 0) {
-                        this.missionFailed('SOLDIER ELIMINATED');
-                        return;
-                    }
-                } catch (e) {
-                    console.error('Mission error:', e);
-                    this.running = false;
-                    return;
-                }
-                
-                this.animationId = requestAnimationFrame(() => this.gameLoop());
-            }
-            
-            run() {
-                gameState.currentLocation = 'mission';
-                gameState.missionActive = true;
-                gameState.missionObjectives = {
-                    explored: false,
-                    artifactFound: false,
-                    extracted: false
-                };
-                gameState.currentMission = {
-                    name: 'HELIOS-7 Extraction',
-                    enemiesKilled: 0,
-                    timeStarted: Date.now(),
-                    healthRemaining: 100
-                };
-                
-                this.running = true;
-                this.updateHUD();
-                this.gameLoop();
+        // CINEMATIC DROPSHIP SEQUENCE - check if exists
+        function startCinematicDropship() {
+            if (typeof cinematicDropshipSequence !== 'undefined') {
+                cinematicDropshipSequence.init();
+            } else {
+                console.log('Cinematic sequence not found');
+                startMission();
             }
         }
 
+        // MISSION ENGINE CLASS - REMOVED FOR RESET
+        // To be rebuilt in Phase 4+
         window.addEventListener('load', () => {
             // Menu ready
         });
