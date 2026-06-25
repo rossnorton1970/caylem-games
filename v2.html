@@ -3753,40 +3753,26 @@
         
         // Handle E key interactions during mission
         function handleMissionInteraction() {
+            console.log('E key pressed during mission!');
+            
             // Check if player is close to artifact
             const artifactEl = document.getElementById('artifact');
-            if (!artifactEl) return;
+            const artifactX = window.innerWidth * 0.85;
+            const artifactY = window.innerHeight * 0.15;
             
-            // Get artifact position (right 15%, top 15%)
-            const artifactX = window.innerWidth * 0.85;  // right 15% = from left 85%
-            const artifactY = window.innerHeight * 0.15;  // top 15%
-            
-            // Calculate distance from player to artifact
             const dx = gameState.playerX - artifactX;
             const dy = gameState.playerY - artifactY;
             const distance = Math.sqrt(dx * dx + dy * dy);
             
-            // Interaction range: 100 pixels
+            // Artifact interaction
             if (distance < 100) {
-                console.log('Artifact collected! Distance was:', distance);
+                console.log('Artifact collected!');
                 gameState.missionObjectives.artifactFound = true;
-                
-                // Visual feedback
                 artifactEl.style.opacity = '0.5';
                 artifactEl.textContent = '✓';
                 
-                // Add to inventory
                 if (!gameState.artifacts) gameState.artifacts = [];
-                gameState.artifacts.push({
-                    name: 'Ancient Artifact',
-                    rarity: 'rare',
-                    type: 'Ancient Technology'
-                });
-                
-                console.log('Mission objectives:', gameState.missionObjectives);
-                console.log('Artifacts collected:', gameState.artifacts.length);
-            } else {
-                console.log('Too far from artifact. Distance:', distance.toFixed(1), 'pixels');
+                gameState.artifacts.push({name: 'Ancient Artifact', rarity: 'rare', type: 'Ancient Technology'});
             }
             
             // Check if player is close to DROPSHIP for extraction
@@ -3794,20 +3780,18 @@
                 const dropshipX = gameState.dropshipLocation.x;
                 const dropshipY = gameState.dropshipLocation.y;
                 
-                // Calculate distance to dropship
                 const dxDrop = gameState.playerX - dropshipX;
                 const dyDrop = gameState.playerY - dropshipY;
                 const dropshipDistance = Math.sqrt(dxDrop * dxDrop + dyDrop * dyDrop);
                 
-                console.log('Dropship check - Player:', {x: gameState.playerX.toFixed(0), y: gameState.playerY.toFixed(0)}, 'Dropship:', {x: dropshipX.toFixed(0), y: dropshipY.toFixed(0)}, 'Distance:', dropshipDistance.toFixed(1), 'Range:', gameState.dropshipLocation.interactionRange);
+                console.log('Distance to dropship:', dropshipDistance.toFixed(1), 'Range:', gameState.dropshipLocation.interactionRange);
                 
+                // SIMPLIFIED: If within range, extract immediately
                 if (dropshipDistance < gameState.dropshipLocation.interactionRange) {
-                    console.log('Near dropship! Distance:', dropshipDistance.toFixed(1), 'pixels - EXTRACTION TRIGGERED!');
-                    
-                    // Show extraction prompt if not already extracting
-                    if (!gameState.extractionInProgress) {
-                        initiateExtraction();
-                    }
+                    console.log('EXTRACTION: Mission Complete!');
+                    initiateExtraction();
+                } else {
+                    console.log('Too far from dropship');
                 }
             }
         }
@@ -3820,20 +3804,18 @@
             const statusMsg = document.getElementById('statusMessage');
             if (statusMsg) {
                 statusMsg.style.display = 'block';
-                statusMsg.textContent = '⚡ EXTRACTION IN PROGRESS...';
+                statusMsg.style.fontSize = '32px';
+                statusMsg.style.fontWeight = 'bold';
+                statusMsg.style.color = '#00ff88';
+                statusMsg.style.textAlign = 'center';
+                statusMsg.textContent = '✓ MISSION COMPLETE';
             }
             
-            // Visual effect on dropship
-            const dropship = document.getElementById('dropship');
-            if (dropship) {
-                dropship.style.animation = 'dropshipGlow 0.3s infinite';
-            }
-            
-            // Fade to black after 2 seconds
+            // Fade to black after 1.5 seconds
             setTimeout(() => {
                 const missionContainer = document.getElementById('missionContainer');
                 if (missionContainer) {
-                    missionContainer.style.transition = 'opacity 1s ease-out';
+                    missionContainer.style.transition = 'opacity 0.5s ease-out';
                     missionContainer.style.opacity = '0';
                 }
                 
@@ -3841,9 +3823,12 @@
                 setTimeout(() => {
                     gameState.missionActive = false;
                     gameLoopRunning = false;
-                    missionContainer.style.display = 'none';
-                    missionContainer.style.opacity = '1';
-                    missionContainer.style.transition = 'none';
+                    const missionContainer = document.getElementById('missionContainer');
+                    if (missionContainer) {
+                        missionContainer.style.display = 'none';
+                        missionContainer.style.opacity = '1';
+                        missionContainer.style.transition = 'none';
+                    }
                     
                     // Return to ship hub
                     document.getElementById('shipHubContainer').style.display = 'block';
