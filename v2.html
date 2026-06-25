@@ -3826,9 +3826,40 @@
             const enemySpecies = missionData.enemyType;
             const enemyCount = missionData.enemyCount;
             
-            // TRACK ENEMY ENCOUNTERS
+            // Launch the actual mission game
+            launchHeliosMission(planet, missionData, missionType);
+        }
+        
+        function launchHeliosMission(planet, missionData, missionType) {
+            // Hide ship hub and show mission container
+            document.getElementById('shipHubContainer').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('missionContainer').style.display = 'block';
+            
+            // Initialize mission state
+            gameState.currentLocation = 'mission';
+            gameState.missionActive = true;
+            gameState.currentMission = {
+                name: 'HELIOS-7 Extraction',
+                planet: planet.name,
+                type: missionType,
+                missionData: missionData,
+                enemiesKilled: 0,
+                timeStarted: Date.now()
+            };
+            gameState.missionObjectives = {
+                explored: false,
+                artifactFound: false,
+                extracted: false
+            };
+            
+            // Track encounters
+            const enemySpecies = missionData.enemyType;
+            if (!gameState.encounterData[enemySpecies]) {
+                gameState.encounterData[enemySpecies] = { encounters: 0, tier: 0, studied: false, damageBonus: 0 };
+            }
             if (gameState.encounterData[enemySpecies]) {
-                gameState.encounterData[enemySpecies].encounters += enemyCount;
+                gameState.encounterData[enemySpecies].encounters += missionData.enemyCount * 0.5; // Scale for actual gameplay
                 
                 // UPDATE TIER BASED ON ENCOUNTERS
                 if (gameState.encounterData[enemySpecies].encounters >= 30) {
@@ -3843,69 +3874,9 @@
                 }
             }
             
-            if (missionType === 'main') {
-                // MAIN MISSION: Credits + occasional artifacts
-                let baseCredits = Math.floor(Math.random() * (missionData.rewardMax - missionData.rewardMin + 1)) + missionData.rewardMin;
-                let baseMaterials = Math.floor(Math.random() * 4) + 1;
-                
-                // Apply Advanced Analytics bonus if researched
-                if (gameState.completedResearch.includes('advAnalytics')) {
-                    baseCredits = Math.floor(baseCredits * 1.25);
-                }
-                
-                const reward = {
-                    credits: baseCredits,
-                    materials: baseMaterials,
-                    artifacts: []
-                };
-                
-                // Generate 1-3 random artifacts
-                const artifactCount = Math.floor(Math.random() * 3) + 1;
-                for (let i = 0; i < artifactCount; i++) {
-                    reward.artifacts.push(generateArtifact());
-                }
-                
-                // Update game state
-                gameState.lastMissionReward = reward;
-                gameState.credits += reward.credits;
-                gameState.materials += baseMaterials;
-                gameState.artifacts.push(...reward.artifacts);
-                gameState.organizationTrust = Math.min(100, gameState.organizationTrust + 5);
-                
-                closeInteractionModal();
-                
-                // Show mission complete screen with encounter data
-                let artifactList = reward.artifacts.map(a => `• ${a.name} (${a.rarity})`).join('\n');
-                let encounterMsg = `${enemyCount}x ${enemySpecies} defeated!\nTotal encounters: ${gameState.encounterData[enemySpecies].encounters}`;
-                alert(`MISSION COMPLETE: ${planet.name}\n\nCOMBAT DATA:\n${encounterMsg}\n\nREWARDS EARNED:\n+${reward.credits} Credits\n+${reward.materials} Materials\n\nARTIFACTS RECOVERED:\n${artifactList}\n\nVisit Research Lab to analyze!`);
-            } else {
-                // ARTIFACT HUNT: No credits, 2-4 artifacts (mixed good/dangerous)
-                const artifactCount = missionData.artifactRewards;
-                const reward = {
-                    credits: 0,
-                    materials: 0,
-                    artifacts: []
-                };
-                
-                // Generate mix of beneficial and dangerous artifacts
-                for (let i = 0; i < artifactCount; i++) {
-                    // Higher chance of dangerous in artifact hunts
-                    const isPositive = Math.random() > 0.6; // 40% beneficial, 60% dangerous
-                    reward.artifacts.push(generateArtifact(isPositive));
-                }
-                
-                // Update game state
-                gameState.lastMissionReward = reward;
-                gameState.artifacts.push(...reward.artifacts);
-                gameState.organizationTrust = Math.min(100, gameState.organizationTrust + 3); // Less trust for risky hunts
-                
-                closeInteractionModal();
-                
-                // Show mission complete screen with artifact recovery details
-                let artifactList = reward.artifacts.map(a => `• ${a.name} (${a.rarity}) ${a.isPositive ? '✓' : '⚠'}`).join('\n');
-                let encounterMsg = `${enemyCount}x ${enemySpecies} encountered!\nTotal encounters: ${gameState.encounterData[enemySpecies].encounters}`;
-                alert(`ARTIFACT HUNT COMPLETE: ${planet.name}\n\nCOMBAT DATA:\n${encounterMsg}\n\nARTIFACTS RECOVERED:\n${artifactList}\n\n⚠️ Some artifacts may have side effects!\nAnalyze in Research Lab to learn more.`);
-            }
+            // Start the actual gameplay mission
+            closeInteractionModal();
+            startMission();
         }
 
         window.exitGame = function() {
@@ -4784,6 +4755,9 @@
                 this.animationId = null;
                 this.running = false;
                 
+                // Get mission data from gameState
+                const missionData = gameState.currentMission.missionData || {};
+                
                 // Player state
                 this.player = {
                     x: window.innerWidth / 2,
@@ -4803,7 +4777,7 @@
                 this.artifact = { collected: false };
                 this.lastPlayerShot = 0;
                 this.playerFireRate = 200;
-                this.maxEnemies = 2;
+                this.maxEnemies = Math.min(3, Math.ceil((missionData.enemyCount || 2) / 2));
                 this.threatLevel = 'green';
                 
                 this.spawnEnemies();
@@ -5112,15 +5086,37 @@
             }
             
             missionComplete() {
+                // Calculate rewards based on mission performance
+                let baseCredits = gameState.currentMission.missionData ? 
+                    Math.floor((gameState.currentMission.missionData.rewardMin + gameState.currentMission.missionData.rewardMax) / 2) : 200;
+                let baseMaterials = gameState.currentMission.missionData ? 
+                    (gameState.currentMission.missionData.materialReward || 5) : 5;
+                
+                // Bonus for kills
+                const killBonus = gameState.currentMission.enemiesKilled * 10;
+                baseCredits += killBonus;
+                
+                // Generate artifacts on artifact hunt missions
+                let artifacts = [];
+                if (gameState.currentMission.type === 'artifactHunt') {
+                    const count = (gameState.currentMission.missionData.artifactRewards || 2);
+                    for (let i = 0; i < count; i++) {
+                        artifacts.push(generateArtifact());
+                    }
+                }
+                
                 const reward = {
-                    credits: 200,
-                    materials: 5,
-                    enemiesDefeated: gameState.currentMission.enemiesKilled
+                    credits: baseCredits,
+                    materials: baseMaterials,
+                    enemiesDefeated: gameState.currentMission.enemiesKilled,
+                    artifacts: artifacts
                 };
                 
                 gameState.lastMissionReward = reward;
                 gameState.credits += reward.credits;
                 gameState.materials += reward.materials;
+                gameState.artifacts.push(...artifacts);
+                gameState.organizationTrust = Math.min(100, gameState.organizationTrust + 5);
                 
                 gameState.missionActive = false;
                 document.getElementById('missionContainer').style.display = 'none';
@@ -5128,7 +5124,8 @@
                 gameState.currentLocation = 'ship';
                 
                 this.showMessage(`✅ MISSION COMPLETE! +${reward.credits} credits`);
-                setTimeout(() => alert(`✅ MISSION COMPLETE!\n\nEnemies Defeated: ${reward.enemiesDefeated}\nReward: ${reward.credits} credits + ${reward.materials} materials`), 1000);
+                let artifactStr = artifacts.length > 0 ? `\n\nARTIFACTS:\n${artifacts.map(a => `• ${a.name}`).join('\n')}` : '';
+                setTimeout(() => alert(`✅ MISSION COMPLETE!\n\nEnemies Defeated: ${reward.enemiesDefeated}\nReward: ${reward.credits} credits + ${reward.materials} materials${artifactStr}`), 1000);
             }
             
             missionFailed(reason) {
