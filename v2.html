@@ -2107,6 +2107,13 @@
                 if (e.key === 'Escape') {
                     exitMission();
                 }
+                // E key for mission interactions (artifact collection)
+                if (e.key.toLowerCase() === 'e') {
+                    if (Date.now() - lastInteractionTime > 200) {
+                        handleMissionInteraction();
+                        lastInteractionTime = Date.now();
+                    }
+                }
                 return;  // Don't process ship hub interactions during mission
             }
             
@@ -3724,6 +3731,45 @@
                 document.getElementById('shipHubContainer').style.display = 'block';
             }
         }
+        
+        // Handle E key interactions during mission
+        function handleMissionInteraction() {
+            // Check if player is close to artifact
+            const artifactEl = document.getElementById('artifact');
+            if (!artifactEl) return;
+            
+            // Get artifact position (right 15%, top 15%)
+            const artifactX = window.innerWidth * 0.85;  // right 15% = from left 85%
+            const artifactY = window.innerHeight * 0.15;  // top 15%
+            
+            // Calculate distance from player to artifact
+            const dx = gameState.playerX - artifactX;
+            const dy = gameState.playerY - artifactY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Interaction range: 100 pixels
+            if (distance < 100) {
+                console.log('Artifact collected! Distance was:', distance);
+                gameState.missionObjectives.artifactFound = true;
+                
+                // Visual feedback
+                artifactEl.style.opacity = '0.5';
+                artifactEl.textContent = '✓';
+                
+                // Add to inventory
+                if (!gameState.artifacts) gameState.artifacts = [];
+                gameState.artifacts.push({
+                    name: 'Ancient Artifact',
+                    rarity: 'rare',
+                    type: 'Ancient Technology'
+                });
+                
+                console.log('Mission objectives:', gameState.missionObjectives);
+                console.log('Artifacts collected:', gameState.artifacts.length);
+            } else {
+                console.log('Too far from artifact. Distance:', distance.toFixed(1), 'pixels');
+            }
+        }
 
         window.exitGame = function() {
             console.log('exitGame() called');
@@ -4619,11 +4665,20 @@
                 artifactEl.style.animation = 'artifactPulse 1.5s infinite';
             }
             
-            // Reset player position
+            // Initialize player position in gameState (for keyboard controls)
+            gameState.playerX = window.innerWidth / 2;
+            gameState.playerY = window.innerHeight * 0.85;
+            gameState.playerHealth = 100;
+            gameState.playerMaxHealth = 100;
+            gameState.playerAmmo = 30;
+            gameState.playerMaxAmmo = 180;
+            
+            // Reset player position in DOM
             const playerEl = document.getElementById('player');
             if (playerEl) {
-                playerEl.style.left = (window.innerWidth / 2) + 'px';
-                playerEl.style.top = (window.innerHeight * 0.85) + 'px';
+                playerEl.style.left = gameState.playerX + 'px';
+                playerEl.style.top = gameState.playerY + 'px';
+                playerEl.style.transform = 'translate(-50%, -50%)';
             }
             
             // Initialize mission state
@@ -4640,9 +4695,10 @@
             gameState.currentMission.enemiesKilled = 0;
             gameState.currentMission.timeStarted = Date.now();
             
-            // Mission engine initialization - REMOVED FOR RESET
-            // To be rebuilt in Phase 4+
-            console.log('startMission() stub - mission system will be rebuilt');
+            // START THE GAME LOOP - This was missing!
+            startGameLoop();
+            
+            console.log('startMission() - game loop started, WASD + E controls active');
         }
         
         // CINEMATIC DROPSHIP SEQUENCE - check if exists
