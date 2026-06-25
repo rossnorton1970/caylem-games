@@ -2156,6 +2156,43 @@
             keys[e.key.toLowerCase()] = false;
         });
 
+        // DIRECT E-KEY HANDLER FOR DROPSHIP (bypasses broken mission state)
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'e') {
+                const missionContainer = document.getElementById('missionContainer');
+                const dropship = document.getElementById('dropship');
+                
+                // If mission is showing AND dropship exists, trigger extraction
+                if (missionContainer && missionContainer.style.display === 'block' && dropship) {
+                    console.log('DIRECT E-KEY: Mission visible, extracting...');
+                    // Show mission complete message
+                    const statusMsg = document.getElementById('statusMessage');
+                    if (statusMsg) {
+                        statusMsg.style.display = 'block';
+                        statusMsg.style.fontSize = '32px';
+                        statusMsg.style.fontWeight = 'bold';
+                        statusMsg.style.color = '#00ff88';
+                        statusMsg.style.textAlign = 'center';
+                        statusMsg.textContent = '✓ MISSION COMPLETE';
+                    }
+                    
+                    // Fade out after 1.5 seconds
+                    setTimeout(() => {
+                        missionContainer.style.transition = 'opacity 0.5s ease-out';
+                        missionContainer.style.opacity = '0';
+                    }, 1500);
+                    
+                    // Return to hub after fade
+                    setTimeout(() => {
+                        missionContainer.style.display = 'none';
+                        missionContainer.style.opacity = '1';
+                        missionContainer.style.transition = 'none';
+                        document.getElementById('shipHubContainer').style.display = 'block';
+                    }, 2500);
+                }
+            }
+        });
+
         // Initialize starfield
         
         // ARMORY MODAL TABBED INTERFACE
