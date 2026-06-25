@@ -3671,7 +3671,7 @@
             gameState.dropshipLocation = {
                 x: window.innerWidth * 0.08,
                 y: window.innerHeight * 0.92,  // bottom 8%
-                interactionRange: 120
+                interactionRange: 250  // Increased for easier interaction
             };
             
             gameState.extractionInProgress = false;
@@ -3799,8 +3799,10 @@
                 const dyDrop = gameState.playerY - dropshipY;
                 const dropshipDistance = Math.sqrt(dxDrop * dxDrop + dyDrop * dyDrop);
                 
+                console.log('Dropship check - Player:', {x: gameState.playerX.toFixed(0), y: gameState.playerY.toFixed(0)}, 'Dropship:', {x: dropshipX.toFixed(0), y: dropshipY.toFixed(0)}, 'Distance:', dropshipDistance.toFixed(1), 'Range:', gameState.dropshipLocation.interactionRange);
+                
                 if (dropshipDistance < gameState.dropshipLocation.interactionRange) {
-                    console.log('Near dropship! Distance:', dropshipDistance.toFixed(1), 'pixels');
+                    console.log('Near dropship! Distance:', dropshipDistance.toFixed(1), 'pixels - EXTRACTION TRIGGERED!');
                     
                     // Show extraction prompt if not already extracting
                     if (!gameState.extractionInProgress) {
