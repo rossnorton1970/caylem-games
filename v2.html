@@ -2121,6 +2121,11 @@
         window.addEventListener('keydown', (e) => {
             keys[e.key.toLowerCase()] = true;
             
+            // DEBUG: Log all keys during mission
+            if (gameState.missionActive) {
+                console.log('KEY PRESSED during mission:', e.key, 'missionActive:', gameState.missionActive);
+            }
+            
             // Mission-specific controls
             if (gameState.missionActive) {
                 if (e.key === 'Escape') {
@@ -2128,6 +2133,7 @@
                 }
                 // E key for mission interactions (artifact collection)
                 if (e.key.toLowerCase() === 'e') {
+                    console.log('E KEY DETECTED - calling handleMissionInteraction');
                     if (Date.now() - lastInteractionTime > 200) {
                         handleMissionInteraction();
                         lastInteractionTime = Date.now();
@@ -3636,18 +3642,23 @@
         
         // Initialize mission world (desert environment)
         function startMissionWorld(planet) {
+            console.log('startMissionWorld() called with planet:', planet.name);
             gameState.currentPlanet = planet;
             gameState.missionActive = true;
+            console.log('gameState.missionActive set to:', gameState.missionActive);
             
             // Show mission container
             const container = document.getElementById('missionContainer');
             container.style.display = 'block';
+            console.log('missionContainer display set to:', container.style.display);
             
             // Create game world
             initializeGameWorld(planet);
+            console.log('initializeGameWorld completed');
             
             // Start game loop
             startGameLoop();
+            console.log('Game loop started - mission is now active and accepting input');
         }
         
         // Initialize the desert world
