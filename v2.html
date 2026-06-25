@@ -2119,11 +2119,12 @@
         let lastInteractionTime = 0;
 
         window.addEventListener('keydown', (e) => {
+            console.log('GLOBAL KEYDOWN:', e.key, '| missionActive:', gameState.missionActive);
             keys[e.key.toLowerCase()] = true;
             
             // DEBUG: Log all keys during mission
             if (gameState.missionActive) {
-                console.log('KEY PRESSED during mission:', e.key, 'missionActive:', gameState.missionActive);
+                console.log('>>> KEY DURING MISSION:', e.key);
             }
             
             // Mission-specific controls
@@ -3632,6 +3633,7 @@
                     requestAnimationFrame(renderCinematicFrame);
                 } else {
                     // Transition to mission
+                    console.log('\n\n>>> CINEMATIC COMPLETE - CALLING startMissionWorld <<<\n');
                     canvas.style.display = 'none';
                     startMissionWorld(planet);
                 }
@@ -3642,6 +3644,7 @@
         
         // Initialize mission world (desert environment)
         function startMissionWorld(planet) {
+            console.log('\n\n=== MISSION WORLD STARTING ===\n');
             console.log('startMissionWorld() called with planet:', planet.name);
             gameState.currentPlanet = planet;
             gameState.missionActive = true;
