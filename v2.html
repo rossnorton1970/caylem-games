@@ -2373,6 +2373,18 @@
             populateUpgradesTab();
             updateLoadoutDisplay();
             
+            // Update loadout status display
+            const loadoutStatusEl = document.getElementById('loadoutStatus');
+            if (loadoutStatusEl) {
+                if (gameState.currentLoadout) {
+                    loadoutStatusEl.innerHTML = '✓ Loadout saved! Ready for deployment.';
+                    loadoutStatusEl.style.color = '#00ff88';
+                } else {
+                    loadoutStatusEl.innerHTML = 'No loadout saved';
+                    loadoutStatusEl.style.color = '#888';
+                }
+            }
+            
             // Tab switching functionality
             document.querySelectorAll('.armory-nav-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -3913,6 +3925,9 @@
             
             // Start the actual gameplay mission
             closeInteractionModal();
+            // Ensure modal is fully hidden
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.getElementById('interactionModal').style.display = 'none';
             startMission();
         }
 
@@ -4758,9 +4773,12 @@
         // Start the actual mission after cinematic completes
         function startMission() {
             // Hide ship hub and modals
+            console.log('startMission() called - hiding hub, showing mission');
             document.getElementById('shipHubContainer').style.display = 'none';
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('missionContainer').style.display = 'block';
+            console.log('missionContainer display:', document.getElementById('missionContainer').style.display);
+            console.log('missionWorld element:', document.getElementById('missionWorld'));
             
             // Clean up any old enemies/projectiles
             const enemiesContainer = document.getElementById('enemiesContainer');
