@@ -2179,6 +2179,36 @@
             demoActive: false
         };
         
+        // MISSION WORLD STATE
+        const missionWorldState = {
+            active: false,
+            canvas: null,
+            ctx: null,
+            width: 1280,
+            height: 720,
+            camera: { x: 0, y: 0 },
+            player: {
+                x: 640,
+                y: 600,
+                width: 24,
+                height: 24,
+                speed: 5,
+                health: 100,
+                maxHealth: 100,
+                velX: 0,
+                velY: 0
+            },
+            terrain: {
+                type: 'desert',
+                color: { r: 210, g: 165, b: 116 }
+            },
+            objects: [],
+            enemies: [],
+            particles: [],
+            gameLoop: null,
+            isPaused: false
+        };
+        
         // Key tracking
         const keys = {};
         let lastInteractionTime = 0;
@@ -2707,6 +2737,292 @@
             
             // Show message
             alert('✅ Loadout equipped!\n\nWalk to the DROPSHIP room and press E to launch.');
+        }
+        
+        // ============================================
+        // MISSION WORLD SYSTEM
+        // ============================================
+        
+        class MissionWorld {
+            constructor() {
+                this.state = missionWorldState;
+                this.keys = {};
+                this.setupCanvas();
+                this.setupInput();
+                this.initTerrain();
+            }
+            
+            setupCanvas() {
+                const missionContainer = document.getElementById('missionContainer');
+                const missionWorld = document.getElementById('missionWorld');
+                
+                if (!missionContainer || !missionWorld) {
+                    console.error('Mission world elements not found');
+                    return;
+                }
+                
+                // Create canvas overlay for mission world rendering
+                let canvas = document.getElementById('missionWorldCanvas');
+                if (!canvas) {
+                    canvas = document.createElement('canvas');
+                    canvas.id = 'missionWorldCanvas';
+                    canvas.width = missionWorldState.width;
+                    canvas.height = missionWorldState.height;
+                    canvas.style.cssText = 'position: absolute; top: 0; left: 0; z-index: 40; display: block;';
+                    missionWorld.appendChild(canvas);
+                }
+                
+                this.state.canvas = canvas;
+                this.state.ctx = canvas.getContext('2d');
+            }
+            
+            setupInput() {
+                const handleKeyDown = (e) => {
+                    if (!this.state.active) return;
+                    this.keys[e.key.toLowerCase()] = true;
+                    
+                    // ESC to pause/menu
+                    if (e.key === 'Escape') {
+                        this.togglePause();
+                    }
+                };
+                
+                const handleKeyUp = (e) => {
+                    if (!this.state.active) return;
+                    this.keys[e.key.toLowerCase()] = false;
+                };
+                
+                document.addEventListener('keydown', handleKeyDown);
+                document.addEventListener('keyup', handleKeyUp);
+                
+                this.keys = {};
+            }
+            
+            initTerrain() {
+                // Simple terrain with some interactive objects
+                this.state.objects = [
+                    { x: 400, y: 300, width: 100, height: 100, type: 'ruin', color: 'rgba(0, 212, 255, 0.6)' },
+                    { x: 1000, y: 400, width: 80, height: 80, type: 'wreckage', color: 'rgba(100, 100, 100, 0.5)' },
+                    { x: 200, y: 500, width: 60, height: 60, type: 'artifact', color: 'rgba(255, 255, 0, 0.8)' }
+                ];
+            }
+            
+            update(deltaTime = 0.016) {
+                if (this.state.isPaused) return;
+                
+                // Handle player movement
+                const player = this.state.player;
+                player.velX = 0;
+                player.velY = 0;
+                
+                if (this.keys['w']) player.velY = -player.speed;
+                if (this.keys['s']) player.velY = player.speed;
+                if (this.keys['a']) player.velX = -player.speed;
+                if (this.keys['d']) player.velX = player.speed;
+                
+                // Update position
+                player.x += player.velX;
+                player.y += player.velY;
+                
+                // Clamp to world bounds (keep player visible)
+                player.x = Math.max(player.width / 2, Math.min(this.state.width - player.width / 2, player.x));
+                player.y = Math.max(player.height / 2, Math.min(this.state.height - player.height / 2, player.y));
+                
+                // Update camera to follow player (centered)
+                this.state.camera.x = player.x - this.state.width / 2;
+                this.state.camera.y = player.y - this.state.height / 2;
+                
+                // Update HUD
+                this.updateHUD();
+            }
+            
+            updateHUD() {
+                const hudHP = document.getElementById('hudHP');
+                if (hudHP) hudHP.textContent = Math.round(this.state.player.health);
+            }
+            
+            render() {
+                const ctx = this.state.ctx;
+                const width = this.state.width;
+                const height = this.state.height;
+                const camera = this.state.camera;
+                const player = this.state.player;
+                
+                // Clear canvas
+                ctx.fillStyle = '#d4a574';
+                ctx.fillRect(0, 0, width, height);
+                
+                // Draw desert gradient background
+                const gradient = ctx.createLinearGradient(0, 0, 0, height);
+                gradient.addColorStop(0, '#e0c59f');
+                gradient.addColorStop(0.5, '#d4a574');
+                gradient.addColorStop(1, '#8b7355');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+                
+                // Draw sand dunes (simple pattern)
+                ctx.fillStyle = 'rgba(200, 180, 140, 0.3)';
+                for (let i = 0; i < width; i += 100) {
+                    ctx.beginPath();
+                    ctx.arc(i, height - 100, 50, Math.PI, 0);
+                    ctx.fill();
+                }
+                
+                // Draw terrain objects
+                for (const obj of this.state.objects) {
+                    const screenX = obj.x - camera.x;
+                    const screenY = obj.y - camera.y;
+                    
+                    ctx.fillStyle = obj.color;
+                    ctx.fillRect(screenX - obj.width / 2, screenY - obj.height / 2, obj.width, obj.height);
+                    
+                    // Draw border
+                    ctx.strokeStyle = obj.type === 'artifact' ? 'rgba(255, 255, 0, 1)' : 'rgba(0, 212, 255, 0.6)';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(screenX - obj.width / 2, screenY - obj.height / 2, obj.width, obj.height);
+                    
+                    // Label
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.textAlign = 'center';
+                    const label = obj.type === 'artifact' ? '🌟' : '⚙';
+                    ctx.fillText(label, screenX, screenY + 5);
+                }
+                
+                // Draw player (center of screen since camera follows)
+                const playerScreenX = width / 2;
+                const playerScreenY = height / 2;
+                
+                ctx.fillStyle = '#00ffff';
+                ctx.fillRect(playerScreenX - player.width / 2, playerScreenY - player.height / 2, player.width, player.height);
+                ctx.strokeStyle = '#00d4ff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(playerScreenX - player.width / 2, playerScreenY - player.height / 2, player.width, player.height);
+                ctx.shadowColor = 'rgba(0, 255, 255, 0.5)';
+                ctx.shadowBlur = 10;
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('YOU', playerScreenX, playerScreenY + 4);
+                ctx.shadowColor = 'transparent';
+                
+                // Draw coordinate display
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(width - 150, 10, 140, 50);
+                ctx.fillStyle = '#00d4ff';
+                ctx.font = '11px monospace';
+                ctx.textAlign = 'right';
+                ctx.fillText(`X: ${Math.round(player.x)}`, width - 20, 25);
+                ctx.fillText(`Y: ${Math.round(player.y)}`, width - 20, 40);
+                ctx.fillText(`ZONE: Desert`, width - 20, 55);
+            }
+            
+            togglePause() {
+                this.state.isPaused = !this.state.isPaused;
+                const status = document.getElementById('statusMessage');
+                if (status) {
+                    status.textContent = this.state.isPaused ? '⏸ MISSION PAUSED - Press ESC to continue' : '';
+                    status.style.display = this.state.isPaused ? 'block' : 'none';
+                }
+            }
+            
+            start() {
+                this.state.active = true;
+                const missionContainer = document.getElementById('missionContainer');
+                if (missionContainer) missionContainer.style.display = 'block';
+                
+                // Start game loop
+                let lastTime = Date.now();
+                const gameLoopFn = () => {
+                    if (!this.state.active) return;
+                    
+                    const currentTime = Date.now();
+                    const deltaTime = (currentTime - lastTime) / 1000;
+                    lastTime = currentTime;
+                    
+                    this.update(deltaTime);
+                    this.render();
+                    
+                    this.state.gameLoop = requestAnimationFrame(gameLoopFn);
+                };
+                
+                this.state.gameLoop = requestAnimationFrame(gameLoopFn);
+            }
+            
+            stop() {
+                this.state.active = false;
+                if (this.state.gameLoop) {
+                    cancelAnimationFrame(this.state.gameLoop);
+                    this.state.gameLoop = null;
+                }
+                const missionContainer = document.getElementById('missionContainer');
+                if (missionContainer) missionContainer.style.display = 'none';
+            }
+        }
+        
+        // Global mission world instance
+        let missionWorld = null;
+        
+        function startMission(planetData) {
+            console.log('startMission() called for:', planetData);
+            
+            // Hide ship hub
+            const shipHub = document.getElementById('shipHubContainer');
+            if (shipHub) shipHub.style.display = 'none';
+            
+            // Initialize mission world
+            if (!missionWorld) {
+                missionWorld = new MissionWorld();
+            }
+            
+            // Reset player state
+            missionWorld.state.player.health = 100;
+            missionWorld.state.player.x = 640;
+            missionWorld.state.player.y = 600;
+            missionWorld.state.isPaused = false;
+            
+            // Start mission
+            missionWorld.start();
+            
+            console.log('Mission started!');
+        }
+        
+        function exitMission() {
+            console.log('exitMission() called');
+            
+            if (missionWorld) {
+                missionWorld.stop();
+            }
+            
+            // Show ship hub
+            const shipHub = document.getElementById('shipHubContainer');
+            if (shipHub) shipHub.style.display = 'block';
+            
+            console.log('Returned to ship hub');
+        }
+        
+        function startMissionWorld() {
+            console.log('startMissionWorld() called');
+            
+            // Hide ship hub
+            const shipHub = document.getElementById('shipHubContainer');
+            if (shipHub) shipHub.style.display = 'none';
+            
+            // Initialize mission world if needed
+            if (!missionWorld) {
+                missionWorld = new MissionWorld();
+            }
+            
+            // Reset player state
+            missionWorld.state.player.health = 100;
+            missionWorld.state.player.x = 640;
+            missionWorld.state.player.y = 600;
+            missionWorld.state.isPaused = false;
+            
+            // Start mission
+            missionWorld.start();
+            
+            console.log('Mission world started!');
         }
         
         // Start game
@@ -4763,8 +5079,21 @@
         }
         
         function launchFromDropship() {
-            // Called when player enters launch tube in Dropship room
-            cinematicDropshipSequence.init();
+            // Check if loadout is equipped
+            if (!gameState.loadoutEquipped) {
+                alert('⚠ Loadout not equipped! Visit the Armory first.');
+                return;
+            }
+            
+            // Close modal and start cinematic
+            closeInteractionModal();
+            console.log('Launching from dropship...');
+            
+            // Play cinematic sequence FIRST
+            startCinematicDropship();
+            
+            // Mission world will be triggered by cinematic completion
+            // or by startMission() function when cinematic ends
         }
         
         // Hook into deployment button to trigger cinematic
