@@ -3880,12 +3880,7 @@
         }
         
         function launchHeliosMission(planet, missionData, missionType) {
-            // Hide ship hub and show mission container
-            document.getElementById('shipHubContainer').style.display = 'none';
-            document.getElementById('mainMenu').style.display = 'none';
-            document.getElementById('missionContainer').style.display = 'block';
-            
-            // Initialize mission state
+            // Initialize mission state FIRST (needed for cinematic)
             gameState.currentLocation = 'mission';
             gameState.missionActive = true;
             gameState.currentMission = {
@@ -3923,12 +3918,18 @@
                 }
             }
             
-            // Start the actual gameplay mission
+            // Close modal before cinematic
             closeInteractionModal();
-            // Ensure modal is fully hidden
             document.getElementById('modalOverlay').style.display = 'none';
             document.getElementById('interactionModal').style.display = 'none';
-            startMission();
+            
+            // Hide ship hub and menu
+            document.getElementById('shipHubContainer').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'none';
+            
+            // TRIGGER CINEMATIC DROPSHIP SEQUENCE
+            // The cinematic will call startMission() when complete
+            cinematicDropshipSequence.init();
         }
 
         window.exitGame = function() {
@@ -4749,7 +4750,8 @@
                 // Transition to actual gameplay
                 setTimeout(() => {
                     this.canvas.remove();
-                    // Start the actual mission gameplay
+                    // Show mission container and start gameplay
+                    document.getElementById('missionContainer').style.display = 'block';
                     startMission();
                 }, 1000);
             }
