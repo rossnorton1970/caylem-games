@@ -3106,25 +3106,12 @@
                         </div>
                     `;
                     
-                    // HUD Prototype Demo Section
-                    const hudProtoSection = `
-                        <div style="background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(187, 0, 255, 0.15)); border-left: 4px solid #00d4ff; border-right: 2px solid #bb00ff; padding: 16px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);">
-                            <div style="color: #00d4ff; font-weight: bold; margin-bottom: 8px; font-size: 14px;">🖥️ HUD PROTOTYPE TERMINAL</div>
-                            <div style="color: #aaa; font-size: 12px; line-height: 1.6; margin-bottom: 12px;">
-                                <strong>Caylem's HUD Design Prototype:</strong>
-                                <br>Test the threat level system, visual states, and component layout.
-                                <br><br>The demo cycles through three threat states:
-                                <br>🟢 <span style="color: #00ff88;">STABLE</span> (calm) → 🟠 <span style="color: #ffaa00;">ACTIVE</span> (detected) → 🔴 <span style="color: #ff4444;">CRITICAL</span> (combat)
-                            </div>
-                            <button class="planet-btn" style="background: linear-gradient(135deg, #00d4ff, #bb00ff); color: #fff; font-size: 12px; padding: 10px; width: 100%; font-weight: bold; letter-spacing: 0.1em;" onclick="launchHUDDemo()">► LAUNCH PROTOTYPE DEMO</button>
-                            <div style="color: #666; font-size: 10px; margin-top: 8px; text-align: center;">Press ESC to exit demo</div>
-                        </div>
-                    `;
+
                     
                     modalContent.innerHTML = `
                         <div class="interaction-modal-header">🔬 RESEARCH LAB</div>
                         <div class="interaction-modal-content" style="font-size: 13px;">
-                            ${hudProtoSection}
+
                             ${hqStats}
                             ${speciesStudy}
                             ${artifactInventory}
