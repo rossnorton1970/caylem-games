@@ -3699,6 +3699,15 @@
             container.style.display = 'block';
             console.log('missionContainer display set to:', container.style.display);
             
+            // SHOW PLAYER ELEMENT
+            const player = document.getElementById('player');
+            if (player) {
+                player.style.display = 'block';
+                player.style.left = gameState.playerX + 'px';
+                player.style.top = gameState.playerY + 'px';
+                console.log('Player shown at:', gameState.playerX, gameState.playerY);
+            }
+            
             // Create game world
             initializeGameWorld(planet);
             console.log('initializeGameWorld completed');
@@ -4073,7 +4082,12 @@
         
         // Update game world
         function updateGameWorld() {
-            if (!gameState.missionActive) return; // Only update when mission is active
+            if (!gameState.missionActive) {
+                // Hide player when mission ends
+                const player = document.getElementById('player');
+                if (player) player.style.display = 'none';
+                return; // Only update when mission is active
+            }
             
             // Player movement
             const speed = 3;
@@ -4086,20 +4100,20 @@
             gameState.playerX = Math.max(50, Math.min(window.innerWidth - 50, gameState.playerX));
             gameState.playerY = Math.max(50, Math.min(window.innerHeight - 50, gameState.playerY));
             
-            // Update player position
+            // Update player position - ALWAYS
             const player = document.getElementById('player');
             if (player) {
+                player.style.display = 'block';
                 player.style.left = gameState.playerX + 'px';
                 player.style.top = gameState.playerY + 'px';
                 player.style.visibility = 'visible';
-                player.style.display = 'block';
                 player.style.opacity = '1';
             }
             
-            // DEBUG: Show coordinates on screen during first few frames
-            if (gameState.missionSimTick < 3) {
-                console.log(`UPDATE FRAME ${gameState.missionSimTick}: playerX=${gameState.playerX}, playerY=${gameState.playerY}`);
-                console.log(`  Keys: w=${keys['w']}, a=${keys['a']}, s=${keys['s']}, d=${keys['d']}`);
+            // DEBUG: Log first few frames
+            if (!gameState.missionSimTick) gameState.missionSimTick = 0;
+            if (gameState.missionSimTick < 5) {
+                console.log(`FRAME ${gameState.missionSimTick}: Player at (${gameState.playerX.toFixed(0)}, ${gameState.playerY.toFixed(0)})`);
             }
             
             // Simulate combat - slow health drain (1 HP every 5 frames at 60fps = 12 HP/sec)
@@ -5293,74 +5307,7 @@
         });
     </script>
     
-    <!-- PLAYER CHARACTER - OUTSIDE ALL CONTAINERS (HIDDEN BY DEFAULT) -->
-    <div id="player" style="position: fixed; left: 640px; top: 600px; width: 50px; height: 50px; background: #00ff00; border: 4px solid #ffff00; border-radius: 50%; box-shadow: 0 0 30px #00ff00, 0 0 60px #ffff00; z-index: 10000; pointer-events: none; transform: translate(-50%, -50%); display: none;"></div>
-    
-    <!-- CANVAS FALLBACK PLAYER RENDERER -->
-    <canvas id="playerCanvas" style="position: fixed; top: 0; left: 0; z-index: 9999; pointer-events: none;"></canvas>
-    
-    <script>
-        // Canvas-based player renderer as backup
-        const playerCanvas = document.getElementById('playerCanvas');
-        const playerCtx = playerCanvas.getContext('2d');
-        const playerDOMElement = document.getElementById('player');
-        
-        playerCanvas.width = window.innerWidth;
-        playerCanvas.height = window.innerHeight;
-        
-        // Hide player canvas by default
-        playerCanvas.style.display = 'none';
-        
-        function renderPlayerCanvas() {
-            playerCtx.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
-            
-            // Show/hide based on mission state
-            if (gameState && gameState.missionActive) {
-                playerCanvas.style.display = 'block';
-                playerDOMElement.style.display = 'block';
-                
-                if (gameState.playerX && gameState.playerY) {
-                    const x = gameState.playerX;
-                    const y = gameState.playerY;
-                    const size = 25;
-                    
-                    // Draw glowing circle
-                    playerCtx.strokeStyle = '#ffff00';
-                    playerCtx.lineWidth = 4;
-                    playerCtx.beginPath();
-                    playerCtx.arc(x, y, size, 0, Math.PI * 2);
-                    playerCtx.stroke();
-                    
-                    // Fill with green
-                    playerCtx.fillStyle = '#00ff00';
-                    playerCtx.beginPath();
-                    playerCtx.arc(x, y, size - 3, 0, Math.PI * 2);
-                    playerCtx.fill();
-                    
-                    // Inner circle
-                    playerCtx.strokeStyle = '#ff00ff';
-                    playerCtx.lineWidth = 2;
-                    playerCtx.beginPath();
-                    playerCtx.arc(x, y, size - 10, 0, Math.PI * 2);
-                    playerCtx.stroke();
-                }
-            } else {
-                playerCanvas.style.display = 'none';
-                playerDOMElement.style.display = 'none';
-            }
-        }
-        
-        // Render player every frame during mission
-        const origRenderGameWorld = window.renderGameWorld || function() {};
-        window.renderGameWorld = function() {
-            renderPlayerCanvas();
-            origRenderGameWorld();
-        };
-        
-        window.addEventListener('resize', () => {
-            playerCanvas.width = window.innerWidth;
-            playerCanvas.height = window.innerHeight;
-        });
-    </script>
+    <!-- PLAYER CHARACTER - SIMPLE IMPLEMENTATION -->
+    <div id="player" style="position: fixed; left: 640px; top: 600px; width: 60px; height: 60px; background: red; border: 3px solid yellow; border-radius: 50%; z-index: 10000; pointer-events: none; display: none; box-shadow: 0 0 20px red;"></div>
 </body>
 </html>
