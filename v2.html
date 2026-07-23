@@ -1266,7 +1266,8 @@
         </div>
         
         <!-- HUD OVERLAY -->
-        <div id="missionHUD" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100;">
+        <div id="missionHUD" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1001;">
+            <!-- Elevated z-index to sit above missionContainer (z-index: 999) so player is visible -->
             <div style="position: fixed; top: 20px; left: 20px; background: rgba(0,0,0,0.8); border: 2px solid #00d4ff; border-radius: 5px; padding: 15px; min-width: 200px; font-size: 12px; font-family: monospace; color: #00d4ff;">
                 <div style="margin-bottom: 8px;"><strong>HP:</strong> <span id="hudHP">100</span> / 100</div>
                 <div style="margin-bottom: 8px;"><strong>AMMO:</strong> <span id="hudAmmo">30</span> / 180</div>
