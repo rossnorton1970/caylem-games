@@ -1239,9 +1239,9 @@
             
             <div id="droneWreckage" style="position: absolute; left: 10%; bottom: 32%; width: 40px; height: 30px; background: linear-gradient(135deg, #555 0%, #333 100%); border: 2px solid #222; opacity: 0.7;"></div>
             
-            <!-- PLAYER -->
-            <div id="player" style="position: absolute; left: 640px; top: 600px; width: 40px; height: 40px; background: #00ff00; border: 3px solid #00ffff; border-radius: 50%; box-shadow: 0 0 20px #00ff00, 0 0 40px #00ffff; z-index: 999; transform: translate(-50%, -50%); pointer-events: none;">
-                <div style="position: absolute; inset: 0; border: 1px dashed #ffff00; border-radius: 50%; opacity: 0.6;"></div>
+            <!-- PLAYER - ALWAYS ON TOP -->
+            <div id="player" style="position: absolute; left: 640px; top: 600px; width: 50px; height: 50px; background: #00ff00 !important; border: 4px solid #ffff00 !important; border-radius: 50%; box-shadow: 0 0 30px #00ff00, 0 0 60px #ffff00, inset 0 0 15px rgba(255,255,0,0.5) !important; z-index: 9999 !important; transform: translate(-50%, -50%) !important; pointer-events: none; display: block !important; visibility: visible !important; opacity: 1 !important;">
+                <div style="position: absolute; inset: 5px; border: 2px solid #ff00ff; border-radius: 50%; background: radial-gradient(circle, rgba(0,255,0,0.3), transparent);"></div>
             </div>
             
             <!-- ARTIFACT -->
@@ -4092,6 +4092,14 @@
                 player.style.left = gameState.playerX + 'px';
                 player.style.top = gameState.playerY + 'px';
                 player.style.transform = 'translate(-50%, -50%)';
+                player.style.display = 'block';
+                player.style.visibility = 'visible';
+                player.style.opacity = '1';
+                player.style.zIndex = '9999';
+                // DEBUG: Log movement for first 5 frames
+                if (gameState.missionSimTick < 5) {
+                    console.log(`FRAME ${gameState.missionSimTick}: Player at (${gameState.playerX}, ${gameState.playerY}), Keys:`, {w: keys['w'], a: keys['a'], s: keys['s'], d: keys['d']});
+                }
             }
             
             // Simulate combat - slow health drain (1 HP every 5 frames at 60fps = 12 HP/sec)
