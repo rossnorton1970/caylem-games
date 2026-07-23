@@ -3719,7 +3719,15 @@
                 player.style.top = gameState.playerY + 'px';
                 player.style.visibility = 'visible';
                 player.style.opacity = '1';
+                player.style.zIndex = '10000';
                 console.log('✅ Player shown at:', gameState.playerX, gameState.playerY);
+                
+                // Show debug output
+                const debugOut = document.getElementById('debugOutput');
+                if (debugOut) {
+                    debugOut.style.display = 'block';
+                    debugOut.innerHTML = 'MISSION STARTED - Look for RED CIRCLE with P on it!';
+                }
             }
             
             // Start game loop
@@ -4127,10 +4135,23 @@
                 player.style.top = gameState.playerY + 'px';
             }
             
-            // DEBUG: Log first few frames
+            // DEBUG: Show on screen AND console
             if (!gameState.missionSimTick) gameState.missionSimTick = 0;
+            
+            const debugOut = document.getElementById('debugOutput');
+            if (debugOut && gameState.missionSimTick % 10 === 0) {
+                debugOut.innerHTML = `
+                    MISSION ACTIVE: ${gameState.missionActive}
+                    Player pos: (${gameState.playerX.toFixed(0)}, ${gameState.playerY.toFixed(0)})
+                    Player element visible: ${player ? player.style.display : 'NOT FOUND'}
+                    Keys: W=${keys['w']||false} A=${keys['a']||false} S=${keys['s']||false} D=${keys['d']||false}
+                    Frame: ${gameState.missionSimTick}
+                    Player element z-index: ${player ? player.style.zIndex : 'N/A'}
+                `;
+            }
+            
             if (gameState.missionSimTick < 5) {
-                console.log(`FRAME ${gameState.missionSimTick}: Player RED CIRCLE at (${gameState.playerX.toFixed(0)}, ${gameState.playerY.toFixed(0)})`);
+                console.log(`FRAME ${gameState.missionSimTick}: Player at (${gameState.playerX.toFixed(0)}, ${gameState.playerY.toFixed(0)})`);
             }
             
             // Simulate combat - slow health drain (1 HP every 5 frames at 60fps = 12 HP/sec)
@@ -5325,6 +5346,9 @@
     </script>
     
     <!-- PLAYER CHARACTER - SIMPLE IMPLEMENTATION -->
-    <div id="player" style="position: fixed; left: 640px; top: 600px; width: 60px; height: 60px; background: red; border: 3px solid yellow; border-radius: 50%; z-index: 10000; pointer-events: none; box-shadow: 0 0 20px red;"></div>
+    <div id="player" style="position: fixed; left: 640px; top: 600px; width: 80px; height: 80px; background: red; border: 5px solid yellow; border-radius: 50%; z-index: 10000; pointer-events: none; box-shadow: 0 0 30px red; font-size: 40px; display: flex; align-items: center; justify-content: center; color: yellow; font-weight: bold;">P</div>
+    
+    <!-- DEBUG OUTPUT -->
+    <div id="debugOutput" style="position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.9); color: #00ff00; font-family: monospace; font-size: 12px; z-index: 9999; padding: 10px; max-width: 400px; max-height: 200px; overflow: auto; border: 2px solid #00ff00;">Debug...</div>
 </body>
 </html>
