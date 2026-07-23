@@ -5293,8 +5293,8 @@
         });
     </script>
     
-    <!-- PLAYER CHARACTER - OUTSIDE ALL CONTAINERS -->
-    <div id="player" style="position: fixed; left: 640px; top: 600px; width: 50px; height: 50px; background: #00ff00; border: 4px solid #ffff00; border-radius: 50%; box-shadow: 0 0 30px #00ff00, 0 0 60px #ffff00; z-index: 10000; pointer-events: none; transform: translate(-50%, -50%);"></div>
+    <!-- PLAYER CHARACTER - OUTSIDE ALL CONTAINERS (HIDDEN BY DEFAULT) -->
+    <div id="player" style="position: fixed; left: 640px; top: 600px; width: 50px; height: 50px; background: #00ff00; border: 4px solid #ffff00; border-radius: 50%; box-shadow: 0 0 30px #00ff00, 0 0 60px #ffff00; z-index: 10000; pointer-events: none; transform: translate(-50%, -50%); display: none;"></div>
     
     <!-- CANVAS FALLBACK PLAYER RENDERER -->
     <canvas id="playerCanvas" style="position: fixed; top: 0; left: 0; z-index: 9999; pointer-events: none;"></canvas>
@@ -5303,37 +5303,50 @@
         // Canvas-based player renderer as backup
         const playerCanvas = document.getElementById('playerCanvas');
         const playerCtx = playerCanvas.getContext('2d');
+        const playerDOMElement = document.getElementById('player');
         
         playerCanvas.width = window.innerWidth;
         playerCanvas.height = window.innerHeight;
         
+        // Hide player canvas by default
+        playerCanvas.style.display = 'none';
+        
         function renderPlayerCanvas() {
             playerCtx.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
             
-            if (gameState && gameState.playerX && gameState.playerY && gameState.missionActive) {
-                const x = gameState.playerX;
-                const y = gameState.playerY;
-                const size = 25;
+            // Show/hide based on mission state
+            if (gameState && gameState.missionActive) {
+                playerCanvas.style.display = 'block';
+                playerDOMElement.style.display = 'block';
                 
-                // Draw glowing circle
-                playerCtx.strokeStyle = '#ffff00';
-                playerCtx.lineWidth = 4;
-                playerCtx.beginPath();
-                playerCtx.arc(x, y, size, 0, Math.PI * 2);
-                playerCtx.stroke();
-                
-                // Fill with green
-                playerCtx.fillStyle = '#00ff00';
-                playerCtx.beginPath();
-                playerCtx.arc(x, y, size - 3, 0, Math.PI * 2);
-                playerCtx.fill();
-                
-                // Inner circle
-                playerCtx.strokeStyle = '#ff00ff';
-                playerCtx.lineWidth = 2;
-                playerCtx.beginPath();
-                playerCtx.arc(x, y, size - 10, 0, Math.PI * 2);
-                playerCtx.stroke();
+                if (gameState.playerX && gameState.playerY) {
+                    const x = gameState.playerX;
+                    const y = gameState.playerY;
+                    const size = 25;
+                    
+                    // Draw glowing circle
+                    playerCtx.strokeStyle = '#ffff00';
+                    playerCtx.lineWidth = 4;
+                    playerCtx.beginPath();
+                    playerCtx.arc(x, y, size, 0, Math.PI * 2);
+                    playerCtx.stroke();
+                    
+                    // Fill with green
+                    playerCtx.fillStyle = '#00ff00';
+                    playerCtx.beginPath();
+                    playerCtx.arc(x, y, size - 3, 0, Math.PI * 2);
+                    playerCtx.fill();
+                    
+                    // Inner circle
+                    playerCtx.strokeStyle = '#ff00ff';
+                    playerCtx.lineWidth = 2;
+                    playerCtx.beginPath();
+                    playerCtx.arc(x, y, size - 10, 0, Math.PI * 2);
+                    playerCtx.stroke();
+                }
+            } else {
+                playerCanvas.style.display = 'none';
+                playerDOMElement.style.display = 'none';
             }
         }
         
