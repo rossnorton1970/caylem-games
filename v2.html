@@ -148,6 +148,11 @@
             0%, 100% { box-shadow: 0 0 40px rgba(255, 204, 0, 0.5); }
             50% { box-shadow: 0 0 60px rgba(255, 204, 0, 0.8); }
         }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+        }
 
         /* SHIP HUB */
         #shipHubContainer {
@@ -3802,12 +3807,27 @@
         }
         
         function updateEnemies() {
+            // Initialize drops array if not exists
+            if (!gameState.drops) gameState.drops = [];
+            
             // Remove dead enemies and award credits
             gameState.enemies = gameState.enemies.filter(e => {
                 if (e.health <= 0) {
                     const reward = { drone: 100, stalker: 250, elemental: 500 }[e.type];
                     gameState.credits += reward;
                     gameState.killCount++;
+                    
+                    // Spawn loot drops
+                    if (Math.random() < 0.5) {
+                        const dropType = Math.random() < 0.6 ? 'ammo' : 'health';
+                        gameState.drops.push({
+                            x: e.x,
+                            y: e.y,
+                            type: dropType,
+                            icon: dropType === 'ammo' ? '📦' : '⚕',
+                            amount: dropType === 'ammo' ? 15 : 25
+                        });
+                    }
                     
                     // Cleanup enemy element
                     const el = document.getElementById(`enemy-${e.id}`);
@@ -3817,6 +3837,26 @@
                 }
                 return true;
             });
+            
+            // Update drops and check for pickup
+            if (gameState.drops) {
+                gameState.drops = gameState.drops.filter(drop => {
+                    const dx = gameState.playerX - drop.x;
+                    const dy = gameState.playerY - drop.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 60) {
+                        // Pickup
+                        if (drop.type === 'ammo') {
+                            gameState.playerAmmo = Math.min(gameState.playerMaxAmmo, gameState.playerAmmo + drop.amount);
+                        } else if (drop.type === 'health') {
+                            gameState.playerHealth = Math.min(gameState.playerMaxHealth, gameState.playerHealth + drop.amount);
+                        }
+                        return false;
+                    }
+                    return true;
+                });
+            }
             
             // Spawn new wave if all enemies killed
             if (gameState.enemies.length === 0 && Date.now() - gameState.lastSpawnTime > 2000) {
@@ -4053,6 +4093,31 @@
         function renderGameWorld() {
             // Render all enemies
             renderEnemies();
+            // Render all drops
+            renderDrops();
+        }
+        
+        function renderDrops() {
+            if (!gameState.drops) return;
+            
+            gameState.drops.forEach(drop => {
+                let dropEl = document.getElementById(`drop-${drop.x}-${drop.y}`);
+                if (!dropEl) {
+                    dropEl = document.createElement('div');
+                    dropEl.id = `drop-${drop.x}-${drop.y}`;
+                    dropEl.style.position = 'fixed';
+                    dropEl.style.fontSize = '20px';
+                    dropEl.style.pointerEvents = 'none';
+                    dropEl.style.zIndex = '40';
+                    dropEl.style.animation = 'pulse 0.8s infinite';
+                    document.getElementById('missionContainer').appendChild(dropEl);
+                }
+                
+                dropEl.textContent = drop.icon;
+                dropEl.style.left = drop.x + 'px';
+                dropEl.style.top = drop.y + 'px';
+                dropEl.style.transform = 'translate(-50%, -50%)';
+            });
         }
         
         // Exit mission
