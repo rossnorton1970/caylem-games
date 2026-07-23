@@ -1268,7 +1268,9 @@
             <div style="position: fixed; top: 20px; left: 20px; background: rgba(0,0,0,0.8); border: 2px solid #00d4ff; border-radius: 5px; padding: 15px; min-width: 200px; font-size: 12px; font-family: monospace; color: #00d4ff;">
                 <div style="margin-bottom: 8px;"><strong>HP:</strong> <span id="hudHP">100</span> / 100</div>
                 <div style="margin-bottom: 8px;"><strong>AMMO:</strong> <span id="hudAmmo">30</span> / 180</div>
+                <div style="margin-bottom: 8px;"><strong>ENEMIES:</strong> <span id="enemyCount" style="color: #ff8800;">0</span> | <strong>KILLS:</strong> <span id="killCount" style="color: #00ff88;">0</span></div>
                 <div style="margin-bottom: 8px;"><strong>THREAT:</strong> <span id="threatLevel" style="color: #00ff88;">🟢 STABLE</span></div>
+                <div style="margin-bottom: 8px;"><strong>CREDITS:</strong> <span id="creditCount" style="color: #ffaa00;">0</span></div>
                 <div style="margin-top: 12px; border-top: 1px solid #00d4ff; padding-top: 8px;">
                     <div style="color: #fff;">OBJECTIVE:</div>
                     <div id="objectiveText" style="color: #ffcc00; margin-top: 4px;">Recover Artifact</div>
@@ -1277,6 +1279,12 @@
             
             <div id="statusMessage" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); border: 2px solid #ffcc00; border-radius: 5px; padding: 12px 24px; font-size: 14px; color: #ffcc00; text-align: center; display: none; pointer-events: auto; z-index: 101;">
                 <!-- Messages go here -->
+            </div>
+            
+            <!-- CONTROLS INFO -->
+            <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(10,14,39,0.95); border: 2px solid #00d4ff; border-radius: 5px; padding: 12px 20px; font-size: 11px; color: #aaa; text-align: center; pointer-events: auto; z-index: 101;">
+                <div style="font-weight: bold; color: #00d4ff; margin-bottom: 6px;">CONTROLS</div>
+                <div><strong>WASD</strong> = Move | <strong>SPACE</strong> = Shoot | <strong>E</strong> = Interact | <strong>ESC</strong> = Exit</div>
             </div>
             
             <!-- MISSION EXIT BUTTON -->
@@ -3724,7 +3732,209 @@
                 artifactFound: false,
                 extracted: false
             };
+            
+            // Initialize enemy system
+            gameState.enemies = [];
+            gameState.missionSimTick = 0;
+            gameState.killCount = 0;
+            gameState.credits = 0;
+            gameState.lastSpawnTime = Date.now();
+            spawnInitialEnemies();
         }
+        
+        // ===== ENEMY SYSTEM =====
+        const enemyTypes = {
+            drone: { name: 'Scavenger Drone', icon: '🤖', health: 30, speed: 2, damage: 10, color: '#ff8800' },
+            stalker: { name: 'Frost Stalker', icon: '❄️', health: 50, speed: 1.5, damage: 15, color: '#00d4ff' },
+            elemental: { name: 'Lava Elemental', icon: '🔥', health: 80, speed: 1, damage: 20, color: '#ff4444' }
+        };
+        
+        function spawnInitialEnemies() {
+            // Spawn 3-5 enemies randomly on screen
+            const enemyCount = 3 + Math.floor(Math.random() * 3);
+            for (let i = 0; i < enemyCount; i++) {
+                const type = Object.keys(enemyTypes)[Math.floor(Math.random() * 3)];
+                const enemy = createEnemy(type);
+                gameState.enemies.push(enemy);
+            }
+        }
+        
+        function spawnEnemyWave() {
+            // Spawn wave with increasing difficulty
+            const waveNum = gameState.killCount / 5;
+            const enemyCount = 3 + Math.floor(waveNum) + Math.floor(Math.random() * 2);
+            
+            for (let i = 0; i < enemyCount; i++) {
+                const typeKeys = Object.keys(enemyTypes);
+                const type = typeKeys[Math.floor(Math.random() * typeKeys.length)];
+                const enemy = createEnemy(type);
+                
+                // Increase health for harder waves
+                if (waveNum > 0) {
+                    enemy.health += Math.floor(enemy.health * waveNum * 0.2);
+                    enemy.maxHealth = enemy.health;
+                    enemy.damage += Math.floor(waveNum * 2);
+                }
+                
+                gameState.enemies.push(enemy);
+            }
+            
+            gameState.lastSpawnTime = Date.now();
+        }
+        
+        function createEnemy(type) {
+            const typeData = enemyTypes[type];
+            return {
+                id: Math.random(),
+                type: type,
+                name: typeData.name,
+                icon: typeData.icon,
+                x: Math.random() * (window.innerWidth * 0.7) + window.innerWidth * 0.15,
+                y: Math.random() * (window.innerHeight * 0.4) + 50,
+                health: typeData.health,
+                maxHealth: typeData.health,
+                speed: typeData.speed,
+                damage: typeData.damage,
+                color: typeData.color,
+                lastAttackTime: 0,
+                attackCooldown: 1500
+            };
+        }
+        
+        function updateEnemies() {
+            // Remove dead enemies and award credits
+            gameState.enemies = gameState.enemies.filter(e => {
+                if (e.health <= 0) {
+                    const reward = { drone: 100, stalker: 250, elemental: 500 }[e.type];
+                    gameState.credits += reward;
+                    gameState.killCount++;
+                    
+                    // Cleanup enemy element
+                    const el = document.getElementById(`enemy-${e.id}`);
+                    if (el) el.remove();
+                    
+                    return false;
+                }
+                return true;
+            });
+            
+            // Spawn new wave if all enemies killed
+            if (gameState.enemies.length === 0 && Date.now() - gameState.lastSpawnTime > 2000) {
+                spawnEnemyWave();
+            }
+            
+            gameState.enemies.forEach(enemy => {
+                // Move toward player
+                const dx = gameState.playerX - enemy.x;
+                const dy = gameState.playerY - enemy.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > 50) {
+                    enemy.x += (dx / distance) * enemy.speed;
+                    enemy.y += (dy / distance) * enemy.speed;
+                }
+                
+                // Attack if close enough
+                if (distance < 80 && Date.now() - enemy.lastAttackTime > enemy.attackCooldown) {
+                    gameState.playerHealth = Math.max(0, gameState.playerHealth - enemy.damage);
+                    enemy.lastAttackTime = Date.now();
+                    // Visual feedback: quick color flash
+                    const player = document.getElementById('player');
+                    if (player) {
+                        player.style.filter = 'brightness(0.5)';
+                        setTimeout(() => { player.style.filter = 'brightness(1)'; }, 100);
+                    }
+                }
+            });
+        }
+        
+        function renderEnemies() {
+            gameState.enemies.forEach(enemy => {
+                let enemyEl = document.getElementById(`enemy-${enemy.id}`);
+                if (!enemyEl) {
+                    enemyEl = document.createElement('div');
+                    enemyEl.id = `enemy-${enemy.id}`;
+                    enemyEl.style.position = 'fixed';
+                    enemyEl.style.fontSize = '28px';
+                    enemyEl.style.pointerEvents = 'none';
+                    enemyEl.style.zIndex = '50';
+                    document.getElementById('missionContainer').appendChild(enemyEl);
+                }
+                
+                enemyEl.textContent = enemy.icon;
+                enemyEl.style.left = enemy.x + 'px';
+                enemyEl.style.top = enemy.y + 'px';
+                enemyEl.style.transform = 'translate(-50%, -50%)';
+                
+                // Health bar above enemy
+                const healthPercent = (enemy.health / enemy.maxHealth) * 100;
+                enemyEl.style.boxShadow = `0 -20px 0 ${healthPercent}% ${enemy.color}`;
+            });
+        }
+        
+        function updateThreatLevel() {
+            if (!gameState.enemies.length) {
+                return { text: '🟢 STABLE', color: '#00ff88' };
+            }
+            
+            // Calculate average distance to enemies
+            const avgDistance = gameState.enemies.reduce((sum, e) => {
+                const dx = gameState.playerX - e.x;
+                const dy = gameState.playerY - e.y;
+                return sum + Math.sqrt(dx * dx + dy * dy);
+            }, 0) / gameState.enemies.length;
+            
+            if (avgDistance > 500) return { text: '🟢 STABLE', color: '#00ff88' };
+            if (avgDistance > 250) return { text: '🟡 WARNING', color: '#ffaa00' };
+            return { text: '🔴 CRITICAL', color: '#ff4444' };
+        }
+        
+        // ===== COMBAT SYSTEM =====
+        let lastShotTime = 0;
+        const shootCooldown = 150; // 150ms between shots
+        
+        function shootAtEnemies() {
+            if (Date.now() - lastShotTime < shootCooldown || gameState.playerAmmo <= 0) return;
+            
+            lastShotTime = Date.now();
+            gameState.playerAmmo--;
+            
+            // Find closest enemy and damage it
+            if (gameState.enemies.length > 0) {
+                let closest = gameState.enemies[0];
+                let closestDist = Infinity;
+                
+                gameState.enemies.forEach(enemy => {
+                    const dx = gameState.playerX - enemy.x;
+                    const dy = gameState.playerY - enemy.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < closestDist) {
+                        closestDist = dist;
+                        closest = enemy;
+                    }
+                });
+                
+                // Damage closest enemy (range 300px)
+                if (closestDist < 300) {
+                    closest.health -= 25;
+                    
+                    // Visual hit feedback
+                    let enemyEl = document.getElementById(`enemy-${closest.id}`);
+                    if (enemyEl) {
+                        enemyEl.style.filter = 'brightness(2)';
+                        setTimeout(() => { enemyEl.style.filter = 'brightness(1)'; }, 150);
+                    }
+                }
+            }
+        }
+        
+        // Bind shooting to Space key during mission
+        window.addEventListener('keydown', (e) => {
+            if (gameState.missionActive && e.key === ' ') {
+                e.preventDefault();
+                shootAtEnemies();
+            }
+        });
         
         // Game loop for mission world
         let gameLoopRunning = false;
@@ -3795,6 +4005,9 @@
                 }
             }
             
+            // Update enemies
+            updateEnemies();
+            
             // Update HUD
             const hudHP = document.getElementById('hudHP');
             if (hudHP) hudHP.textContent = gameState.playerHealth;
@@ -3802,26 +4015,44 @@
             const hudAmmo = document.getElementById('hudAmmo');
             if (hudAmmo) hudAmmo.textContent = gameState.playerAmmo;
             
-            // Update threat level (randomize for now, based on mission time)
+            const enemyCount = document.getElementById('enemyCount');
+            if (enemyCount) enemyCount.textContent = gameState.enemies.length;
+            
+            const killCount = document.getElementById('killCount');
+            if (killCount) killCount.textContent = gameState.killCount;
+            
+            const creditCount = document.getElementById('creditCount');
+            if (creditCount) creditCount.textContent = gameState.credits;
+            
+            // Update threat level based on nearby enemies
             const threatLevel = document.getElementById('threatLevel');
             if (threatLevel) {
-                const threatRand = Math.random();
-                if (threatRand < 0.6) {
-                    threatLevel.textContent = '🟢 STABLE';
-                    threatLevel.style.color = '#00ff88';
-                } else if (threatRand < 0.85) {
-                    threatLevel.textContent = '🟡 WARNING';
-                    threatLevel.style.color = '#ffaa00';
-                } else {
-                    threatLevel.textContent = '🔴 CRITICAL';
-                    threatLevel.style.color = '#ff4444';
+                const threat = updateThreatLevel();
+                threatLevel.textContent = threat.text;
+                threatLevel.style.color = threat.color;
+            }
+            
+            // Check for mission failure
+            if (gameState.playerHealth <= 0) {
+                gameState.missionActive = false;
+                stopGameLoop();
+                const statusMsg = document.getElementById('statusMessage');
+                if (statusMsg) {
+                    statusMsg.style.display = 'block';
+                    statusMsg.style.color = '#ff4444';
+                    statusMsg.textContent = '✗ MISSION FAILED - KIA';
+                    setTimeout(() => {
+                        document.getElementById('missionContainer').style.display = 'none';
+                        document.getElementById('shipHubContainer').style.display = 'block';
+                    }, 3000);
                 }
             }
         }
         
         // Render game world (canvas-based if needed)
         function renderGameWorld() {
-            // Visual updates handled by CSS/DOM
+            // Render all enemies
+            renderEnemies();
         }
         
         // Exit mission
