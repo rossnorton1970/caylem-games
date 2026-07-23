@@ -3932,12 +3932,29 @@
         // ===== COMBAT SYSTEM =====
         let lastShotTime = 0;
         const shootCooldown = 150; // 150ms between shots
+        let screenShake = 0;
         
         function shootAtEnemies() {
             if (Date.now() - lastShotTime < shootCooldown || gameState.playerAmmo <= 0) return;
             
             lastShotTime = Date.now();
             gameState.playerAmmo--;
+            screenShake = 8; // Trigger screen shake
+            
+            // Visual feedback: muzzle flash
+            const muzzleFlash = document.createElement('div');
+            muzzleFlash.style.position = 'fixed';
+            muzzleFlash.style.left = gameState.playerX + 'px';
+            muzzleFlash.style.top = gameState.playerY + 'px';
+            muzzleFlash.style.width = '40px';
+            muzzleFlash.style.height = '40px';
+            muzzleFlash.style.background = 'radial-gradient(circle, rgba(255,150,0,0.8), transparent)';
+            muzzleFlash.style.borderRadius = '50%';
+            muzzleFlash.style.pointerEvents = 'none';
+            muzzleFlash.style.zIndex = '30';
+            muzzleFlash.style.transform = 'translate(-50%, -50%)';
+            document.getElementById('missionContainer').appendChild(muzzleFlash);
+            setTimeout(() => muzzleFlash.remove(), 100);
             
             // Find closest enemy and damage it
             if (gameState.enemies.length > 0) {
@@ -3958,13 +3975,60 @@
                 if (closestDist < 300) {
                     closest.health -= 25;
                     
-                    // Visual hit feedback
+                    // Visual hit feedback - KNOCKBACK
+                    const dx = closest.x - gameState.playerX;
+                    const dy = closest.y - gameState.playerY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    closest.x += (dx / dist) * 20;
+                    closest.y += (dy / dist) * 20;
+                    
                     let enemyEl = document.getElementById(`enemy-${closest.id}`);
                     if (enemyEl) {
                         enemyEl.style.filter = 'brightness(2)';
                         setTimeout(() => { enemyEl.style.filter = 'brightness(1)'; }, 150);
                     }
+                    
+                    // Damage number pop-up
+                    const damageNumber = document.createElement('div');
+                    damageNumber.textContent = '-25';
+                    damageNumber.style.position = 'fixed';
+                    damageNumber.style.left = closest.x + 'px';
+                    damageNumber.style.top = closest.y + 'px';
+                    damageNumber.style.color = '#ff4444';
+                    damageNumber.style.fontWeight = 'bold';
+                    damageNumber.style.fontSize = '18px';
+                    damageNumber.style.pointerEvents = 'none';
+                    damageNumber.style.zIndex = '60';
+                    damageNumber.style.transform = 'translate(-50%, -50%)';
+                    document.getElementById('missionContainer').appendChild(damageNumber);
+                    
+                    // Float up and fade
+                    let opacity = 1;
+                    let y = closest.y;
+                    const fadeInterval = setInterval(() => {
+                        y -= 2;
+                        opacity -= 0.05;
+                        damageNumber.style.top = y + 'px';
+                        damageNumber.style.opacity = opacity;
+                        if (opacity <= 0) {
+                            clearInterval(fadeInterval);
+                            damageNumber.remove();
+                        }
+                    }, 50);
                 }
+            }
+        }
+        
+        function applyScreenShake() {
+            if (screenShake > 0) {
+                const container = document.getElementById('missionContainer');
+                if (container) {
+                    const offsetX = (Math.random() - 0.5) * screenShake * 2;
+                    const offsetY = (Math.random() - 0.5) * screenShake * 2;
+                    container.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+                }
+                screenShake *= 0.9;
+                if (screenShake < 0.5) screenShake = 0;
             }
         }
         
@@ -4091,6 +4155,8 @@
         
         // Render game world (canvas-based if needed)
         function renderGameWorld() {
+            // Apply screen shake effect
+            applyScreenShake();
             // Render all enemies
             renderEnemies();
             // Render all drops
