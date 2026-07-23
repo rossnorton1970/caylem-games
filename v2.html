@@ -2130,6 +2130,14 @@
         // Key tracking
         const keys = {};
         let lastInteractionTime = 0;
+        
+        // Initialize player visibility (hidden until mission starts)
+        document.addEventListener('DOMContentLoaded', () => {
+            const player = document.getElementById('player');
+            if (player) player.style.display = 'none';
+        });
+        const playerInitial = document.getElementById('player');
+        if (playerInitial) playerInitial.style.display = 'none';
 
         window.addEventListener('keydown', (e) => {
             console.log('GLOBAL KEYDOWN:', e.key, '| missionActive:', gameState.missionActive);
@@ -3699,18 +3707,20 @@
             container.style.display = 'block';
             console.log('missionContainer display set to:', container.style.display);
             
-            // SHOW PLAYER ELEMENT
+            // Create game world (this sets playerX, playerY)
+            initializeGameWorld(planet);
+            console.log('initializeGameWorld completed');
+            
+            // NOW SHOW PLAYER at correct position
             const player = document.getElementById('player');
             if (player) {
                 player.style.display = 'block';
                 player.style.left = gameState.playerX + 'px';
                 player.style.top = gameState.playerY + 'px';
-                console.log('Player shown at:', gameState.playerX, gameState.playerY);
+                player.style.visibility = 'visible';
+                player.style.opacity = '1';
+                console.log('✅ Player shown at:', gameState.playerX, gameState.playerY);
             }
-            
-            // Create game world
-            initializeGameWorld(planet);
-            console.log('initializeGameWorld completed');
             
             // Start game loop
             startGameLoop();
@@ -4082,11 +4092,22 @@
         
         // Update game world
         function updateGameWorld() {
+            const player = document.getElementById('player');
+            
             if (!gameState.missionActive) {
                 // Hide player when mission ends
-                const player = document.getElementById('player');
-                if (player) player.style.display = 'none';
+                if (player) {
+                    player.style.display = 'none';
+                    player.style.visibility = 'hidden';
+                }
                 return; // Only update when mission is active
+            }
+            
+            // Ensure player is visible during mission
+            if (player) {
+                player.style.display = 'block';
+                player.style.visibility = 'visible';
+                player.style.opacity = '1';
             }
             
             // Player movement
@@ -4100,20 +4121,16 @@
             gameState.playerX = Math.max(50, Math.min(window.innerWidth - 50, gameState.playerX));
             gameState.playerY = Math.max(50, Math.min(window.innerHeight - 50, gameState.playerY));
             
-            // Update player position - ALWAYS
-            const player = document.getElementById('player');
+            // Update player position
             if (player) {
-                player.style.display = 'block';
                 player.style.left = gameState.playerX + 'px';
                 player.style.top = gameState.playerY + 'px';
-                player.style.visibility = 'visible';
-                player.style.opacity = '1';
             }
             
             // DEBUG: Log first few frames
             if (!gameState.missionSimTick) gameState.missionSimTick = 0;
             if (gameState.missionSimTick < 5) {
-                console.log(`FRAME ${gameState.missionSimTick}: Player at (${gameState.playerX.toFixed(0)}, ${gameState.playerY.toFixed(0)})`);
+                console.log(`FRAME ${gameState.missionSimTick}: Player RED CIRCLE at (${gameState.playerX.toFixed(0)}, ${gameState.playerY.toFixed(0)})`);
             }
             
             // Simulate combat - slow health drain (1 HP every 5 frames at 60fps = 12 HP/sec)
@@ -5308,6 +5325,6 @@
     </script>
     
     <!-- PLAYER CHARACTER - SIMPLE IMPLEMENTATION -->
-    <div id="player" style="position: fixed; left: 640px; top: 600px; width: 60px; height: 60px; background: red; border: 3px solid yellow; border-radius: 50%; z-index: 10000; pointer-events: none; display: none; box-shadow: 0 0 20px red;"></div>
+    <div id="player" style="position: fixed; left: 640px; top: 600px; width: 60px; height: 60px; background: red; border: 3px solid yellow; border-radius: 50%; z-index: 10000; pointer-events: none; box-shadow: 0 0 20px red;"></div>
 </body>
 </html>
