@@ -3744,6 +3744,7 @@
             gameState.killCount = 0;
             gameState.credits = 0;
             gameState.lastSpawnTime = Date.now();
+            gameState.missionStartTime = Date.now();
             spawnInitialEnemies();
         }
         
@@ -4246,10 +4247,33 @@
         }
         
         // Initiate extraction sequence
+        function calculateMissionScore() {
+            const baseScore = 1000;
+            const timeBonus = Math.max(0, 5000 - (Date.now() - gameState.missionStartTime)) / 1000;
+            const healthBonus = gameState.playerHealth * 10;
+            const killBonus = gameState.killCount * 50;
+            
+            const totalScore = Math.floor(baseScore + timeBonus + healthBonus + killBonus);
+            
+            return {
+                total: totalScore,
+                base: baseScore,
+                time: Math.floor(timeBonus),
+                health: healthBonus,
+                kills: killBonus,
+                timeSeconds: Math.floor((Date.now() - gameState.missionStartTime) / 1000)
+            };
+        }
+        
         function initiateExtraction() {
             gameState.extractionInProgress = true;
             gameState.missionObjectives.extracted = true;
             stopGameLoop();
+            
+            // Calculate score
+            const score = calculateMissionScore();
+            gameState.missionScore = score;
+            gameState.credits += Math.floor(score.total / 10);
             
             const statusMsg = document.getElementById('statusMessage');
             if (statusMsg) {
@@ -4258,7 +4282,7 @@
                 statusMsg.style.fontWeight = 'bold';
                 statusMsg.style.color = '#00ff88';
                 statusMsg.style.textAlign = 'center';
-                statusMsg.textContent = '✓ MISSION COMPLETE';
+                statusMsg.innerHTML = `<div style="margin-bottom: 10px;">✓ MISSION COMPLETE</div><div style="font-size: 20px; color: #ffaa00;">SCORE: ${score.total}</div><div style="font-size: 14px; color: #aaa; margin-top: 8px;">Time: ${score.timeSeconds}s | Kills: ${gameState.killCount} | Bonus Credits: ${Math.floor(score.total / 10)}</div>`;
             }
             
             // Fade to black after 1.5 seconds
