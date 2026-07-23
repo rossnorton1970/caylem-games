@@ -1240,7 +1240,7 @@
             <div id="droneWreckage" style="position: absolute; left: 10%; bottom: 32%; width: 40px; height: 30px; background: linear-gradient(135deg, #555 0%, #333 100%); border: 2px solid #222; opacity: 0.7;"></div>
             
             <!-- PLAYER -->
-            <div id="player" style="position: absolute; left: 50%; bottom: 5%; transform: translate(-50%, 0); width: 24px; height: 24px; background: cyan; border: 2px solid #00ffff; box-shadow: 0 0 10px cyan; z-index: 50;">
+            <div id="player" style="position: fixed; left: 640px; top: 600px; width: 24px; height: 24px; background: cyan; border: 2px solid #00ffff; box-shadow: 0 0 10px cyan; z-index: 50; transform: translate(-50%, -50%);">
                 <div id="playerDirection" style="position: absolute; top: 50%; right: -10px; transform: translateY(-50%); width: 10px; height: 2px; background: #00ffff;"></div>
             </div>
             
@@ -4073,8 +4073,7 @@
         
         // Update game world
         function updateGameWorld() {
-            const world = document.getElementById('missionWorld');
-            if (!world) return;
+            if (!gameState.missionActive) return; // Only update when mission is active
             
             // Player movement
             const speed = 3;
