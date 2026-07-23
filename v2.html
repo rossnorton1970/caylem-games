@@ -2156,43 +2156,6 @@
             keys[e.key.toLowerCase()] = false;
         });
 
-        // DIRECT E-KEY HANDLER FOR DROPSHIP (bypasses broken mission state)
-        document.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 'e') {
-                const missionContainer = document.getElementById('missionContainer');
-                const dropship = document.getElementById('dropship');
-                
-                // If mission is showing AND dropship exists, trigger extraction
-                if (missionContainer && missionContainer.style.display === 'block' && dropship) {
-                    console.log('DIRECT E-KEY: Mission visible, extracting...');
-                    // Show mission complete message
-                    const statusMsg = document.getElementById('statusMessage');
-                    if (statusMsg) {
-                        statusMsg.style.display = 'block';
-                        statusMsg.style.fontSize = '32px';
-                        statusMsg.style.fontWeight = 'bold';
-                        statusMsg.style.color = '#00ff88';
-                        statusMsg.style.textAlign = 'center';
-                        statusMsg.textContent = '✓ MISSION COMPLETE';
-                    }
-                    
-                    // Fade out after 1.5 seconds
-                    setTimeout(() => {
-                        missionContainer.style.transition = 'opacity 0.5s ease-out';
-                        missionContainer.style.opacity = '0';
-                    }, 1500);
-                    
-                    // Return to hub after fade
-                    setTimeout(() => {
-                        missionContainer.style.display = 'none';
-                        missionContainer.style.opacity = '1';
-                        missionContainer.style.transition = 'none';
-                        document.getElementById('shipHubContainer').style.display = 'block';
-                    }, 2500);
-                }
-            }
-        });
-
         // Initialize starfield
         
         // ARMORY MODAL TABBED INTERFACE
@@ -3416,6 +3379,32 @@
         function closePreMissionScreen() { closeInteractionModal(); }
 
         // Show artifact preview and acceptance dialog
+        // Simple artifact preview for mission collection
+        function showArtifactPreviewModal(artifact) {
+            const artifactPreview = {
+                name: artifact.name || 'Ancient Technology',
+                rarity: artifact.rarity || 'rare',
+                isPositive: true,
+                benefit: '+100 Research Points',
+                penalty: null,
+                lore: 'An ancient artifact found on this alien world. Could hold valuable technological secrets.'
+            };
+            
+            showArtifactPreview(artifactPreview, 'collectMissionArtifact()', 'dismissMissionArtifact()');
+            showInteractionModal();
+        }
+        
+        function collectMissionArtifact() {
+            console.log('Artifact collected and added to inventory');
+            gameState.artifacts = gameState.artifacts || [];
+            closeInteractionModal();
+        }
+        
+        function dismissMissionArtifact() {
+            console.log('Artifact dismissed');
+            closeInteractionModal();
+        }
+
         function showArtifactPreview(artifact, onAccept, onReject) {
             const modalContent = document.getElementById('modalContent');
             
@@ -3722,7 +3711,7 @@
             gameState.dropshipLocation = {
                 x: window.innerWidth * 0.08,
                 y: window.innerHeight * 0.92,  // bottom 8%
-                interactionRange: 500  // Large range: extraction accessible from most of desert
+                interactionRange: 150  // Reduced range: need to reach dropship for extraction
             };
             
             gameState.extractionInProgress = false;
@@ -3734,20 +3723,32 @@
         
         // Game loop for mission world
         let gameLoopRunning = false;
+        let gameLoopId = null;
         function startGameLoop() {
             if (gameLoopRunning) return;
             gameLoopRunning = true;
             
             function gameLoop() {
+                if (!gameState.missionActive) {
+                    gameLoopRunning = false;
+                    gameLoopId = null;
+                    return;
+                }
+                
                 updateGameWorld();
                 renderGameWorld();
-                
-                if (gameState.missionActive) {
-                    requestAnimationFrame(gameLoop);
-                }
+                gameLoopId = requestAnimationFrame(gameLoop);
             }
             
             gameLoop();
+        }
+        
+        function stopGameLoop() {
+            gameLoopRunning = false;
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+                gameLoopId = null;
+            }
         }
         
         // Update game world
@@ -3774,6 +3775,21 @@
                 player.style.transform = 'translate(-50%, -50%)';
             }
             
+            // Simulate combat - slow health drain (1 HP every 5 frames at 60fps = 12 HP/sec)
+            if (!gameState.missionSimTick) gameState.missionSimTick = 0;
+            gameState.missionSimTick++;
+            if (gameState.missionSimTick % 5 === 0) {
+                if (gameState.playerHealth > 0) {
+                    gameState.playerHealth = Math.max(0, gameState.playerHealth - 1);
+                }
+            }
+            // Ammo consumption (1 ammo every 10 frames)
+            if (gameState.missionSimTick % 10 === 0) {
+                if (gameState.playerAmmo > 0) {
+                    gameState.playerAmmo = Math.max(0, gameState.playerAmmo - 1);
+                }
+            }
+            
             // Update HUD
             const hudHP = document.getElementById('hudHP');
             if (hudHP) hudHP.textContent = gameState.playerHealth;
@@ -3781,9 +3797,20 @@
             const hudAmmo = document.getElementById('hudAmmo');
             if (hudAmmo) hudAmmo.textContent = gameState.playerAmmo;
             
+            // Update threat level (randomize for now, based on mission time)
             const threatLevel = document.getElementById('threatLevel');
             if (threatLevel) {
-                threatLevel.textContent = '🟢 STABLE';
+                const threatRand = Math.random();
+                if (threatRand < 0.6) {
+                    threatLevel.textContent = '🟢 STABLE';
+                    threatLevel.style.color = '#00ff88';
+                } else if (threatRand < 0.85) {
+                    threatLevel.textContent = '🟡 WARNING';
+                    threatLevel.style.color = '#ffaa00';
+                } else {
+                    threatLevel.textContent = '🔴 CRITICAL';
+                    threatLevel.style.color = '#ff4444';
+                }
             }
         }
         
@@ -3796,7 +3823,7 @@
         function exitMission() {
             if (confirm('Leave mission?')) {
                 gameState.missionActive = false;
-                gameLoopRunning = false;
+                stopGameLoop();
                 document.getElementById('missionContainer').style.display = 'none';
                 document.getElementById('shipHubContainer').style.display = 'block';
             }
@@ -3823,7 +3850,11 @@
                 artifactEl.textContent = '✓';
                 
                 if (!gameState.artifacts) gameState.artifacts = [];
-                gameState.artifacts.push({name: 'Ancient Artifact', rarity: 'rare', type: 'Ancient Technology'});
+                const newArtifact = {name: 'Ancient Artifact', rarity: 'rare', type: 'Ancient Technology'};
+                gameState.artifacts.push(newArtifact);
+                
+                // Show artifact preview modal
+                showArtifactPreviewModal(newArtifact);
             }
             
             // Check if player is close to DROPSHIP for extraction
@@ -3851,6 +3882,7 @@
         function initiateExtraction() {
             gameState.extractionInProgress = true;
             gameState.missionObjectives.extracted = true;
+            stopGameLoop();
             
             const statusMsg = document.getElementById('statusMessage');
             if (statusMsg) {
@@ -3870,12 +3902,12 @@
                     missionContainer.style.opacity = '0';
                 }
                 
-                // Return to hub after fade
+                // Return to hub after fade completes
                 setTimeout(() => {
                     gameState.missionActive = false;
-                    gameLoopRunning = false;
                     const missionContainer = document.getElementById('missionContainer');
                     if (missionContainer) {
+                        // FIRST hide, THEN reset opacity for next time
                         missionContainer.style.display = 'none';
                         missionContainer.style.opacity = '1';
                         missionContainer.style.transition = 'none';
@@ -3886,8 +3918,8 @@
                     
                     // Show extraction complete message
                     showStatusMessage('✓ EXTRACTION COMPLETE - MISSION SUCCESSFUL!');
-                }, 1000);
-            }, 2000);
+                }, 550);
+            }, 1500);
         }
         
         function showStatusMessage(message) {
