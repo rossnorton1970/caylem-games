@@ -2140,16 +2140,24 @@
         if (playerInitial) playerInitial.style.display = 'none';
 
         window.addEventListener('keydown', (e) => {
-            console.log('GLOBAL KEYDOWN:', e.key, '| missionActive:', gameState.missionActive);
+            console.log('GLOBAL KEYDOWN:', e.key, '| missionActive:', gameState.missionActive, '| location:', gameState.currentLocation);
+            
+            // ALWAYS capture keys, regardless of missionActive state
             keys[e.key.toLowerCase()] = true;
             
+            // ENSURE mission stays active if we're in mission location
+            if (gameState.currentLocation === 'mission' && !gameState.missionActive) {
+                console.warn('⚠️ Mission location but missionActive=false, forcing true!');
+                gameState.missionActive = true;
+            }
+            
             // DEBUG: Log all keys during mission
-            if (gameState.missionActive) {
+            if (gameState.currentLocation === 'mission' || gameState.missionActive) {
                 console.log('>>> KEY DURING MISSION:', e.key);
             }
             
-            // Mission-specific controls
-            if (gameState.missionActive) {
+            // Mission-specific controls (based on location, not missionActive)
+            if (gameState.currentLocation === 'mission') {
                 if (e.key === 'Escape') {
                     exitMission();
                 }
@@ -4074,11 +4082,22 @@
         function startGameLoop() {
             if (gameLoopRunning) return;
             gameLoopRunning = true;
+            console.log('🎮 GAME LOOP STARTED - missionActive:', gameState.missionActive);
             
             function gameLoop() {
-                if (!gameState.missionActive) {
+                // CRITICAL: Only stop if mission is actually meant to end
+                // Don't let a temporary false value kill the loop
+                if (!gameState.missionActive && gameState.extractionInProgress) {
                     gameLoopRunning = false;
                     gameLoopId = null;
+                    console.log('🛑 Game loop stopped - extraction complete');
+                    return;
+                }
+                
+                if (!gameState.missionActive && gameState.playerHealth <= 0) {
+                    gameLoopRunning = false;
+                    gameLoopId = null;
+                    console.log('🛑 Game loop stopped - player dead');
                     return;
                 }
                 
@@ -4102,8 +4121,14 @@
         function updateGameWorld() {
             const player = document.getElementById('player');
             
-            if (!gameState.missionActive) {
-                // Hide player when mission ends
+            // ENSURE MISSION STAYS ACTIVE DURING GAMEPLAY
+            if (!gameState.missionActive && gameState.currentLocation === 'mission') {
+                console.warn('⚠️ CRITICAL: missionActive was false during mission! Restoring...');
+                gameState.missionActive = true;
+            }
+            
+            if (!gameState.missionActive && gameState.extractionInProgress) {
+                // Hide player when extraction is complete
                 if (player) {
                     player.style.display = 'none';
                     player.style.visibility = 'hidden';
